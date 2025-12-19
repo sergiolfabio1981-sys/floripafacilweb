@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Floripa Fácil - Excursiones y Traslados</title>
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/mD8G8h4H/Logo-Floripa-Facil.png" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=BAASwB8vDZxz0JI6SiJ_v0PC3EYE2V2EqIgWjy9ms7Vj0IaYurP0IguUrS0fjOywkyZAVMXYtcfIOnQ7qk&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
+    <style>
+      body { font-family: 'Poppins', sans-serif; }
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      /* Custom Green Theme Overrides */
+      .bg-primary { background-color: #16a34a; }
+      .text-primary { color: #16a34a; }
+      .border-primary { border-color: #16a34a; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "leaflet": "https://aistudiocdn.com/leaflet@^1.9.4",
+    "leaflet/": "https://aistudiocdn.com/leaflet@^1.9.4/",
+    "react-leaflet": "https://aistudiocdn.com/react-leaflet@^5.0.0",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "Floripa Fácil",
+  "description": "Agencia de turismo receptivo especializada en excursiones, tours, traslados y alquiler de coches en Florianópolis y principales destinos de Brasil.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
