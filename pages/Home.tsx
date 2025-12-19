@@ -6,6 +6,7 @@ import { getTrips } from '../services/tripService';
 import { getRentals } from '../services/rentalService';
 import { getExcursions } from '../services/excursionService';
 import { getHotels } from '../services/hotelService';
+import { getCarRentals } from '../services/carRentalService';
 import { getHeroSlides, getPromoBanners } from '../services/heroService';
 import TripCard from '../components/TripCard';
 import Testimonials from '../components/Testimonials';
@@ -23,8 +24,8 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const [slides, banners, trips, rentals, excursions, hotels] = await Promise.all([
-                getHeroSlides(), getPromoBanners(), getTrips(), getRentals(), getExcursions(), getHotels()
+            const [slides, banners, trips, rentals, excursions, hotels, cars] = await Promise.all([
+                getHeroSlides(), getPromoBanners(), getTrips(), getRentals(), getExcursions(), getHotels(), getCarRentals()
             ]);
             setHeroSlides(slides);
             setPromoBanners(banners);
@@ -32,7 +33,8 @@ const Home: React.FC = () => {
                 ...trips.map(t => ({...t, type: 'trip' as const})),
                 ...rentals.map(r => ({...r, type: 'rental' as const})),
                 ...excursions.map(e => ({...e, type: 'excursion' as const})),
-                ...hotels.map(h => ({...h, type: 'hotel' as const}))
+                ...hotels.map(h => ({...h, type: 'hotel' as const})),
+                ...cars.map(c => ({...c, type: 'car' as const}))
             ];
             setCombinedOffers(fullInventory.filter(item => item.isOffer));
             setAllItems(fullInventory.filter(item => !item.isOffer));
@@ -50,7 +52,8 @@ const Home: React.FC = () => {
   }, [heroSlides.length]);
 
   const filteredItems = allItems.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) || item.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const titleToSearch = (item as any).title || (item as any).brand || '';
+    const matchesSearch = titleToSearch.toLowerCase().includes(searchTerm.toLowerCase()) || item.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = activeCategory === 'all' || item.type === activeCategory;
     return matchesSearch && matchesCategory;
   });
@@ -93,16 +96,23 @@ const Home: React.FC = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
              <div>
-                <h2 className="text-3xl font-bold text-gray-800">Toda nuestra oferta</h2>
+                <h2 className="text-3xl font-bold text-gray-800 tracking-tighter">TODA NUESTRA OFERTA</h2>
                 <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-hide pb-2">
-                    {['all', 'excursion', 'trip', 'hotel', 'rental'].map(cat => (
-                        <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full text-xs font-bold capitalize transition-all ${activeCategory === cat ? 'bg-green-600 text-white shadow-md' : 'bg-white text-gray-600 border'}`}>
-                            {cat === 'all' ? 'Todos' : cat === 'trip' ? 'Paseos' : cat === 'excursion' ? 'Traslados' : cat}
+                    {[
+                        {id: 'all', label: 'Todos'},
+                        {id: 'car', label: 'Autos'},
+                        {id: 'trip', label: 'Paquetes'},
+                        {id: 'excursion', label: 'Traslados'},
+                        {id: 'hotel', label: 'Hoteles'},
+                        {id: 'rental', label: 'Casas'}
+                    ].map(cat => (
+                        <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-4 py-2 rounded-full text-xs font-bold capitalize transition-all whitespace-nowrap ${activeCategory === cat.id ? 'bg-green-600 text-white shadow-md' : 'bg-white text-gray-600 border'}`}>
+                            {cat.label}
                         </button>
                     ))}
                 </div>
              </div>
-             <input type="text" placeholder="Buscar destino..." className="border rounded-full px-6 py-3 w-full md:w-80 outline-none focus:ring-2 focus:ring-lime-500" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+             <input type="text" placeholder="Buscar destino o modelo..." className="border rounded-full px-6 py-3 w-full md:w-80 outline-none focus:ring-2 focus:ring-lime-500" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

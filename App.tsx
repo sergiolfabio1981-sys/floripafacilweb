@@ -8,15 +8,15 @@ import Home from './pages/Home';
 import Details from './pages/Details';
 import Trips from './pages/Trips';
 import Admin from './pages/Admin';
-import Rentals from './pages/Rentals'; // Will remain for compatibility if needed, or repurposed
-import RentalDetails from './pages/RentalDetails';
 import Accommodations from './pages/Accommodations';
+import RentalDetails from './pages/RentalDetails';
 import Groups from './pages/Groups';
 import GroupDetails from './pages/GroupDetails';
 import Excursions from './pages/Excursions';
 import ExcursionDetails from './pages/ExcursionDetails';
-import Hotels from './pages/Hotels'; // Will remain for compatibility
 import HotelDetails from './pages/HotelDetails';
+import CarRentals from './pages/CarRentals';
+import CarRentalDetails from './pages/CarRentalDetails';
 import Installments from './pages/Installments';
 import InstallmentDetails from './pages/InstallmentDetails';
 import WorldCup from './pages/WorldCup';
@@ -37,22 +37,15 @@ const App: React.FC = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/trips" element={<Trips />} />
                 <Route path="/trip/:id" element={<Details />} />
-                
-                {/* Unified Accommodations Route */}
                 <Route path="/accommodations" element={<Accommodations />} />
-                
-                {/* Group Routes */}
                 <Route path="/groups" element={<Groups />} />
                 <Route path="/groups/:id" element={<GroupDetails />} />
-
-                {/* Legacy/Specific Routes kept for compatibility */}
-                <Route path="/rentals" element={<Accommodations />} /> 
                 <Route path="/rentals/:id" element={<RentalDetails />} />
-                <Route path="/hotels" element={<Accommodations />} />
                 <Route path="/hotels/:id" element={<HotelDetails />} />
-
                 <Route path="/excursions" element={<Excursions />} />
                 <Route path="/excursions/:id" element={<ExcursionDetails />} />
+                <Route path="/cars" element={<CarRentals />} />
+                <Route path="/car/:id" element={<CarRentalDetails />} />
                 <Route path="/installments" element={<Installments />} />
                 <Route path="/installments/:id" element={<InstallmentDetails />} />
                 <Route path="/worldcup" element={<WorldCup />} />

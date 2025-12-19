@@ -7,18 +7,18 @@ import { useCurrency } from '../contexts/CurrencyContext';
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
-  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const location = useLocation();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const { currency, setCurrency } = useCurrency();
 
   const navLinks = [
     { name: t('nav.home'), path: '/', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> },
     { name: 'Excursiones', path: '/excursions', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
     { name: 'Tours', path: '/trips', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+    { name: 'Coches', path: '/cars', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m-8 4h8m-8 4h5" /></svg> },
     { name: 'Alojamientos', path: '/accommodations', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> },
-    { name: 'Admin', path: '/admin', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
   ];
 
   const currencies = [
@@ -36,11 +36,17 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-20">
             <div className="flex-shrink-0 flex items-center h-full py-2">
                 <Link to="/" className="group h-full flex items-center">
-                    <img 
-                        src="https://i.postimg.cc/mD8G8h4H/Logo-Floripa-Facil.png" 
-                        alt="Floripa Fácil" 
-                        className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105 max-h-[70px]" 
-                    />
+                    {!imgError ? (
+                        <img 
+                            src="https://i.postimg.cc/9f0v8G0D/Logo-Floripa-Facil-Dark.png" 
+                            alt="Floripa Fácil" 
+                            className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105 max-h-[75px] rounded-full shadow-sm"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">FF</div>
+                    )}
+                    <span className="ml-3 font-black text-green-700 text-xl hidden lg:block tracking-tighter">FLORIPA FÁCIL</span>
                 </Link>
             </div>
 

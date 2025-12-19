@@ -7,15 +7,15 @@ export interface Trip {
   description: string;
   images: string[];
   isOffer: boolean;
-  offerExpiresAt?: string; // ISO date string
+  offerExpiresAt?: string; 
   availableDates: string[];
   discount?: number;
-  includesFlight?: boolean; // New: mimic package feature
-  rating?: number; // New: mimic user rating
-  reviewsCount?: number; // New
+  includesFlight?: boolean;
+  rating?: number;
+  reviewsCount?: number;
   baseCurrency?: 'ARS' | 'USD';
-  specialLabel?: string; // e.g. "HOT SALE", "BLACK FRIDAY"
-  durationLabel?: string; // e.g. "8 DÍAS / 7 NOCHES"
+  specialLabel?: string;
+  durationLabel?: string;
   type?: 'trip';
 }
 
@@ -27,7 +27,7 @@ export interface GroupTrip {
   description: string;
   images: string[];
   isOffer: boolean;
-  availableDates: string[]; // Fixed dates
+  availableDates: string[];
   discount?: number;
   includesFlight?: boolean;
   rating?: number;
@@ -47,7 +47,7 @@ export interface Apartment {
   images: string[];
   bedrooms: number;
   maxGuests: number;
-  amenities: string[]; // Wifi, Pileta, Aire Acondicionado, etc.
+  amenities: string[];
   isOffer?: boolean;
   offerExpiresAt?: string;
   lat?: number;
@@ -81,6 +81,28 @@ export interface Hotel {
   type?: 'hotel';
 }
 
+export interface CarRental {
+  id: string;
+  title: string; // Ej: Chevrolet Onix o Similar
+  brand: string;
+  category: string; // Económico, SUV, Luxury, etc.
+  pricePerDay: number;
+  description: string;
+  images: string[];
+  transmission: 'Manual' | 'Automático';
+  fuel: 'Nafta' | 'Diesel' | 'Híbrido' | 'Eléctrico';
+  doors: number;
+  passengers: number;
+  largeSuitcases: number;
+  smallSuitcases: number;
+  hasAC: boolean;
+  location: string;
+  isOffer: boolean;
+  discount?: number;
+  baseCurrency?: 'ARS' | 'USD' | 'BRL';
+  type?: 'car';
+}
+
 export interface Excursion {
   id: string;
   title: string;
@@ -90,8 +112,8 @@ export interface Excursion {
   images: string[];
   isOffer: boolean;
   offerExpiresAt?: string;
-  duration: string; // e.g. "Full Day", "4 hours"
-  availableDates: string[]; // e.g. "Lunes, Miércoles y Viernes"
+  duration: string;
+  availableDates: string[];
   discount?: number;
   rating?: number;
   reviewsCount?: number;
@@ -107,8 +129,8 @@ export interface InstallmentTrip {
   totalPrice: number;
   description: string;
   images: string[];
-  departureDate: string; // ISO string or "YYYY-MM-DD"
-  isOffer: boolean; // Just for highlighting
+  departureDate: string;
+  isOffer: boolean;
   discount?: number;
   baseCurrency?: 'ARS' | 'USD';
   specialLabel?: string;
@@ -122,11 +144,11 @@ export interface WorldCupTrip {
   totalPrice: number;
   description: string;
   images: string[];
-  departureDate: string; // Fixed mostly to June 2026
-  originCountry: string; // e.g. "Salida desde Argentina"
+  departureDate: string;
+  originCountry: string;
   isOffer: boolean;
   discount?: number;
-  baseCurrency?: 'ARS' | 'USD'; // Force USD for World Cup
+  baseCurrency?: 'ARS' | 'USD';
   specialLabel?: string;
   type?: 'worldcup';
 }
@@ -138,7 +160,7 @@ export interface HeroSlide {
   subtitle: string;
   ctaText: string;
   ctaLink: string;
-  highlightColor: string; // Tailwind color class for accents
+  highlightColor: string;
 }
 
 export interface PromoBanner {
@@ -151,7 +173,7 @@ export interface PromoBanner {
   link: string;
 }
 
-export type ListingItem = Trip | Apartment | Excursion | Hotel | InstallmentTrip | WorldCupTrip | GroupTrip;
+export type ListingItem = Trip | Apartment | Excursion | Hotel | InstallmentTrip | WorldCupTrip | GroupTrip | CarRental;
 
 export interface ChatMessage {
   id: string;
