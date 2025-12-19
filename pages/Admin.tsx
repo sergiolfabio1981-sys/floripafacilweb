@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Apartment, Excursion, HeroSlide, PromoBanner, CarRental, InstallmentTrip } from '../types';
+import { Trip, Apartment, Excursion, HeroSlide, PromoBanner, CarRental, InstallmentTrip } from '../types';
+import { getTrips, saveTrip, deleteTrip, createEmptyTrip } from '../services/tripService';
 import { getRentals, saveRental, deleteRental, createEmptyRental } from '../services/rentalService';
 import { getExcursions, saveExcursion, deleteExcursion, createEmptyExcursion } from '../services/excursionService';
 import { getCarRentals, saveCarRental, deleteCarRental, createEmptyCarRental } from '../services/carRentalService';
@@ -17,10 +18,11 @@ const Admin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<'hero' | 'rentals' | 'excursions' | 'cars' | 'installments' | 'legales' | 'quote'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'trips' | 'rentals' | 'excursions' | 'cars' | 'installments' | 'legales' | 'quote'>('hero');
   const [isSaving, setIsSaving] = useState(false);
 
   // State
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [rentals, setRentals] = useState<Apartment[]>([]);
   const [excursions, setExcursions] = useState<Excursion[]>([]);
   const [cars, setCars] = useState<CarRental[]>([]);
@@ -30,6 +32,7 @@ const Admin: React.FC = () => {
   const [termsText, setTermsText] = useState('');
 
   // Edit State
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [editingRental, setEditingRental] = useState<Apartment | null>(null);
   const [editingExcursion, setEditingExcursion] = useState<Excursion | null>(null);
   const [editingCar, setEditingCar] = useState<CarRental | null>(null);
@@ -37,6 +40,7 @@ const Admin: React.FC = () => {
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [editingBanner, setEditingBanner] = useState<PromoBanner | null>(null);
 
+  const [tripDatesInput, setTripDatesInput] = useState('');
   const [rentalAmenitiesInput, setRentalAmenitiesInput] = useState('');
   const [excursionDatesInput, setExcursionDatesInput] = useState('');
 
@@ -56,11 +60,11 @@ const Admin: React.FC = () => {
 
   const loadAllData = async () => {
       try {
-          const [r, e, c, i, hs, pb] = await Promise.all([
-              getRentals(), getExcursions(), getCarRentals(),
+          const [t, r, e, c, i, hs, pb] = await Promise.all([
+              getTrips(), getRentals(), getExcursions(), getCarRentals(),
               getInstallmentTrips(), getHeroSlides(), getPromoBanners()
           ]);
-          setRentals(r); setExcursions(e); setCars(c);
+          setTrips(t); setRentals(r); setExcursions(e); setCars(c);
           setInstallments(i); setHeroSlides(hs); setPromoBanners(pb);
       } catch (error) {
           console.error("Error loading data", error);
@@ -80,7 +84,7 @@ const Admin: React.FC = () => {
   const handleLogout = () => { setIsAuthenticated(false); localStorage.removeItem('floripa_isAdmin'); };
 
   const resetEditState = () => {
-      setEditingRental(null); setEditingExcursion(null);
+      setEditingTrip(null); setEditingRental(null); setEditingExcursion(null);
       setEditingCar(null); setEditingInstallment(null);
       setEditingSlide(null); setEditingBanner(null);
       setIsSaving(false);
@@ -89,6 +93,7 @@ const Admin: React.FC = () => {
   const handleDelete = async (id: any, type: string) => {
       if(!window.confirm("¿Eliminar este elemento?")) return;
       try {
+          if (type === 'trip') await deleteTrip(id);
           if (type === 'rental') await deleteRental(id);
           if (type === 'car') await deleteCarRental(id);
           if (type === 'excursion') await deleteExcursion(id);
@@ -104,7 +109,8 @@ const Admin: React.FC = () => {
       e.preventDefault();
       setIsSaving(true);
       try {
-          if (editingRental) await saveRental({...editingRental, amenities: rentalAmenitiesInput.split('\n').filter(a=>a.trim()!=='')});
+          if (editingTrip) await saveTrip({...editingTrip, availableDates: tripDatesInput.split('\n').filter(d=>d.trim()!=='')});
+          else if (editingRental) await saveRental({...editingRental, amenities: rentalAmenitiesInput.split('\n').filter(a=>a.trim()!=='')});
           else if (editingCar) await saveCarRental(editingCar);
           else if (editingExcursion) await saveExcursion({...editingExcursion, availableDates: excursionDatesInput.split('\n').filter(d=>d.trim()!=='')});
           else if (editingInstallment) await saveInstallmentTrip(editingInstallment);
@@ -165,6 +171,7 @@ const Admin: React.FC = () => {
                 <div className="flex space-x-1 bg-white rounded-lg p-1 shadow-sm overflow-x-auto w-full md:w-auto scrollbar-hide">
                     {[
                         {id: 'hero', label: 'Portada'},
+                        {id: 'trips', label: 'Tours'},
                         {id: 'cars', label: 'Coches'},
                         {id: 'rentals', label: 'Alquileres'},
                         {id: 'excursions', label: 'Excursiones'},
@@ -204,6 +211,29 @@ const Admin: React.FC = () => {
                             </div>
                         ))}
                     </div>
+                </div>
+            </div>
+        )}
+
+        {activeTab === 'trips' && (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between mb-4">
+                    <h2 className="font-bold text-xl text-green-800">Paquetes y Tours</h2>
+                    <button onClick={()=>{resetEditState(); setEditingTrip(createEmptyTrip()); setTripDatesInput(''); setIsModalOpen(true)}} className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold">+ Nuevo Tour</button>
+                </div>
+                <div className="space-y-1">
+                    {trips.map(t => (
+                        <div key={t.id} className="flex justify-between border-b py-3 items-center">
+                            <div className="flex items-center gap-3">
+                                <img src={t.images[0]} className="w-10 h-10 rounded object-cover" />
+                                <div><span className="font-medium">{t.title}</span><span className="text-xs text-gray-400 ml-2">{t.location}</span></div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={()=>{resetEditState(); setEditingTrip({...t}); setTripDatesInput(t.availableDates.join('\n')); setIsModalOpen(true)}} className="bg-blue-50 text-blue-600 px-3 py-1 rounded font-bold text-xs">Editar</button>
+                                <button onClick={()=>handleDelete(t.id, 'trip')} className="bg-red-50 text-red-600 px-3 py-1 rounded font-bold text-xs">Eliminar</button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         )}
@@ -324,6 +354,29 @@ const Admin: React.FC = () => {
                         <button onClick={()=>setIsModalOpen(false)} className="text-2xl text-gray-400">&times;</button>
                     </div>
                     <div className="p-6 overflow-y-auto">
+                        {editingTrip && (
+                            <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <input value={editingTrip.title} onChange={e=>setEditingTrip({...editingTrip, title: e.target.value})} placeholder="Título del Tour" className="w-full border p-2 rounded" required />
+                                    <input value={editingTrip.location} onChange={e=>setEditingTrip({...editingTrip, location: e.target.value})} placeholder="Ubicación" className="w-full border p-2 rounded" required />
+                                    <input value={editingTrip.price} onChange={e=>setEditingTrip({...editingTrip, price: Number(e.target.value)})} type="number" placeholder="Precio Base" className="w-full border p-2 rounded" required />
+                                    <select value={editingTrip.baseCurrency} onChange={e=>setEditingTrip({...editingTrip, baseCurrency: e.target.value as any})} className="w-full border p-2 rounded">
+                                        <option value="USD">Dólares (USD)</option>
+                                        <option value="ARS">Pesos (ARS)</option>
+                                    </select>
+                                    <textarea value={editingTrip.description} onChange={e=>setEditingTrip({...editingTrip, description: e.target.value})} placeholder="Descripción del viaje..." className="w-full border p-2 rounded h-32" />
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="block text-xs font-bold text-gray-400">Fechas de Salida (una por línea)</label>
+                                    <textarea value={tripDatesInput} onChange={e=>setTripDatesInput(e.target.value)} placeholder="Ej: Lunes 15 de Enero" className="w-full border p-2 rounded h-32" />
+                                    <input type="file" multiple onChange={e=>handleFileUpload(e, setEditingTrip)} className="text-xs" />
+                                    <div className="flex gap-2 flex-wrap">{editingTrip.images.map((img,i)=><img key={i} src={img} className="w-12 h-12 object-cover rounded" />)}</div>
+                                    <label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={editingTrip.isOffer} onChange={e=>setEditingTrip({...editingTrip, isOffer: e.target.checked})} /> Destacar como Oferta</label>
+                                </div>
+                                <button type="submit" className="md:col-span-2 bg-green-600 text-white py-3 rounded font-bold hover:bg-green-700 transition-colors">Guardar Tour</button>
+                            </form>
+                        )}
+
                         {editingCar && (
                             <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
