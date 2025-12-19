@@ -11,8 +11,6 @@ import { getWorldCupTrips, saveWorldCupTrip, deleteWorldCupTrip, createEmptyWorl
 import { getGroupTrips, saveGroupTrip, deleteGroupTrip, createEmptyGroupTrip } from '../services/groupService';
 import { getHeroSlides, saveHeroSlide, getPromoBanners, savePromoBanner, deleteHeroSlide } from '../services/heroService';
 import { getTermsAndConditions, saveTermsAndConditions } from '../services/settingsService';
-import { generateDestinationGuide } from '../services/geminiService';
-import { generateQuotePDF } from '../services/quotePdfService';
 import { ADMIN_EMAIL, ADMIN_PASS } from '../constants';
 
 const Admin: React.FC = () => {
@@ -212,7 +210,7 @@ const Admin: React.FC = () => {
                         <div key={c.id} className="flex justify-between border-b py-3 items-center group">
                             <div>
                                 <span className="font-medium">{c.brand} {c.title}</span>
-                                <span className="text-xs text-gray-400 ml-2">({c.category})</span>
+                                <span className="text-xs text-gray-400 ml-2">({c.category} - {c.location})</span>
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={()=>{resetEditState(); setEditingCar({...c}); setIsModalOpen(true)}} className="bg-blue-50 text-blue-600 px-3 py-1 rounded font-bold">Editar</button>
@@ -224,31 +222,49 @@ const Admin: React.FC = () => {
             </div>
         )}
 
-        {/* Existing tabs here... */}
+        {/* Existing Tab rendering logic for others... */}
 
         {isModalOpen && (
             <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
                     <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-                        <h3 className="font-bold">Editar Elemento</h3>
+                        <h3 className="font-bold">Información del Coche</h3>
                         <button onClick={()=>setIsModalOpen(false)} className="text-2xl text-gray-400">&times;</button>
                     </div>
                     <div className="p-6 overflow-y-auto">
                         {editingCar && (
                             <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
-                                    <input value={editingCar.brand} onChange={e=>setEditingCar({...editingCar, brand: e.target.value})} placeholder="Marca (ej: Chevrolet)" className="w-full border p-2 rounded" required />
-                                    <input value={editingCar.title} onChange={e=>setEditingCar({...editingCar, title: e.target.value})} placeholder="Modelo / Título (ej: Onix o Similar)" className="w-full border p-2 rounded" required />
-                                    <select value={editingCar.category} onChange={e=>setEditingCar({...editingCar, category: e.target.value})} className="w-full border p-2 rounded">
-                                        <option>Económico</option><option>Intermedio</option><option>SUV</option><option>Premium</option><option>Pick-up</option>
-                                    </select>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <input type="number" value={editingCar.pricePerDay} onChange={e=>setEditingCar({...editingCar, pricePerDay: Number(e.target.value)})} placeholder="USD x Día" className="border p-2 rounded" required />
+                                        <input value={editingCar.brand} onChange={e=>setEditingCar({...editingCar, brand: e.target.value})} placeholder="Marca (ej: Chevrolet)" className="w-full border p-2 rounded" required />
+                                        <input value={editingCar.title} onChange={e=>setEditingCar({...editingCar, title: e.target.value})} placeholder="Modelo (ej: Onix o Similar)" className="w-full border p-2 rounded" required />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <select value={editingCar.category} onChange={e=>setEditingCar({...editingCar, category: e.target.value})} className="w-full border p-2 rounded">
+                                            <option>Económico</option><option>Intermedio</option><option>SUV</option><option>Premium</option><option>Pick-up</option>
+                                        </select>
+                                        <input value={editingCar.location} onChange={e=>setEditingCar({...editingCar, location: e.target.value})} placeholder="Ubicación de entrega" className="w-full border p-2 rounded" required />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="relative">
+                                            <span className="absolute left-2 top-2 text-gray-400 text-xs">$</span>
+                                            <input type="number" value={editingCar.pricePerDay} onChange={e=>setEditingCar({...editingCar, pricePerDay: Number(e.target.value)})} placeholder="Precio x Día" className="w-full border p-2 pl-6 rounded" required />
+                                        </div>
+                                        <select value={editingCar.baseCurrency} onChange={e=>setEditingCar({...editingCar, baseCurrency: e.target.value as any})} className="border p-2 rounded">
+                                            <option value="USD">USD (Dólares)</option>
+                                            <option value="BRL">BRL (Reales)</option>
+                                            <option value="ARS">ARS (Pesos)</option>
+                                        </select>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
                                         <select value={editingCar.transmission} onChange={e=>setEditingCar({...editingCar, transmission: e.target.value as any})} className="border p-2 rounded">
                                             <option>Manual</option><option>Automático</option>
                                         </select>
+                                        <select value={editingCar.fuel} onChange={e=>setEditingCar({...editingCar, fuel: e.target.value as any})} className="border p-2 rounded">
+                                            <option>Nafta</option><option>Diesel</option><option>Híbrido</option><option>Eléctrico</option>
+                                        </select>
                                     </div>
-                                    <textarea value={editingCar.description} onChange={e=>setEditingCar({...editingCar, description: e.target.value})} placeholder="Descripción técnica y condiciones..." className="w-full border p-2 rounded h-32" />
+                                    <textarea value={editingCar.description} onChange={e=>setEditingCar({...editingCar, description: e.target.value})} placeholder="Requisitos (Licencia, Franquicia, Edad min...)" className="w-full border p-2 rounded h-32" />
                                 </div>
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
@@ -259,17 +275,23 @@ const Admin: React.FC = () => {
                                         <input type="number" value={editingCar.largeSuitcases} onChange={e=>setEditingCar({...editingCar, largeSuitcases: Number(e.target.value)})} placeholder="Valijas Grandes" className="border p-2 rounded" />
                                         <input type="number" value={editingCar.smallSuitcases} onChange={e=>setEditingCar({...editingCar, smallSuitcases: Number(e.target.value)})} placeholder="Valijas Chicas" className="border p-2 rounded" />
                                     </div>
-                                    <label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={editingCar.hasAC} onChange={e=>setEditingCar({...editingCar, hasAC: e.target.checked})} /> Aire Acondicionado</label>
-                                    <label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={editingCar.isOffer} onChange={e=>setEditingCar({...editingCar, isOffer: e.target.checked})} /> Destacar como Oferta</label>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-400 mb-2">Fotos del Vehículo</label>
-                                        <input type="file" multiple onChange={e=>handleFileUpload(e, setEditingCar)} className="text-xs" />
-                                        <div className="flex gap-2 mt-2 flex-wrap">{editingCar.images.map((img, i)=><img key={i} src={img} className="w-16 h-16 object-cover rounded" />)}</div>
+                                    <div className="grid grid-cols-2 gap-4 items-center">
+                                        <label className="flex items-center gap-2 font-bold text-sm"><input type="checkbox" checked={editingCar.hasAC} onChange={e=>setEditingCar({...editingCar, hasAC: e.target.checked})} /> Aire Acond.</label>
+                                        <label className="flex items-center gap-2 font-bold text-sm text-green-600"><input type="checkbox" checked={editingCar.isOffer} onChange={e=>setEditingCar({...editingCar, isOffer: e.target.checked})} /> Destacar Oferta</label>
+                                    </div>
+                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                        <label className="block text-xs font-bold text-gray-500 mb-2">Fotos del Vehículo (PNG/JPG)</label>
+                                        <input type="file" multiple onChange={e=>handleFileUpload(e, setEditingCar)} className="text-xs w-full" />
+                                        <div className="flex gap-2 mt-2 flex-wrap max-h-24 overflow-y-auto">{editingCar.images.map((img, i)=><img key={i} src={img} className="w-12 h-12 object-cover rounded border" />)}</div>
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-xs font-bold text-gray-400 mb-1">Descuento (%)</label>
+                                        <input type="number" value={editingCar.discount || 0} onChange={e=>setEditingCar({...editingCar, discount: Number(e.target.value)})} className="w-full border p-2 rounded" />
                                     </div>
                                 </div>
                                 <div className="md:col-span-2 flex justify-end gap-3 mt-4">
-                                    <button type="button" onClick={()=>setIsModalOpen(false)} className="px-6 py-2 border rounded">Cancelar</button>
-                                    <button type="submit" disabled={isSaving} className="px-6 py-2 bg-green-600 text-white rounded font-bold">{isSaving ? 'Guardando...' : 'Guardar Coche'}</button>
+                                    <button type="button" onClick={()=>setIsModalOpen(false)} className="px-6 py-2 border rounded font-bold text-gray-500">Cancelar</button>
+                                    <button type="submit" disabled={isSaving} className="px-6 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 shadow-lg">{isSaving ? 'Guardando...' : 'Guardar Coche'}</button>
                                 </div>
                             </form>
                         )}
