@@ -15,13 +15,14 @@ IMPORTANTE:
 
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    const apiKey = process.env.API_KEY;
+    // Verificamos tanto la forma correcta como el error tipográfico detectado en la captura
+    const apiKey = process.env.API_KEY || (process.env as any).API_KEI;
+    
     if (!apiKey) {
-      yield "¡Olá! Mi sistema está esperando la configuración de mi clave de acceso en Vercel. 🌴✨";
+      yield "¡Olá! Detecto que la clave API no está llegando correctamente. Por favor, asegúrate de que la variable en Vercel se llame exactamente API_KEY (con Y griega). 🌴✨";
       return;
     }
 
-    // Creamos una instancia fresca para asegurar que tome la API_KEY del entorno
     const ai = new GoogleGenAI({ apiKey });
     const chat = ai.chats.create({
       model: 'gemini-3-flash-preview',
@@ -43,8 +44,8 @@ export const sendMessageToFlori = async function* (message: string) {
   } catch (error: any) {
     console.error("Error en Flori AI:", error);
     
-    if (error?.message?.includes("API_KEY") || error?.message?.includes("key")) {
-      yield "¡Olá! Parece que hay un problema con mi clave de acceso. Por favor, revisa las variables de entorno en Vercel. 🌊";
+    if (error?.message?.includes("API_KEY") || error?.message?.includes("key") || error?.message?.includes("403")) {
+      yield "¡Olá! Mi clave de acceso parece no ser válida o no tener permisos. Revisa que sea una clave de Gemini activa en Google AI Studio. 🌊";
     } else {
       yield "¡Olá! Tuve un pequeño contratiempo con mi conexión. ¿Podrías intentar escribirme de nuevo? 🌊✨";
     }
