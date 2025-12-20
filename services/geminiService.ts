@@ -13,28 +13,26 @@ Tu misión:
 
 Conversión:
 - Si el usuario muestra interés en reservar, solicita su nombre y WhatsApp para que el equipo humano cierre la reserva.
-- Recuerda que las reservas se confirman con un 40% de seña.
+- Las reservas se confirman con un 40% de seña.
 
 Conocimiento:
 - Eres experta en Florianópolis (42 playas), Bombinhas, Camboriú e Itapema.`;
 
 export const getChatSession = (): Chat => {
-  // Siempre creamos una instancia fresca si no existe para asegurar que use la API_KEY del entorno
   if (chatSession) return chatSession;
 
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API_KEY no configurada.");
+    throw new Error("API_KEY no detectada. Asegúrate de configurarla en las variables de entorno de Vercel.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
   
-  // Usamos 'gemini-flash-latest' por ser el alias más estable y compatible para chats rápidos
   chatSession = ai.chats.create({
-    model: 'gemini-flash-latest',
+    model: 'gemini-3-flash-preview',
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
-      temperature: 0.8,
+      temperature: 0.7,
       topP: 0.95,
     },
   });
@@ -54,16 +52,12 @@ export const sendMessageToFlori = async function* (message: string) {
     }
   } catch (error: any) {
     console.error("Error en Flori AI:", error);
-    
-    // Si la sesión falla por cualquier motivo, la reseteamos para el próximo intento
-    chatSession = null;
+    chatSession = null; // Resetear sesión para reintentar conexión limpia
 
-    if (error?.message?.includes("API key not valid") || error?.message?.includes("invalid")) {
-      yield "Parece que hay un tema con mi configuración de seguridad (Clave de API). Por favor, avísale al administrador. 🌴";
-    } else if (error?.message?.includes("not found")) {
-      yield "Estoy reconfigurando mi sistema de navegación... ¿Podrías repetirme tu pregunta en un momento? 🌊✨";
+    if (error?.message?.includes("API_KEY") || error?.message?.includes("key")) {
+      yield "¡Olá! Parece que falta configurar mi clave de acceso en el servidor. Por favor, verifica las variables de entorno. 🌴";
     } else {
-      yield "¡Olá! Tuve un pequeño tropiezo con la conexión, pero ya estoy aquí. ¿Cómo puedo ayudarte con tu viaje a Floripa? 🌴✨";
+      yield "¡Olá! Tuve un pequeño inconveniente técnico al conectar con mis servidores. ¿Podrías intentar escribirme de nuevo en unos segundos? 🌊✨";
     }
   }
 };

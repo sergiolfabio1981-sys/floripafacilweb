@@ -3,7 +3,6 @@ import { Trip } from '../types';
 import { INITIAL_TRIPS } from '../constants';
 import { supabase } from './supabase';
 
-// Función para asegurar que el objeto solo contenga campos que existen en la base de datos estándar
 const getSanitizedPayload = (trip: any) => {
     return {
         id: trip.id,
@@ -18,7 +17,6 @@ const getSanitizedPayload = (trip: any) => {
         baseCurrency: trip.baseCurrency || 'USD',
         specialLabel: trip.specialLabel || '',
         durationLabel: trip.durationLabel || '',
-        // Campos nuevos (Booking Style)
         highlights: Array.isArray(trip.highlights) ? trip.highlights : [],
         included: Array.isArray(trip.included) ? trip.included : [],
         notIncluded: Array.isArray(trip.notIncluded) ? trip.notIncluded : [],
@@ -32,11 +30,11 @@ export const getTrips = async (): Promise<Trip[]> => {
   try {
     const { data, error } = await supabase.from('trips').select('*');
     if (error) {
-      console.error('Error fetching trips:', error.message || error);
+      // Convertimos el objeto de error a string para evitar el "[object Object]"
+      console.error('Error fetching trips de Supabase:', JSON.stringify(error, null, 2));
       return INITIAL_TRIPS; 
     }
     if (!data || data.length === 0) {
-        // Intento de sembrado automático si la tabla está vacía
         const { error: seedError } = await supabase.from('trips').insert(INITIAL_TRIPS.map(t => {
             const { type, ...clean } = t;
             return clean;
@@ -46,7 +44,7 @@ export const getTrips = async (): Promise<Trip[]> => {
     }
     return data.map(t => ({...t, type: 'trip'})) as Trip[];
   } catch (err: any) {
-    console.error('Unexpected error in getTrips:', err.message || err);
+    console.error('Error inesperado en getTrips:', err.message || err);
     return INITIAL_TRIPS;
   }
 };
@@ -55,7 +53,7 @@ export const getTripById = async (id: string): Promise<Trip | undefined> => {
   try {
     const { data, error } = await supabase.from('trips').select('*').eq('id', id).single();
     if (error) {
-        console.warn(`Trip ${id} not found in DB, checking constants.`);
+        console.warn(`Trip ${id} no encontrado en DB, usando constantes.`);
         return INITIAL_TRIPS.find(t => t.id === id);
     }
     return {...data, type: 'trip'} as Trip;
@@ -68,14 +66,17 @@ export const saveTrip = async (trip: any): Promise<void> => {
   const payload = getSanitizedPayload(trip);
   const { error } = await supabase.from('trips').upsert(payload);
   if (error) {
-    console.error('Supabase Save Error:', error.message || error);
+    console.error('Error al guardar en Supabase:', JSON.stringify(error, null, 2));
     throw error;
   }
 };
 
 export const deleteTrip = async (id: string): Promise<void> => {
   const { error } = await supabase.from('trips').delete().eq('id', id);
-  if (error) throw error;
+  if (error) {
+      console.error('Error al eliminar viaje:', JSON.stringify(error, null, 2));
+      throw error;
+  }
 };
 
 export const createEmptyTrip = (): Trip => ({
