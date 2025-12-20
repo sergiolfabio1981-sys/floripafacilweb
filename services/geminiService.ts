@@ -15,24 +15,26 @@ IMPORTANTE:
 
 /**
  * Función para enviar mensajes a Flori usando la API de Gemini.
- * Sigue estrictamente las guías de @google/genai.
+ * Obtiene la API KEY exclusivamente de process.env.API_KEY según las directrices.
  */
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    // La API KEY debe obtenerse exclusivamente de process.env.API_KEY
-    const apiKey = process.env.API_KEY;
+    // Intentamos acceder a la clave siguiendo estrictamente la directriz de process.env.API_KEY
+    // Usamos una verificación segura para evitar que el navegador lance un error de referencia
+    const env = typeof process !== 'undefined' ? process.env : (window as any).process?.env || {};
+    const apiKey = env.API_KEY;
 
     if (!apiKey) {
-      console.error("Error: process.env.API_KEY no está definida.");
-      yield "¡Olá! Mi sistema no detecta la clave de acceso (API_KEY). 🌴\n\nPor favor, verifica en el panel de Vercel que la variable se llame exactamente **API_KEY** y que hayas realizado un **Redeploy** manual de la aplicación. ✨";
+      console.error("Flori AI: API_KEY no encontrada en process.env");
+      yield "¡Olá! Mi sistema todavía no detecta la clave de acceso (API_KEY). 🌴\n\n**PASO FINAL NECESARIO:** Ve a tu panel de Vercel, pestaña **'Deployments'**, busca este último despliegue y selecciona **'Redeploy'**. Vercel necesita reconstruir la app para inyectar la clave que guardaste. ✨";
       return;
     }
 
-    // Se crea la instancia justo antes de usarla para asegurar que tome el valor actual
+    // Inicialización siguiendo las reglas: nueva instancia antes de la llamada
     const ai = new GoogleGenAI({ apiKey });
     
-    // Usamos el modelo gemini-3-flash-preview para tareas de chat rápidas
-    const response = await ai.models.generateContent({
+    // Llamada al modelo gemini-3-flash-preview
+    const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: message,
       config: {
@@ -41,17 +43,19 @@ export const sendMessageToFlori = async function* (message: string) {
       },
     });
 
-    // Extraemos el texto de la respuesta (response.text es una propiedad, no un método)
+    // Extraemos el texto de la propiedad .text (no es un método)
     const text = response.text;
     if (text) {
       yield text;
+    } else {
+      yield "¡Olá! Recibí tu mensaje pero mi respuesta salió en blanco. ¿Podrías intentar de nuevo? 🌊";
     }
   } catch (error: any) {
     console.error("Error crítico en Flori AI:", error);
     
-    // Manejo de errores amigable
-    if (error?.message?.includes("API_KEY") || error?.message?.includes("403")) {
-      yield "¡Olá! Mi clave de acceso parece ser inválida. Por favor, revisa la configuración en Google AI Studio y Vercel. 🌊";
+    const errorMsg = error?.message || "";
+    if (errorMsg.includes("API_KEY") || errorMsg.includes("403")) {
+      yield "¡Olá! Mi clave de acceso parece ser inválida. Por favor, verifica que la clave de Google AI Studio sea correcta y que el nombre en Vercel sea exactamente **API_KEY**. 🌊";
     } else {
       yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊✨";
     }
