@@ -11,8 +11,7 @@ import { getDestinations, saveDestination, deleteDestination, createEmptyDestina
 import { getSellers, saveSeller, deleteSeller, createEmptySeller } from '../services/sellerService';
 import { supabase } from '../services/supabase';
 import { useCurrency } from '../contexts/CurrencyContext';
-
-const LOGO_URL = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png";
+import { LOGO_URL, LOGO_FALLBACK_URL } from '../constants';
 
 const Admin: React.FC = () => {
   const { formatPrice } = useCurrency();
@@ -49,13 +48,8 @@ const Admin: React.FC = () => {
       try {
           const { data, error } = await supabase.from('destinations').select('id').limit(1);
           if (error) {
-              if (error.code === '42P01') {
-                  setDbStatus('Error: Tablas no creadas');
-                  setDbError('Falta tabla "destinations" en Supabase.');
-              } else {
-                  setDbStatus(`Error: ${error.code}`);
-                  setDbError(error.message);
-              }
+              setDbStatus(`Error: ${error.code}`);
+              setDbError(error.message);
               return;
           }
           setDbStatus('Conectado');
@@ -114,45 +108,6 @@ const Admin: React.FC = () => {
   
   const handleLogout = () => { setUser(null); localStorage.removeItem('abras_user'); };
 
-  const handleSave = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSaving(true);
-      try {
-          if (modalType === 'destination') await saveDestination(editingItem);
-          else if (modalType === 'inventory_item') {
-              const type = editingItem.type;
-              if (type === 'trip') await saveTrip(editingItem);
-              else if (type === 'car') await saveCarRental(editingItem);
-              else if (type === 'excursion') await saveExcursion(editingItem);
-              else if (type === 'hotel') await saveHotel(editingItem);
-              else if (type === 'rental') await saveRental(editingItem);
-          } else if (modalType === 'guide') await saveGuide(editingItem);
-          else if (modalType === 'seller') await saveSeller(editingItem);
-          
-          await loadData();
-          setIsModalOpen(false);
-          alert("Cambios guardados.");
-      } catch (err: any) {
-          alert(`Error: ${err.message}`);
-      } finally { setIsSaving(false); }
-  };
-
-  const handleDelete = async (item: any) => {
-      if (!window.confirm(`¿Eliminar "${item.title || item.name}"?`)) return;
-      try {
-          if (activeTab === 'destinations') await deleteDestination(item.id);
-          else if (activeTab === 'inventory') {
-              if (item.type === 'trip') await deleteTrip(item.id);
-              else if (item.type === 'car') await deleteCarRental(item.id);
-              else if (item.type === 'excursion') await deleteExcursion(item.id);
-              else if (item.type === 'hotel') await deleteHotel(item.id);
-              else if (item.type === 'rental') await deleteRental(item.id);
-          } else if (activeTab === 'guides') await deleteGuide(item.id);
-          else if (activeTab === 'sellers') await deleteSeller(item.id);
-          await loadData();
-      } catch (e) { console.error(e); }
-  };
-
   const getFilteredInventory = () => {
     let list = inventory;
     if (destFilter !== 'all') list = list.filter(i => i.location && i.location.includes(destFilter));
@@ -168,9 +123,16 @@ const Admin: React.FC = () => {
   if (!user) {
      return (
         <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
-            <form onSubmit={handleLogin} className="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md space-y-6">
+            <form onSubmit={handleLogin} className="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md space-y-6 animate-pop-in">
                 <div className="text-center">
-                    <img src={LOGO_URL} className="h-36 mx-auto mb-6 rounded-full shadow-2xl border-4 border-lime-500 bg-white p-2" alt="Logo" />
+                    <div className="w-36 h-36 mx-auto mb-6 bg-slate-50 rounded-full flex items-center justify-center p-4 border-4 border-lime-500 shadow-xl overflow-hidden">
+                        <img 
+                          src={LOGO_URL} 
+                          className="w-full h-full object-contain" 
+                          alt="Logo" 
+                          onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
+                        />
+                    </div>
                     <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter">Acceso Central</h2>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Floripa Fácil - Administración</p>
                 </div>
@@ -188,7 +150,14 @@ const Admin: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       <aside className="w-full md:w-72 bg-slate-900 text-white shrink-0 flex flex-col">
           <div className="p-8 border-b border-white/10 text-center">
-              <img src={LOGO_URL} className="w-24 h-24 mx-auto rounded-full mb-4 border-2 border-green-500 shadow-xl bg-white p-1" alt="Logo" />
+              <div className="w-24 h-24 mx-auto rounded-full mb-4 border-2 border-green-500 shadow-xl bg-white p-2 overflow-hidden flex items-center justify-center">
+                  <img 
+                    src={LOGO_URL} 
+                    className="w-full h-full object-contain" 
+                    alt="Logo" 
+                    onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
+                  />
+              </div>
               <h3 className="font-black text-xs uppercase tracking-widest text-green-400">Admin Floripa Fácil</h3>
               <div className="mt-4 p-3 bg-white/5 rounded-xl border border-white/10">
                   <div className="flex items-center justify-center gap-2">
@@ -201,9 +170,7 @@ const Admin: React.FC = () => {
               <button onClick={()=>setActiveTab('inventory')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='inventory' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>🎒 Inventario</button>
               <button onClick={()=>setActiveTab('sellers')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sellers' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>👥 Vendedores</button>
               <button onClick={()=>setActiveTab('destinations')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='destinations' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>📍 Destinos</button>
-              <button onClick={()=>setActiveTab('guides')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='guides' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>🌍 Guías Cult.</button>
               <button onClick={()=>setActiveTab('sales')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sales' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>💰 Ventas</button>
-              <button onClick={()=>setActiveTab('metrics')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='metrics' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>📊 Métricas</button>
               <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-red-400 hover:bg-red-500/10 mt-10 transition-all italic">Cerrar Sesión</button>
           </nav>
       </aside>

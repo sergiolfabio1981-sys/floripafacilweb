@@ -1,6 +1,7 @@
 
 import { ListingItem } from '../types';
 import html2canvas from 'html2canvas';
+import { LOGO_URL } from '../constants';
 
 export const generateShareImage = async (item: ListingItem, formattedPrice: string) => {
   const container = document.createElement('div');
@@ -14,7 +15,7 @@ export const generateShareImage = async (item: ListingItem, formattedPrice: stri
   document.body.appendChild(container);
 
   const mainImage = item.images[0];
-  const logoUrl = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png"; 
+  const logoUrl = LOGO_URL; 
   
   let duration = "TEMPORADA 2025/2026";
   if ('durationLabel' in item && item.durationLabel) duration = item.durationLabel;

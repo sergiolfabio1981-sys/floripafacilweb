@@ -9,10 +9,9 @@ import { getHotels } from '../services/hotelService';
 import { getCarRentals } from '../services/carRentalService';
 import { getHeroSlides, getPromoBanners } from '../services/heroService';
 import { usePlanner } from '../contexts/PlannerContext';
+import { LOGO_URL, LOGO_FALLBACK_URL } from '../constants';
 import TripCard from '../components/TripCard';
 import Testimonials from '../components/Testimonials';
-
-const LOGO_URL = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png";
 
 const Home: React.FC = () => {
   const [combinedOffers, setCombinedOffers] = useState<ListingItem[]>([]);
@@ -23,6 +22,7 @@ const Home: React.FC = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [promoBanners, setPromoBanners] = useState<PromoBanner[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [logoLoaded, setLogoLoaded] = useState<'primary' | 'fallback' | 'none'>('none');
 
   const { selectedItems } = usePlanner();
   const selectedIds = selectedItems.map(i => i.id);
@@ -77,7 +77,14 @@ const Home: React.FC = () => {
             <div key={slide.id} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
                 <img src={slide.image} className="w-full h-full object-cover brightness-[0.4]" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                    <img src={LOGO_URL} className="w-44 h-44 mb-6 animate-pop-in drop-shadow-2xl object-contain bg-white rounded-full p-2 border-4 border-lime-500/20 shadow-2xl" alt="Floripa Fácil" />
+                    <div className="w-40 h-40 mb-6 bg-white/10 rounded-full flex items-center justify-center p-2 border-4 border-white/20 shadow-2xl backdrop-blur-sm overflow-hidden">
+                        <img 
+                          src={LOGO_URL} 
+                          className="w-full h-full object-contain" 
+                          alt="Logo" 
+                          onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
+                        />
+                    </div>
                     <h2 className="text-5xl md:text-7xl font-black text-white mb-4 animate-fade-in-up uppercase tracking-tighter italic">
                       {slide.title}
                     </h2>
@@ -96,8 +103,13 @@ const Home: React.FC = () => {
       {/* BRAND INTRODUCTION */}
       <section className="max-w-7xl mx-auto px-4 -mt-12 relative z-30">
           <div className="bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border border-gray-100 flex flex-col md:flex-row items-center gap-10">
-              <div className="flex-shrink-0 bg-slate-50 p-4 rounded-full border-4 border-lime-100 shadow-inner">
-                  <img src={LOGO_URL} className="w-48 h-48 object-contain rounded-full shadow-lg border-2 border-white" alt="Floripa Fácil" />
+              <div className="flex-shrink-0 bg-slate-50 p-4 rounded-full border-4 border-lime-100 shadow-inner w-56 h-56 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={LOGO_URL} 
+                    className="w-full h-full object-contain rounded-full shadow-lg" 
+                    alt="Floripa Fácil" 
+                    onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
+                  />
               </div>
               <div className="text-center md:text-left flex-1">
                   <h3 className="text-3xl font-black text-gray-800 uppercase tracking-tighter mb-4 italic">
@@ -175,13 +187,6 @@ const Home: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredItems.map(item => <TripCard key={item.id} trip={item} />)}
-            {filteredItems.length === 0 && !isLoading && (
-              <div className="col-span-full py-24 text-center bg-white rounded-[3rem] border-4 border-dashed border-gray-100">
-                <div className="text-6xl mb-4">🏝️</div>
-                <p className="text-gray-400 font-black uppercase tracking-widest text-lg">No encontramos lo que buscas hoy...</p>
-                <button onClick={()=>{setSearchTerm(''); setActiveCategory('all')}} className="text-green-600 font-black uppercase tracking-widest mt-4 hover:underline">Ver todo el catálogo</button>
-              </div>
-            )}
         </div>
       </div>
       <Testimonials />

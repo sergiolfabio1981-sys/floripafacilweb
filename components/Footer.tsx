@@ -2,13 +2,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getTermsAndConditions } from '../services/settingsService';
-
-const LOGO_URL = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png";
+import { LOGO_URL, LOGO_FALLBACK_URL } from '../constants';
 
 const Footer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [termsContent, setTermsContent] = useState('');
-  const [imgError, setImgError] = useState(false);
 
   const openTerms = async (e: React.MouseEvent) => {
       e.preventDefault();
@@ -27,16 +25,12 @@ const Footer: React.FC = () => {
           <div className="md:col-span-5">
             <div className="flex flex-col items-start gap-6 mb-8">
                 <div className="bg-white p-1 rounded-full shadow-2xl border-4 border-lime-500/20 w-32 h-32 flex items-center justify-center overflow-hidden">
-                    {!imgError ? (
-                        <img 
-                            src={LOGO_URL} 
-                            alt="Floripa Fácil" 
-                            className="h-full w-full object-contain rounded-full" 
-                            onError={() => setImgError(true)}
-                        />
-                    ) : (
-                        <div className="h-full w-full bg-green-600 flex items-center justify-center text-white font-black text-2xl">FF</div>
-                    )}
+                    <img 
+                      src={LOGO_URL} 
+                      alt="Floripa Fácil" 
+                      className="h-full w-full object-contain rounded-full"
+                      onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
+                    />
                 </div>
                 <div>
                     <h4 className="text-3xl font-black text-lime-400 leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</h4>
