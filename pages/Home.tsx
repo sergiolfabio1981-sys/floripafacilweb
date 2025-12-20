@@ -22,7 +22,6 @@ const Home: React.FC = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [promoBanners, setPromoBanners] = useState<PromoBanner[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [logoLoaded, setLogoLoaded] = useState<'primary' | 'fallback' | 'none'>('none');
 
   const { selectedItems } = usePlanner();
   const selectedIds = selectedItems.map(i => i.id);

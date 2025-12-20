@@ -11,8 +11,8 @@ export const INITIAL_HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
     image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop",
-    title: "ABRAS TRAVEL",
-    subtitle: "Tu agencia de confianza para experiencias exclusivas y traslados premium en Brasil.",
+    title: "VIVÍ FLORIANÓPOLIS",
+    subtitle: "Excursiones exclusivas, paseos en barco y los mejores traslados con el sello Floripa Fácil.",
     ctaText: "Ver Excursiones",
     ctaLink: "/excursions",
     highlightColor: "text-lime-400"
@@ -20,8 +20,8 @@ export const INITIAL_HERO_SLIDES: HeroSlide[] = [
   {
     id: 2,
     image: "https://images.unsplash.com/photo-1519832276906-e77fa7478054?q=80&w=2069&auto=format&fit=crop",
-    title: "DESCUBRÍ EL SUR",
-    subtitle: "Desde Bombinhas hasta Camboriú, vive el paraíso con servicios verificados.",
+    title: "BOMBINHAS & MÁS",
+    subtitle: "Explorá las aguas cristalinas del sur de Brasil con nuestros guías expertos.",
     ctaText: "Explorar Tours",
     ctaLink: "/trips",
     highlightColor: "text-emerald-400"
@@ -32,16 +32,16 @@ export const INITIAL_PROMO_BANNERS: PromoBanner[] = [
   {
     id: 'banner_rentacar',
     title: 'ALQUILER DE COCHES',
-    subtitle: 'La flota más moderna para recorrer el litoral a tu ritmo.',
+    subtitle: 'Recorré las 42 playas de la isla a tu propio ritmo con nuestra flota.',
     image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop',
-    badge: 'ABRAS RENT',
+    badge: 'MOVILIDAD TOTAL',
     ctaText: 'Consultar Tarifas',
     link: '/cars'
   },
   {
     id: 'banner_transfers',
     title: 'TRANSFERS PRIVADOS',
-    subtitle: 'Llegadas seguras desde Aeropuerto FLN a tu destino.',
+    subtitle: 'Llegadas seguras y cómodas desde el Aeropuerto FLN a tu hotel.',
     image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop',
     badge: 'PUERTA A PUERTA',
     ctaText: 'Ver Servicios',
@@ -53,8 +53,8 @@ export const INITIAL_GUIDES: DestinationGuide[] = [
   {
     id: 'guide-florianopolis',
     name: 'Florianópolis',
-    summary: 'La Isla de la Magia: 42 playas y cultura única.',
-    description: `Florianópolis combina perfectamente infraestructura moderna con naturaleza virgen. ABRAS Travel te lleva a conocer cada rincón.`,
+    summary: 'La Isla de la Magia: 42 playas y una cultura azoriana vibrante.',
+    description: `Florianópolis combina perfectamente infraestructura moderna con naturaleza virgen. Floripa Fácil te garantiza la mejor experiencia receptiva.`,
     images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop'],
     highlights: ['Playa Joaquina', 'Santo Antonio de Lisboa', 'Mercado Público'],
     active: true
@@ -63,21 +63,21 @@ export const INITIAL_GUIDES: DestinationGuide[] = [
 
 export const INITIAL_TRIPS: Trip[] = [
   {
-    id: 'abras-city-tour',
-    title: 'Floripa City Tour: Isla Completa',
+    id: 'floripa-city-tour',
+    title: 'City Tour Florianópolis Completo',
     location: 'Florianópolis, SC',
     providerPrice: 45,
     profitMargin: 20,
-    description: 'El tour más completo para conocer los miradores, el centro histórico y las playas del norte y este de la isla.',
+    description: 'Recorrido detallado por los puntos históricos, miradores y las playas más emblemáticas de la isla.',
     images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop'],
     isOffer: true,
     availableDates: ['Diario'],
     baseCurrency: 'USD',
     type: 'trip',
-    highlights: ['Recorrido en Bus Panorámico', 'Guía Histórico', 'Tiempo libre en Barra da Lagoa'],
-    included: ['Transporte ida y vuelta', 'Guía bilingüe', 'Seguro de pasajero'],
-    notIncluded: ['Almuerzo', 'Tickets a museos'],
-    meetingPoint: 'Pick up en hoteles del Norte de la Isla (Ingleses, Canasvieiras).'
+    highlights: ['Bus Panorámico', 'Guía en Español/Portugués', 'Tiempo de Playa'],
+    included: ['Transporte ida y vuelta', 'Seguro de viaje', 'Guía acreditado'],
+    notIncluded: ['Almuerzo', 'Tickets de ingreso'],
+    meetingPoint: 'Pick up en hoteles del Norte (Ingleses, Canasvieiras, Jurerê).'
   }
 ];
 

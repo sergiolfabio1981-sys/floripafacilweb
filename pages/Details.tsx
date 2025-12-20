@@ -65,7 +65,7 @@ const Details: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
-                  <span className="bg-lime-100 text-lime-700 text-[10px] font-black px-2 py-1 rounded">SERVICIO ABRAS VERIFICADO</span>
+                  <span className="bg-lime-100 text-lime-700 text-[10px] font-black px-2 py-1 rounded">SERVICIO FLORIPA FÁCIL VERIFICADO</span>
                   <div className="flex text-yellow-400 text-sm">★★★★★</div>
               </div>
               <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tighter uppercase italic mb-2">{trip.title}</h1>
@@ -81,7 +81,7 @@ const Details: React.FC = () => {
                       <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duración</span><span className="font-bold text-slate-700">{trip.durationLabel || 'Todo el día'}</span></div>
                       <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cancelación</span><span className="font-bold text-green-600">Gratuita</span></div>
                       <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reserva</span><span className="font-bold text-slate-700">Confirmación Inmediata</span></div>
-                      <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Guía</span><span className="font-bold text-slate-700">Bilingüe ABRAS</span></div>
+                      <div className="flex flex-col"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Guía</span><span className="font-bold text-slate-700">Especializado FF</span></div>
                   </div>
 
                   {/* HIGHLIGHTS */}
