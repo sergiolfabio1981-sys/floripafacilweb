@@ -4,6 +4,7 @@ import { Trip, Apartment, Excursion, Hotel, InstallmentTrip, WorldCupTrip, Group
 export const ADMIN_EMAIL = "sergiolfabio1981@gmail.com";
 export const ADMIN_PASS = "Colo1981";
 
+// Logo de ABRAS Travel (Uso el mismo proporcionado pero con nombre comercial actualizado en UI)
 export const LOGO_URL = "https://i.ibb.co/ymdsLXHV/Blue-Yellow-Classic-Retro-Beach-Resort-Logo-1.png"; 
 export const LOGO_FALLBACK_URL = "https://i.ibb.co/ymdsLXHV/Blue-Yellow-Classic-Retro-Beach-Resort-Logo-1.png";
 
@@ -11,8 +12,8 @@ export const INITIAL_HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
     image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop",
-    title: "VIVÍ FLORIANÓPOLIS",
-    subtitle: "Excursiones exclusivas, paseos en barco y los mejores traslados con el sello Floripa Fácil.",
+    title: "ABRAS TRAVEL",
+    subtitle: "Tu puerta de entrada a experiencias exclusivas y traslados premium en todo Brasil.",
     ctaText: "Ver Excursiones",
     ctaLink: "/excursions",
     highlightColor: "text-lime-400"
@@ -20,8 +21,8 @@ export const INITIAL_HERO_SLIDES: HeroSlide[] = [
   {
     id: 2,
     image: "https://images.unsplash.com/photo-1519832276906-e77fa7478054?q=80&w=2069&auto=format&fit=crop",
-    title: "BOMBINHAS & MÁS",
-    subtitle: "Explorá las aguas cristalinas del sur de Brasil con nuestros guías expertos.",
+    title: "DESCUBRÍ EL PARAÍSO",
+    subtitle: "Planifica tu viaje soñado con el asesoramiento experto de ABRAS Travel.",
     ctaText: "Explorar Tours",
     ctaLink: "/trips",
     highlightColor: "text-emerald-400"
@@ -31,8 +32,8 @@ export const INITIAL_HERO_SLIDES: HeroSlide[] = [
 export const INITIAL_PROMO_BANNERS: PromoBanner[] = [
   {
     id: 'banner_rentacar',
-    title: 'ALQUILER DE COCHES',
-    subtitle: 'Recorré las 42 playas de la isla a tu propio ritmo con nuestra flota.',
+    title: 'RENT A CAR ABRAS',
+    subtitle: 'Flota propia y moderna para recorrer cada rincón a tu ritmo.',
     image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop',
     badge: 'MOVILIDAD TOTAL',
     ctaText: 'Consultar Tarifas',
@@ -40,10 +41,10 @@ export const INITIAL_PROMO_BANNERS: PromoBanner[] = [
   },
   {
     id: 'banner_transfers',
-    title: 'TRANSFERS PRIVADOS',
-    subtitle: 'Llegadas seguras y cómodas desde el Aeropuerto FLN a tu hotel.',
+    title: 'TRANSFERS VIP',
+    subtitle: 'Seguridad y confort desde el aeropuerto hasta tu destino final.',
     image: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop',
-    badge: 'PUERTA A PUERTA',
+    badge: 'SERVICIO PREMIUM',
     ctaText: 'Ver Servicios',
     link: '/excursions'
   }
@@ -54,7 +55,7 @@ export const INITIAL_GUIDES: DestinationGuide[] = [
     id: 'guide-florianopolis',
     name: 'Florianópolis',
     summary: 'La Isla de la Magia: 42 playas y una cultura azoriana vibrante.',
-    description: `Florianópolis combina perfectamente infraestructura moderna con naturaleza virgen. Floripa Fácil te garantiza la mejor experiencia receptiva.`,
+    description: `ABRAS Travel te lleva a conocer la isla de una manera diferente. Desde el norte sofisticado hasta el sur virgen.`,
     images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop'],
     highlights: ['Playa Joaquina', 'Santo Antonio de Lisboa', 'Mercado Público'],
     active: true
@@ -63,21 +64,21 @@ export const INITIAL_GUIDES: DestinationGuide[] = [
 
 export const INITIAL_TRIPS: Trip[] = [
   {
-    id: 'floripa-city-tour',
-    title: 'City Tour Florianópolis Completo',
+    id: 'abras-city-tour',
+    title: 'City Tour ABRAS Exclusive',
     location: 'Florianópolis, SC',
     providerPrice: 45,
     profitMargin: 20,
-    description: 'Recorrido detallado por los puntos históricos, miradores y las playas más emblemáticas de la isla.',
+    description: 'Recorrido detallado por los puntos históricos, miradores y las playas más emblemáticas de la isla con el sello ABRAS.',
     images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop'],
     isOffer: true,
     availableDates: ['Diario'],
     baseCurrency: 'USD',
     type: 'trip',
-    highlights: ['Bus Panorámico', 'Guía en Español/Portugués', 'Tiempo de Playa'],
-    included: ['Transporte ida y vuelta', 'Seguro de viaje', 'Guía acreditado'],
+    highlights: ['Bus Panorámico', 'Guía Exclusivo ABRAS', 'Tiempo de Playa'],
+    included: ['Transporte VIP', 'Seguro de viaje', 'Guía acreditado'],
     notIncluded: ['Almuerzo', 'Tickets de ingreso'],
-    meetingPoint: 'Pick up en hoteles del Norte (Ingleses, Canasvieiras, Jurerê).'
+    meetingPoint: 'Pick up coordinado en tu alojamiento.'
   }
 ];
 

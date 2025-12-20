@@ -1,6 +1,6 @@
 {
-  "name": "Floripa Fácil - Hub de Turismo Receptivo",
-  "description": "Plataforma premium para la gestión de servicios turísticos en Brasil, incluyendo cotizaciones de traslados, autos y hotelería con el sello Floripa Fácil.",
+  "name": "ABRAS Travel - Tu Agencia de Viajes",
+  "description": "Plataforma moderna para la gestión de servicios turísticos, traslados y experiencias exclusivas en Brasil y el mundo con ABRAS Travel.",
   "requestFramePermissions": [
     "camera",
     "geolocation"
