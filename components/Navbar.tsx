@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { usePlanner } from '../contexts/PlannerContext';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,20 +13,21 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const { t } = useLanguage();
   const { currency, setCurrency } = useCurrency();
+  const { selectedItems } = usePlanner();
 
   const navLinks = [
     { name: t('nav.home'), path: '/', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> },
-    { name: 'Excursiones', path: '/excursions', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+    { name: 'Destinos', path: '/guides', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg> },
     { name: 'Tours', path: '/trips', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
     { name: 'Coches', path: '/cars', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m-8 4h8m-8 4h5" /></svg> },
-    { name: 'Alojamientos', path: '/accommodations', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> },
+    { name: 'Traslados', path: '/excursions', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
     { name: 'Admin', path: '/admin', icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
   ];
 
   const currencies = [
+    { code: 'ARS', label: 'Peso Arg', flag: '🇦🇷' },
     { code: 'BRL', label: 'Real', flag: '🇧🇷' },
     { code: 'USD', label: 'Dólar', flag: '🇺🇸' },
-    { code: 'ARS', label: 'Peso Arg', flag: '🇦🇷' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -40,56 +42,76 @@ const Navbar: React.FC = () => {
                     {!imgError ? (
                         <img 
                             src="https://i.postimg.cc/9f0v8G0D/Logo-Floripa-Facil-Dark.png" 
-                            alt="Floripa Fácil" 
+                            alt="ABRAS Travel" 
                             className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105 max-h-[75px] rounded-full shadow-sm"
                             onError={() => setImgError(true)}
                         />
                     ) : (
-                        <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">FF</div>
+                        <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">AB</div>
                     )}
-                    <span className="ml-3 font-black text-green-700 text-xl hidden lg:block tracking-tighter">FLORIPA FÁCIL</span>
+                    <div className="ml-3 flex flex-col justify-center">
+                        <span className="font-black text-green-700 text-xl leading-none tracking-tighter">ABRAS</span>
+                        <span className="font-bold text-gray-400 text-[10px] tracking-[0.2em] uppercase">Travel Agency</span>
+                    </div>
                 </Link>
             </div>
 
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden lg:flex items-center space-x-2">
                 {navLinks.map((link) => (
                 <Link
                     key={link.path}
                     to={link.path}
-                    className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 group ${
+                    className={`flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all duration-200 group ${
                     isActive(link.path)
                         ? 'text-green-700 bg-green-50 font-bold'
                         : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
                     }`}
                 >
-                    <span className={`mb-1 ${isActive(link.path) ? 'text-green-600' : 'text-gray-400 group-hover:text-green-500'}`}>{link.icon}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{link.name}</span>
+                    <span className={`mb-1 transition-transform group-hover:scale-110 ${isActive(link.path) ? 'text-green-600' : 'text-gray-300'}`}>{link.icon}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest">{link.name}</span>
                 </Link>
                 ))}
             </div>
 
             <div className="flex items-center gap-3">
-                <div className="relative">
-                    <button onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)} className="flex items-center gap-2 text-xs font-bold text-gray-600 bg-gray-50 px-3 py-2 rounded-full border border-gray-100 hover:border-green-200 transition-all">
+                <Link to="/planner" className="relative p-2.5 text-green-600 bg-green-50 rounded-full hover:bg-green-100 transition-all mr-1">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                    {selectedItems.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                            {selectedItems.length}
+                        </span>
+                    )}
+                </Link>
+
+                <div className="relative group">
+                    <button onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)} className="flex items-center gap-2 text-[10px] font-black text-gray-600 bg-gray-50 px-3 py-2 rounded-full border border-gray-100 hover:border-green-200 transition-all">
                         <span>{currentCurr.flag}</span> {currentCurr.code}
                     </button>
                     {currencyDropdownOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-xl border z-50">
+                        <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-fade-in">
                             {currencies.map(c => (
-                                <button key={c.code} onClick={() => { setCurrency(c.code as any); setCurrencyDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-sm hover:bg-green-50 flex items-center gap-2"><span>{c.flag}</span> {c.code}</button>
+                                <button key={c.code} onClick={() => { setCurrency(c.code as any); setCurrencyDropdownOpen(false); }} className="w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-green-50 flex items-center gap-2 text-gray-700 transition-colors">
+                                    <span>{c.flag}</span> {c.code}
+                                </button>
                             ))}
                         </div>
                     )}
                 </div>
-                <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-green-600 p-2"><svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} /></svg></button>
+                <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden text-green-600 p-2"><svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} /></svg></button>
             </div>
         </div>
       </div>
       {isOpen && (
-        <div className="md:hidden bg-white border-t p-4 space-y-2 animate-fade-in">
+        <div className="lg:hidden bg-white border-t p-4 space-y-2 animate-fade-in shadow-xl">
             {navLinks.map((link) => (
-              <Link key={link.path} to={link.path} onClick={() => setIsOpen(false)} className={`flex items-center px-4 py-3 rounded-xl text-sm font-bold ${isActive(link.path) ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-green-50'}`}><span className="mr-3">{link.icon}</span>{link.name}</Link>
+              <Link key={link.path} to={link.path} onClick={() => setIsOpen(false)} className={`flex items-center px-4 py-4 rounded-xl text-sm font-black uppercase tracking-widest ${isActive(link.path) ? 'bg-green-600 text-white' : 'text-gray-600 hover:bg-green-50'}`}>
+                <span className="mr-3">{link.icon}</span>{link.name}
+              </Link>
             ))}
+            <Link to="/planner" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-4 rounded-xl text-sm font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100 mt-4">
+                <span className="mr-3"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg></span>
+                Mi Itinerario ({selectedItems.length})
+            </Link>
         </div>
       )}
     </nav>

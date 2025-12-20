@@ -46,7 +46,7 @@ const InstallmentDetails: React.FC = () => {
   };
 
   const shareUrl = window.location.href;
-  const shareText = `Mira este Plan de Cuotas en ABRAS Travel: ${trip?.title}`;
+  const shareText = `Mira este Plan de Cuotas en Floripa Fácil: ${trip?.title}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
   const emailUrl = `mailto:?subject=${encodeURIComponent(trip?.title || '')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
 
@@ -55,7 +55,7 @@ const InstallmentDetails: React.FC = () => {
   };
 
   const handleConfirmWhatsApp = (passengerData: any) => {
-    const message = `*PLAN ABRAS CUOTAS - SOLICITUD*\n\n` +
+    const message = `*PLAN FLORIPA CUOTAS - SOLICITUD*\n\n` +
                     `📦 *Plan:* ${trip?.title}\n` +
                     `👥 *Pasajeros:* ${passengers}\n` +
                     `💳 *Cuota Estimada:* ${formatPrice(installmentValue)} (${monthsCount} cuotas)\n\n` +
@@ -98,7 +98,7 @@ const InstallmentDetails: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white p-8 rounded-xl shadow-sm">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Detalles de ABRAS Cuotas</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Detalles de Floripa Cuotas</h2>
                     <p className="text-gray-600 text-lg leading-relaxed mb-6">{trip.description}</p>
                     <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="text-center md:text-left"><p className="text-indigo-900 font-bold text-lg">Financiación Propia</p><p className="text-indigo-700 text-sm">Sin bancos, sin intereses ocultos.</p></div>

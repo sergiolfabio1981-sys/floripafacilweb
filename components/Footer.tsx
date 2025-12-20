@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
             <h4 className="font-bold text-lg mb-6 text-lime-400">Contacto Directo</h4>
             <div className="space-y-4 text-sm text-gray-400">
                 <p className="flex items-center gap-2">📍 Florianópolis, SC, Brasil</p>
-                <p className="flex items-center gap-2">📞 +55 48 99123-4567</p>
+                <p className="flex items-center gap-2">📞 +54 9 11 4063 2644</p>
                 <p className="flex items-center gap-2">✉️ hola@floripafacil.com</p>
                 <div className="pt-4 flex gap-4">
                     <a href="#" className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-lime-500 hover:text-green-950 transition-all">Ig</a>

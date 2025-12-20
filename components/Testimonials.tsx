@@ -8,7 +8,7 @@ const reviews = [
     country: 'Argentina',
     flag: '🇦🇷',
     role: 'Cliente Frecuente',
-    text: 'Excelente atención. Compramos el paquete a Florianópolis y todo salió perfecto. Los hoteles superaron nuestras expectativas. ¡Muy recomendados!',
+    text: 'Excelente atención. Compramos el paquete a Florianópolis y todo salió perfecto. Los hoteles superaron nuestras expectativas. ¡Floripa Fácil es muy recomendada!',
     rating: 5,
     trip: 'Florianópolis 2026'
   },
@@ -18,7 +18,7 @@ const reviews = [
     country: 'Brasil',
     flag: '🇧🇷',
     role: 'Viajera',
-    text: 'Amei a experiência! A agência cuidou de todos os detalhes da nossa viagem para Bariloche. Atendimento impecável e preços justos.',
+    text: 'Amei a experiência! A Floripa Fácil cuidou de todos os detalhes da nossa viagem para Bariloche. Atendimento impecável e preços justos.',
     rating: 5,
     trip: 'Patagonia Argentina'
   },
@@ -28,7 +28,7 @@ const reviews = [
     country: 'Uruguay',
     flag: '🇺🇾',
     role: 'Familia',
-    text: 'Muy buena opción para pagar en cuotas. Reservamos el viaje al Mundial 2026 y la financiación propia nos facilitó mucho todo.',
+    text: 'Muy buena opción para pagar en cuotas. Reservamos el viaje al Mundial 2026 y la financiación de Floripa Cuotas nos facilitó mucho todo.',
     rating: 5,
     trip: 'Mundial 2026'
   },
@@ -38,7 +38,7 @@ const reviews = [
     country: 'Chile',
     flag: '🇨🇱',
     role: 'Pareja',
-    text: 'Buscábamos una escapada romántica a Buzios y encontramos la mejor oferta aquí. La posada era hermosa y la atención por WhatsApp muy rápida.',
+    text: 'Buscábamos una escapada romántica a Buzios y encontramos la mejor oferta aquí. La posada era hermosa y la atención por WhatsApp de Floripa Fácil fue muy rápida.',
     rating: 4,
     trip: 'Escapada a Buzios'
   },
@@ -48,7 +48,7 @@ const reviews = [
     country: 'Bolivia',
     flag: '🇧🇴',
     role: 'Grupo de Amigos',
-    text: 'Organizamos un viaje grupal a Camboriú. La coordinación fue excelente y el bus muy cómodo. ¡Volveremos a viajar con ABRAS!',
+    text: 'Organizamos un viaje grupal a Camboriú. La coordinación de Floripa Fácil fue excelente y el bus muy cómodo. ¡Volveremos a viajar con ellos!',
     rating: 5,
     trip: 'Camboriú en Bus'
   },
@@ -58,7 +58,7 @@ const reviews = [
     country: 'Colombia',
     flag: '🇨🇴',
     role: 'Solo Traveler',
-    text: 'Increíble experiencia en Río de Janeiro. Me sentí muy segura y acompañada por el equipo de la agencia. Gracias por todo.',
+    text: 'Increíble experiencia en Río de Janeiro. Me sentí muy segura y acompañada por el equipo de Floripa Fácil. Gracias por todo.',
     rating: 5,
     trip: 'Rio de Janeiro'
   }

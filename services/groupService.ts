@@ -48,7 +48,9 @@ export const createEmptyGroupTrip = (): GroupTrip => ({
   id: crypto.randomUUID(),
   title: '',
   location: '',
-  price: 0,
+  // Use correct property names from GroupTrip interface in types.ts
+  providerPrice: 0,
+  profitMargin: 0,
   description: '',
   images: [`https://picsum.photos/seed/${Date.now()}/800/600`],
   availableDates: [],

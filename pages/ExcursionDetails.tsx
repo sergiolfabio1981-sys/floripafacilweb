@@ -1,115 +1,88 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getExcursionById } from '../services/excursionService';
 import { Excursion } from '../types';
-import { useLanguage } from '../contexts/LanguageContext';
 import { useCurrency } from '../contexts/CurrencyContext';
-import { generateShareImage } from '../services/imageShareService';
+import { usePlanner } from '../contexts/PlannerContext';
 import ImageGallery from '../components/ImageGallery';
-import BookingModal from '../components/BookingModal';
+import SelectionModal from '../components/SelectionModal';
 
 const ExcursionDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [excursion, setExcursion] = useState<Excursion | undefined>(undefined);
   const [selectedDate, setSelectedDate] = useState('');
   const [passengers, setPassengers] = useState(2);
-  const [isSharingMenuOpen, setIsSharingMenuOpen] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-
   const { formatPrice } = useCurrency();
+  const { addItem } = usePlanner();
 
   useEffect(() => {
-    if (id) {
-      getExcursionById(id).then(setExcursion);
-    }
+    if (id) getExcursionById(id).then(setExcursion);
   }, [id]);
 
-  const totalPrice = excursion ? excursion.price * passengers : 0;
-  const bookingFee = totalPrice * 0.10;
+  if (!excursion) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-600"></div></div>;
 
-  const handleBookingClick = () => {
+  const handleAddToPlan = () => {
       if(!selectedDate) {
-          alert("Seleccione una fecha");
+          alert("Seleccione una fecha preferida");
           return;
       }
-      setIsBookingModalOpen(true);
+      addItem(excursion, passengers, 1, selectedDate);
+      setIsSelectionModalOpen(true);
   };
-
-  const handleConfirmWhatsApp = (passengerData: any) => {
-    const message = `*SOLICITUD DE EXCURSIÓN - ABRAS TRAVEL*\n\n` +
-                    `🎒 *Excursión:* ${excursion?.title}\n` +
-                    `📅 *Fecha:* ${selectedDate}\n` +
-                    `👥 *Pasajeros:* ${passengers}\n` +
-                    `💰 *Total:* ${formatPrice(totalPrice)}\n\n` +
-                    `*DATOS DE CONTACTO:*\n` +
-                    `👤 Nombre: ${passengerData.firstName} ${passengerData.lastName}\n` +
-                    `🆔 DNI: ${passengerData.dni}\n` +
-                    `📧 Email: ${passengerData.email}\n` +
-                    `🔗 Link: ${window.location.href}`;
-    
-    const whatsappUrl = `https://wa.me/5491140632644?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
-    setIsBookingModalOpen(false);
-  };
-
-  const handleShareImage = async () => {
-    if (!excursion) return;
-    setIsGeneratingPdf(true);
-    const itemForImage = { ...excursion, type: 'excursion' as const };
-    await generateShareImage(itemForImage, formatPrice(excursion.price));
-    setIsGeneratingPdf(false);
-    setIsSharingMenuOpen(false);
-  };
-
-  const shareUrl = window.location.href;
-  const shareText = `Mira esta excursión en ABRAS Travel: ${excursion?.title}`;
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
-  const emailUrl = `mailto:?subject=${encodeURIComponent(excursion?.title || '')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
-
-  if (!excursion) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-600"></div></div>;
 
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-              <div><h1 className="text-lg md:text-xl font-bold text-gray-800 leading-tight truncate max-w-[200px] md:max-w-md">{excursion.title}</h1><p className="text-gray-500 text-xs flex items-center mt-1"><svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>{excursion.location}</p></div>
-              <div className="relative">
-                  <button onClick={() => setIsSharingMenuOpen(!isSharingMenuOpen)} disabled={isGeneratingPdf} className="p-2 md:p-3 rounded-full hover:bg-gray-100 text-gray-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 flex items-center gap-2" title="Compartir">
-                      {isGeneratingPdf ? (<svg className="animate-spin h-5 w-5 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>) : (<svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>)}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-30 px-4 py-4 flex justify-between items-center">
+          <div><h1 className="text-xl font-bold">{excursion.title}</h1><p className="text-xs text-gray-500 uppercase tracking-widest font-black text-green-600">Excursión / Traslado</p></div>
+          <Link to="/excursions" className="text-xs font-bold text-green-600 uppercase hover:underline">Ver todas</Link>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+              <ImageGallery images={excursion.images} title={excursion.title} />
+              <div className="bg-white p-8 rounded-3xl mt-6 shadow-sm border border-gray-100">
+                  <h2 className="text-2xl font-bold mb-4">Información del Servicio</h2>
+                  <p className="text-gray-600 mb-8 leading-relaxed text-lg">{excursion.description}</p>
+                  <div className="flex flex-wrap gap-4">
+                      <span className="bg-slate-50 px-4 py-2 rounded-xl font-bold text-gray-500 border border-gray-100">Duración: {excursion.duration}</span>
+                      <span className="bg-slate-50 px-4 py-2 rounded-xl font-bold text-gray-500 border border-gray-100">Salidas: {excursion.availableDates.join(', ')}</span>
+                  </div>
+              </div>
+          </div>
+
+          <div className="lg:col-span-1">
+              <div className="bg-white p-8 rounded-3xl shadow-xl sticky top-24 border-t-8 border-green-600">
+                  <div className="flex justify-between items-end mb-6 pb-6 border-b border-gray-50">
+                      <span className="text-xs font-black text-gray-400 uppercase">Precio por persona</span>
+                      <span className="text-3xl font-black text-gray-900">{formatPrice(excursion.price)}</span>
+                  </div>
+                  
+                  <div className="space-y-6 mb-8">
+                      <div><label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Fecha Preferida</label><input type="date" className="w-full border-2 border-gray-100 rounded-2xl p-4 font-bold outline-none focus:border-green-600" value={selectedDate} onChange={(e)=>setSelectedDate(e.target.value)} /></div>
+                      <div>
+                          <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Pasajeros</label>
+                          <div className="flex border-2 border-gray-100 rounded-2xl overflow-hidden">
+                              <button onClick={()=>setPassengers(Math.max(1, passengers-1))} className="px-5 py-3 bg-gray-50 hover:bg-gray-100 border-r-2 border-gray-100 font-bold text-xl">-</button>
+                              <span className="flex-1 text-center py-3 font-black text-xl">{passengers}</span>
+                              <button onClick={()=>setPassengers(passengers+1)} className="px-5 py-3 bg-gray-50 hover:bg-gray-100 border-l-2 border-gray-100 font-bold text-xl">+</button>
+                          </div>
+                      </div>
+                      <div className="bg-green-50 p-6 rounded-2xl border-2 border-green-100 flex justify-between items-center">
+                          <span className="font-black text-green-900">Total</span>
+                          <span className="text-xl font-black text-green-700">{formatPrice(excursion.price * passengers)}</span>
+                      </div>
+                  </div>
+                  <button onClick={handleAddToPlan} className="w-full bg-green-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                      Agregar a mi Plan
                   </button>
-                  {isSharingMenuOpen && (<><div className="fixed inset-0 z-40" onClick={() => setIsSharingMenuOpen(false)}></div><div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-fade-in-up"><div className="p-2"><a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors" onClick={()=>setIsSharingMenuOpen(false)}><span className="text-green-500 font-bold">WhatsApp</span></a><a href={emailUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors" onClick={()=>setIsSharingMenuOpen(false)}><span className="text-blue-500 font-bold">Email</span></a><button onClick={handleShareImage} className="flex items-center gap-3 w-full px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 rounded-lg transition-colors text-left"><span className="text-orange-500 font-bold">Descargar Flyer (JPG)</span></button></div></div></>)}
               </div>
           </div>
       </div>
-      
-      <div className="relative w-full">
-          <ImageGallery images={excursion.images} title={excursion.title} />
-          <div className="absolute bottom-0 left-0 w-full p-8 pointer-events-none bg-gradient-to-t from-black/80 to-transparent"><div className="max-w-7xl mx-auto w-full"><span className="bg-green-600 text-white px-2 py-1 text-sm font-bold rounded mb-2 inline-block shadow">EXCURSIÓN</span><h1 className="text-4xl font-bold text-white drop-shadow-md">{excursion.title}</h1><p className="text-white text-lg drop-shadow-md">{excursion.location}</p></div></div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2"><div className="bg-white p-6 rounded-xl shadow-sm mb-6"><h2 className="text-2xl font-bold mb-4">Descripción</h2><p className="text-gray-600 mb-4">{excursion.description}</p><div className="flex gap-4 text-sm font-bold text-gray-500"><span className="bg-gray-100 px-3 py-1 rounded">Duración: {excursion.duration}</span><span className="bg-gray-100 px-3 py-1 rounded">Salidas: {excursion.availableDates.join(', ')}</span></div></div></div>
-          <div className="md:col-span-1">
-            <div className="bg-white p-6 rounded-xl shadow-lg sticky top-24">
-                <div className="flex justify-between items-end mb-4"><span className="text-gray-500">Precio x persona</span><span className="text-2xl font-bold text-cyan-600">{formatPrice(excursion.price)}</span></div>
-                <div className="mb-4"><label className="block text-sm font-bold mb-1">Fecha Preferida</label><input type="date" className="w-full border rounded p-2" value={selectedDate} onChange={(e)=>setSelectedDate(e.target.value)} /></div>
-                <div className="mb-4"><label className="block text-sm font-bold mb-1">Cantidad de Personas</label><div className="flex items-center border rounded"><button onClick={()=>setPassengers(Math.max(1, passengers-1))} className="p-2 px-4 hover:bg-gray-100">-</button><span className="flex-1 text-center font-bold">{passengers}</span><button onClick={()=>setPassengers(passengers+1)} className="p-2 px-4 hover:bg-gray-100">+</button></div></div>
-                <div className="border-t pt-4 mb-4 space-y-2"><div className="flex justify-between text-sm"><span>Total</span><span>{formatPrice(totalPrice)}</span></div><div className="flex justify-between font-bold text-orange-600"><span>Reserva (10%)</span><span>{formatPrice(bookingFee)}</span></div></div>
-                <button onClick={handleBookingClick} disabled={!selectedDate} className="w-full bg-cyan-600 text-white font-bold py-3 rounded hover:bg-cyan-700 disabled:bg-gray-300">Reservar Lugar</button>
-            </div>
-          </div>
-      </div>
-
-      <BookingModal 
-        isOpen={isBookingModalOpen} 
-        onClose={() => setIsBookingModalOpen(false)}
-        title={excursion.title}
-        priceInfo={`Total (${passengers} pax): ${formatPrice(totalPrice)}`}
-        onConfirmWhatsApp={handleConfirmWhatsApp}
-      />
+      <SelectionModal isOpen={isSelectionModalOpen} onClose={() => setIsSelectionModalOpen(false)} itemName={excursion.title} />
     </div>
   );
 };

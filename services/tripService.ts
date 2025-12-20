@@ -70,10 +70,7 @@ export const saveTrip = async (trip: Trip): Promise<void> => {
 };
 
 export const deleteTrip = async (id: string): Promise<void> => {
-  const { error } = await supabase
-    .from('trips')
-    .delete()
-    .eq('id', id);
+  const { error } = await supabase.from('trips').delete().eq('id', id);
 
   if (error) {
     console.error('Error deleting trip:', error);
@@ -84,7 +81,9 @@ export const createEmptyTrip = (): Trip => ({
   id: crypto.randomUUID(), // Use standard UUID for DB
   title: '',
   location: '',
-  price: 0,
+  // Use correct property names from Trip interface in types.ts
+  providerPrice: 0,
+  profitMargin: 0,
   description: '',
   images: [`https://picsum.photos/seed/${Date.now()}/800/600`],
   isOffer: false,

@@ -1,3 +1,4 @@
+
 import { ListingItem } from '../types';
 
 // Helper to load image from URL to Base64
@@ -36,16 +37,16 @@ export const generateSharePDF = async (item: ListingItem, formattedPrice: string
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.setTextColor(...cyanColor);
-  doc.text("ABRAS", 15, 20);
+  doc.text("FLORIPA", 15, 20);
   doc.setTextColor(...orangeColor);
-  doc.text("Travel", 55, 20);
+  doc.text("FÁCIL", 55, 20);
   
   // Contact Info in Header
   doc.setFontSize(9);
   doc.setTextColor(255, 255, 255);
-  doc.text("www.abrastravel.com", 200, 12, { align: 'right' });
+  doc.text("www.floripafacil.com", 200, 12, { align: 'right' });
   doc.text("+54 9 11 4063 2644", 200, 18, { align: 'right' });
-  doc.text("info@abrastravel.com", 200, 24, { align: 'right' });
+  doc.text("hola@floripafacil.com", 200, 24, { align: 'right' });
 
   // 2. HERO IMAGE
   let currentY = 30;
@@ -55,9 +56,6 @@ export const generateSharePDF = async (item: ListingItem, formattedPrice: string
           const imgData = await getDataUrl(imageUrl);
           if (imgData) {
               doc.addImage(imgData, 'JPEG', 0, 30, 210, 90); // Full width image
-              
-              // Gradient Overlay effect (Simulated with semi-transparent rect if supported, else just text box)
-              // Since standard jsPDF doesn't support transparency easily without plugins, we use a text box below.
           }
       } catch (e) {
           console.error(e);
@@ -146,7 +144,7 @@ export const generateSharePDF = async (item: ListingItem, formattedPrice: string
       col1Y += 6;
   }
 
-  // Col 2: Services (Constructed logic)
+  // Col 2: Services
   const services = [];
   if ((item as any).includesFlight) services.push("Aéreos Ida y Vuelta");
   if (item.type === 'trip' || item.type === 'worldcup') {
@@ -167,10 +165,8 @@ export const generateSharePDF = async (item: ListingItem, formattedPrice: string
   }
 
   services.forEach(svc => {
-      // Draw checkmark
       doc.setTextColor(34, 197, 94); // Green
       doc.text("✓", col2X, col2Y);
-      // Draw text
       doc.setTextColor(60, 60, 60);
       doc.text(svc, col2X + 5, col2Y);
       col2Y += 6;
@@ -179,10 +175,9 @@ export const generateSharePDF = async (item: ListingItem, formattedPrice: string
   currentY = Math.max(col1Y, col2Y) + 20;
 
   // 5. FOOTER CALL TO ACTION
-  // Orange Box
-  doc.setFillColor(255, 247, 237); // Very light orange background
+  doc.setFillColor(255, 247, 237); 
   doc.setDrawColor(...orangeColor);
-  doc.roundedRect(15, currentY, 180, 35, 3, 3, 'FD'); // Fill and Draw
+  doc.roundedRect(15, currentY, 180, 35, 3, 3, 'FD'); 
 
   doc.setFontSize(14);
   doc.setTextColor(...orangeColor);
@@ -195,7 +190,6 @@ export const generateSharePDF = async (item: ListingItem, formattedPrice: string
   doc.text("Contáctanos ahora por WhatsApp para reservar tu lugar.", 105, currentY + 22, { align: 'center' });
   doc.text("+54 9 11 4063 2644", 105, currentY + 28, { align: 'center' });
 
-  // Save
   const cleanTitle = item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-  doc.save(`ABRAS_Travel_${cleanTitle}.pdf`);
+  doc.save(`Floripa_Facil_${cleanTitle}.pdf`);
 };

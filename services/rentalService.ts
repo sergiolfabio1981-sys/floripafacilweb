@@ -46,7 +46,9 @@ export const createEmptyRental = (): Apartment => ({
   id: crypto.randomUUID(),
   title: '',
   location: '',
-  pricePerNight: 0,
+  // Use correct property names from Apartment interface in types.ts
+  providerPricePerNight: 0,
+  profitMarginPerNight: 0,
   description: '',
   images: [`https://picsum.photos/seed/${Date.now()}/800/600`],
   bedrooms: 1,

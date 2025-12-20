@@ -56,7 +56,9 @@ export const createEmptyExcursion = (): Excursion => ({
   id: crypto.randomUUID(),
   title: '',
   location: '',
-  price: 0,
+  // Fix: providerPrice and profitMargin instead of price
+  providerPrice: 0,
+  profitMargin: 0,
   description: '',
   images: [`https://picsum.photos/seed/${Date.now()}/800/600`],
   isOffer: false,

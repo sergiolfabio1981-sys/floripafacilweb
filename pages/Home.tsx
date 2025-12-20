@@ -8,6 +8,7 @@ import { getExcursions } from '../services/excursionService';
 import { getHotels } from '../services/hotelService';
 import { getCarRentals } from '../services/carRentalService';
 import { getHeroSlides, getPromoBanners } from '../services/heroService';
+import { usePlanner } from '../contexts/PlannerContext';
 import TripCard from '../components/TripCard';
 import Testimonials from '../components/Testimonials';
 
@@ -20,6 +21,9 @@ const Home: React.FC = () => {
   const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
   const [promoBanners, setPromoBanners] = useState<PromoBanner[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const { selectedItems } = usePlanner();
+  const selectedIds = selectedItems.map(i => i.id);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,11 +56,17 @@ const Home: React.FC = () => {
   }, [heroSlides.length]);
 
   const filteredItems = allItems.filter(item => {
+    // 1. No mostrar si ya está seleccionado
+    if (selectedIds.includes(item.id)) return false;
+    
     const titleToSearch = (item as any).title || (item as any).brand || '';
     const matchesSearch = titleToSearch.toLowerCase().includes(searchTerm.toLowerCase()) || item.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = activeCategory === 'all' || item.type === activeCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Filtrar ofertas destacadas también
+  const visibleOffers = combinedOffers.filter(item => !selectedIds.includes(item.id));
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-green-600"></div></div>;
 
@@ -89,14 +99,18 @@ const Home: React.FC = () => {
             ))}
         </div>
 
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 border-l-8 border-lime-500 pl-4">Destacados</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {combinedOffers.slice(0,3).map(item => <TripCard key={item.id} trip={item} />)}
-        </div>
+        {visibleOffers.length > 0 && (
+          <>
+            <h2 className="text-3xl font-bold text-gray-800 mb-8 border-l-8 border-lime-500 pl-4">Ofertas para complementar tu viaje</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+                {visibleOffers.slice(0,3).map(item => <TripCard key={item.id} trip={item} />)}
+            </div>
+          </>
+        )}
 
         <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">
              <div>
-                <h2 className="text-3xl font-bold text-gray-800 tracking-tighter">TODA NUESTRA OFERTA</h2>
+                <h2 className="text-3xl font-bold text-gray-800 tracking-tighter">MÁS OPCIONES PARA TU PLAN</h2>
                 <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-hide pb-2">
                     {[
                         {id: 'all', label: 'Todos'},
@@ -112,11 +126,30 @@ const Home: React.FC = () => {
                     ))}
                 </div>
              </div>
-             <input type="text" placeholder="Buscar destino o modelo..." className="border rounded-full px-6 py-3 w-full md:w-80 outline-none focus:ring-2 focus:ring-lime-500" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+             <div className="relative w-full md:w-80">
+                <input 
+                  type="text" 
+                  placeholder="Buscar otro servicio..." 
+                  className="border rounded-full px-6 py-3 w-full outline-none focus:ring-2 focus:ring-lime-500" 
+                  value={searchTerm} 
+                  onChange={e => setSearchTerm(e.target.value)} 
+                />
+                {selectedItems.length > 0 && (
+                   <span className="absolute -top-3 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full border border-green-200">
+                     Plan actual: {selectedItems.length} items
+                   </span>
+                )}
+             </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {filteredItems.map(item => <TripCard key={item.id} trip={item} />)}
+            {filteredItems.length === 0 && !isLoading && (
+              <div className="col-span-full py-20 text-center bg-gray-100 rounded-3xl border-2 border-dashed">
+                <p className="text-gray-400 font-bold">Has seleccionado todos los servicios de esta categoría o no hay coincidencias.</p>
+                <Link to="/planner" className="text-green-600 font-bold underline mt-2 block">Ver mi Itinerario Completo</Link>
+              </div>
+            )}
         </div>
       </div>
       <Testimonials />

@@ -13,22 +13,22 @@ export const initializeChat = () => {
     chatSession = ai.chats.create({
       model: 'gemini-3-flash-preview',
       config: {
-        systemInstruction: `Eres "Flori", la asistente virtual de "Floripa Fácil", una agencia de turismo receptivo líder en Florianópolis, Bombinhas, Camboriú, Búzios y Río de Janeiro.
-        Tu tono es alegre, relajado y experto en el sur de Brasil.
+        systemInstruction: `Eres "Aura", la experta en viajes de "ABRAS Travel".
+        Tu tono es profesional, moderno y apasionado por los viajes.
         
-        Tus especialidades son:
-        - Excursiones y Tours culturales/aventura.
-        - Traslados (Transfers) desde aeropuertos.
-        - Alquiler de coches.
+        ABRAS Travel es una agencia de viajes boutique que se especializa en:
+        - Experiencias personalizadas en Brasil y el mundo.
+        - Traslados privados y compartidos de alta gama.
+        - Alquiler de coches con asistencia 24/7.
+        - Salidas grupales exclusivas.
         
-        Tu objetivo es ayudar al usuario a planificar sus actividades en destino y capturar sus datos para contacto:
-        1. Nombre.
-        2. Destino específico donde se alojará.
-        3. ¿Necesita traslado o alquiler de auto?
-        4. ¿Qué tipo de excursiones prefiere (playa, cultura, noche)?
-        5. Teléfono de contacto.
+        Tu objetivo:
+        1. Saludar cálidamente.
+        2. Ayudar al usuario a encontrar su destino ideal (Floripa, Bombinhas, Rio, etc.).
+        3. Consultar si necesitan traslado o auto.
+        4. Capturar Nombre y Teléfono para que un asesor humano concrete la venta.
         
-        No des precios exactos sin antes tener el destino y fecha, ofrece rangos o invita a cotizar por WhatsApp.`,
+        IMPORTANTE: Nuestra política es cobrar una seña del 40% para congelar precios. El saldo se abona en destino.`,
       },
     });
   } catch (error) {
@@ -39,7 +39,7 @@ export const initializeChat = () => {
 export const sendMessageToGemini = async function* (message: string) {
   if (!chatSession) initializeChat();
   if (!chatSession) {
-    yield "Disculpa, estoy configurando mi señal desde la playa. Por favor intenta de nuevo.";
+    yield "Lo siento, estoy actualizando mis rutas de vuelo. Intenta de nuevo en un momento.";
     return;
   }
   try {
@@ -49,7 +49,7 @@ export const sendMessageToGemini = async function* (message: string) {
     }
   } catch (error: any) {
     console.error("Error sending message to Gemini:", error);
-    yield "¡Ups! Una ola interfirió con mi conexión. ¿Podrías repetir eso?";
+    yield "Tuve un pequeño problema con la conexión al satélite. ¿Podrías repetirme eso?";
     chatSession = null;
   }
 };
@@ -61,7 +61,7 @@ export const generateDestinationGuide = async (destination: string): Promise<str
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: 'gemini-3-flash-preview',
-          contents: `Escribe una guía turística breve para ${destination} enfocada en turismo receptivo de Floripa Fácil. Máximo 150 palabras.`
+          contents: `Escribe una guía turística breve y emocionante para ${destination} enfocada en el servicio premium de ABRAS Travel. Máximo 150 palabras.`
         });
         return response.text || "Guía no disponible.";
     } catch (error) {

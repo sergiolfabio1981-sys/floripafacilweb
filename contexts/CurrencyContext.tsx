@@ -25,8 +25,8 @@ const EXCHANGE_RATES = {
 const CurrencyContext = createContext<CurrencyContextProps | undefined>(undefined);
 
 export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Configuración por defecto: USD (Solicitado por usuario)
-  const [currency, setCurrencyState] = useState<Currency>('USD');
+  // Configuración por defecto: ARS (Pesos Argentinos)
+  const [currency, setCurrencyState] = useState<Currency>('ARS');
 
   useEffect(() => {
     const saved = localStorage.getItem('abras_currency');
@@ -34,8 +34,8 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (saved && supportedCurrencies.includes(saved)) {
       setCurrencyState(saved as Currency);
     } else {
-        // Force USD default if nothing saved
-        setCurrencyState('USD');
+        // Forzar ARS como predeterminado si no hay nada guardado
+        setCurrencyState('ARS');
     }
   }, []);
 
@@ -45,31 +45,30 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   // Convert any base currency amount to the currently selected currency
-  const convertPrice = (amount: number, baseCurrency: string = 'USD'): number => {
+  const convertPrice = (amount: number, baseCurrency: string = 'ARS'): number => {
     if (isNaN(amount) || amount === undefined) return 0;
 
     // 1. Convert everything to ARS first (Common Denominator)
     let amountInArs = amount;
     
-    // Default base is usually USD now for Admin, but handling ARS legacy
     if (baseCurrency === 'USD') {
         amountInArs = amount * EXCHANGE_RATES.USD;
     } else if (baseCurrency === 'ARS') {
         amountInArs = amount;
+    } else if (baseCurrency === 'BRL') {
+        amountInArs = amount * EXCHANGE_RATES.BRL;
     }
-    // Add other base currencies here if needed in future
 
     // 2. Convert ARS to Target Currency
-    // Formula: AmountInArs / RateOfTarget
     return amountInArs / EXCHANGE_RATES[currency];
   };
 
-  const formatPrice = (amount: number, baseCurrency: string = 'USD'): string => {
+  const formatPrice = (amount: number, baseCurrency: string = 'ARS'): string => {
     const value = convertPrice(amount, baseCurrency);
     
     // Configuraciones regionales para formato de números
-    let locale = 'en-US'; // Default para USD
-    if (currency === 'ARS') locale = 'es-AR';
+    let locale = 'es-AR'; // Default para ARS
+    if (currency === 'USD') locale = 'en-US';
     if (currency === 'BRL') locale = 'pt-BR';
     if (currency === 'UYU') locale = 'es-UY';
     if (currency === 'CLP') locale = 'es-CL';
@@ -80,14 +79,12 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     const noFraction = ['CLP', 'COP', 'ARS']; 
     const maxDigits = noFraction.includes(currency) ? 0 : 2;
 
-    // Usamos 'decimal' en lugar de 'currency' para controlar manualmente el prefijo
     const numberString = new Intl.NumberFormat(locale, {
       style: 'decimal',
       minimumFractionDigits: maxDigits,
       maximumFractionDigits: maxDigits
     }).format(value);
 
-    // Retornamos explícitamente "USD 1,200" o "ARS 1.500.000"
     return `${currency} ${numberString}`;
   };
 

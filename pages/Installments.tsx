@@ -20,7 +20,7 @@ const Installments: React.FC = () => {
         <div className="bg-indigo-900 py-16 px-4 text-center text-white relative overflow-hidden">
              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2071&auto=format&fit=crop')] bg-cover bg-center opacity-20"></div>
              <div className="relative z-10 max-w-4xl mx-auto">
-                 <h1 className="text-4xl md:text-5xl font-bold mb-4">ABRAS Cuotas: Viajá sin interés</h1>
+                 <h1 className="text-4xl md:text-5xl font-bold mb-4">Floripa Cuotas: Viajá sin interés</h1>
                  <p className="text-xl text-indigo-100 mb-6">Congela el precio hoy y paga mes a mes sin interés hasta la fecha de salida.</p>
                  <div className="flex flex-wrap justify-center gap-4 text-sm font-bold">
                      <div className="bg-white/10 px-4 py-2 rounded-full border border-white/20">📅 Elige tu destino 2026/2027</div>
@@ -39,7 +39,7 @@ const Installments: React.FC = () => {
             
             {trips.length === 0 && (
                 <div className="text-center py-20">
-                    <p className="text-gray-500 text-xl">Actualmente no hay opciones de ABRAS Cuotas activas.</p>
+                    <p className="text-gray-500 text-xl">Actualmente no hay opciones de Floripa Cuotas activas.</p>
                 </div>
             )}
         </div>

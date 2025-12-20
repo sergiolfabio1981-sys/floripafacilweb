@@ -1,9 +1,58 @@
 
+export type UserRole = 'admin' | 'seller';
+
+export interface DestinationGuide {
+  id: string;
+  name: string;
+  summary: string;
+  description: string;
+  images: string[];
+  videoUrl?: string;
+  highlights: string[]; // Lista de actividades o tips
+  active: boolean;
+}
+
+export interface Seller {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  commissionRate: number;
+  totalSales: number;
+  active: boolean;
+  role: 'seller';
+}
+
+export interface Provider {
+  id: string;
+  name: string;
+  category: 'Transporte' | 'Alojamiento' | 'Excursiones' | 'Otros';
+  contactName: string;
+  phone: string;
+  email: string;
+  location: string;
+  notes: string;
+}
+
+export interface Sale {
+  id: string;
+  sellerId: string;
+  sellerName: string;
+  clientName: string;
+  clientPhone: string;
+  totalAmount: number;
+  totalProfit: number;
+  commissionAmount: number;
+  date: string;
+  items: string[];
+}
+
 export interface Trip {
   id: string;
   title: string;
   location: string;
-  price: number;
+  providerPrice: number;
+  profitMargin: number;
   description: string;
   images: string[];
   isOffer: boolean;
@@ -19,74 +68,52 @@ export interface Trip {
   type?: 'trip';
 }
 
-export interface GroupTrip {
-  id: string;
-  title: string;
-  location: string;
-  price: number;
-  description: string;
-  images: string[];
-  isOffer: boolean;
-  availableDates: string[];
-  discount?: number;
-  includesFlight?: boolean;
-  rating?: number;
-  reviewsCount?: number;
-  specialLabel?: string;
-  durationLabel?: string;
-  baseCurrency?: 'ARS' | 'USD';
-  type?: 'group';
-}
-
 export interface Apartment {
   id: string;
   title: string;
   location: string;
-  pricePerNight: number;
+  providerPricePerNight: number;
+  profitMarginPerNight: number;
   description: string;
   images: string[];
   bedrooms: number;
   maxGuests: number;
   amenities: string[];
   isOffer?: boolean;
-  offerExpiresAt?: string;
+  type?: 'rental';
+  baseCurrency?: 'ARS' | 'USD';
   lat?: number;
   lng?: number;
   discount?: number;
-  rating?: number;
-  reviewsCount?: number;
-  baseCurrency?: 'ARS' | 'USD';
   specialLabel?: string;
-  type?: 'rental';
 }
 
 export interface Hotel {
   id: string;
   title: string;
   location: string;
-  pricePerNight: number;
+  providerPricePerNight: number;
+  profitMarginPerNight: number;
   description: string;
   images: string[];
   stars: number;
   amenities: string[];
   isOffer: boolean;
-  offerExpiresAt?: string;
+  type?: 'hotel';
+  baseCurrency?: 'ARS' | 'USD';
   lat?: number;
   lng?: number;
   discount?: number;
-  rating?: number;
-  reviewsCount?: number;
-  baseCurrency?: 'ARS' | 'USD';
   specialLabel?: string;
-  type?: 'hotel';
 }
 
 export interface CarRental {
   id: string;
-  title: string; // Ej: Chevrolet Onix o Similar
+  title: string;
   brand: string;
-  category: string; // Económico, SUV, Luxury, etc.
-  pricePerDay: number;
+  category: string;
+  providerPricePerDay: number;
+  profitMarginPerDay: number;
   description: string;
   images: string[];
   transmission: 'Manual' | 'Automático';
@@ -98,7 +125,6 @@ export interface CarRental {
   hasAC: boolean;
   location: string;
   isOffer: boolean;
-  discount?: number;
   baseCurrency?: 'ARS' | 'USD' | 'BRL';
   type?: 'car';
 }
@@ -107,50 +133,70 @@ export interface Excursion {
   id: string;
   title: string;
   location: string;
-  price: number;
+  providerPrice: number;
+  profitMargin: number;
   description: string;
   images: string[];
   isOffer: boolean;
-  offerExpiresAt?: string;
   duration: string;
   availableDates: string[];
-  discount?: number;
+  baseCurrency?: 'ARS' | 'USD';
+  type?: 'excursion';
   rating?: number;
   reviewsCount?: number;
-  baseCurrency?: 'ARS' | 'USD';
+  discount?: number;
   specialLabel?: string;
-  type?: 'excursion';
 }
 
 export interface InstallmentTrip {
   id: string;
   title: string;
   location: string;
-  totalPrice: number;
+  providerTotalPrice: number;
+  profitMargin: number;
   description: string;
   images: string[];
   departureDate: string;
   isOffer: boolean;
-  discount?: number;
-  baseCurrency?: 'ARS' | 'USD';
-  specialLabel?: string;
   type?: 'installment';
+  baseCurrency?: 'ARS' | 'USD';
+  discount?: number;
+  specialLabel?: string;
 }
 
 export interface WorldCupTrip {
   id: string;
   title: string;
   location: string;
-  totalPrice: number;
+  providerTotalPrice: number;
+  profitMargin: number;
   description: string;
   images: string[];
   departureDate: string;
   originCountry: string;
   isOffer: boolean;
+  type?: 'worldcup';
+  baseCurrency?: 'ARS' | 'USD';
+  discount?: number;
+  specialLabel?: string;
+}
+
+export interface GroupTrip {
+  id: string;
+  title: string;
+  location: string;
+  providerPrice: number;
+  profitMargin: number;
+  description: string;
+  images: string[];
+  availableDates: string[];
+  isOffer: boolean;
+  type?: 'group';
   discount?: number;
   baseCurrency?: 'ARS' | 'USD';
   specialLabel?: string;
-  type?: 'worldcup';
+  durationLabel?: string;
+  includesFlight?: boolean;
 }
 
 export interface HeroSlide {
@@ -173,7 +219,7 @@ export interface PromoBanner {
   link: string;
 }
 
-export type ListingItem = Trip | Apartment | Excursion | Hotel | InstallmentTrip | WorldCupTrip | GroupTrip | CarRental;
+export type ListingItem = Trip | Apartment | Excursion | Hotel | InstallmentTrip | WorldCupTrip | CarRental | GroupTrip;
 
 export interface ChatMessage {
   id: string;

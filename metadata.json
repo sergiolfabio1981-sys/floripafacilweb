@@ -1,6 +1,6 @@
 {
-  "name": "Floripa Fácil",
-  "description": "Agencia de turismo receptivo especializada en excursiones, tours, traslados y alquiler de coches en Florianópolis y principales destinos de Brasil.",
+  "name": "Floripa Fácil - Hub Gestión",
+  "description": "Plataforma de turismo receptivo para Floripa Fácil con gestión de vendedores, proveedores, métricas de rendimiento y cotizador de itinerarios personalizados.",
   "requestFramePermissions": [
     "camera",
     "geolocation"

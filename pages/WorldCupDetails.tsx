@@ -47,7 +47,7 @@ const WorldCupDetails: React.FC = () => {
   };
 
   const shareUrl = window.location.href;
-  const shareText = `Mira este paquete al MUNDIAL 2026 en ABRAS Travel: ${trip?.title}`;
+  const shareText = `Mira este paquete al MUNDIAL 2026 en Floripa Fácil: ${trip?.title}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
   const emailUrl = `mailto:?subject=${encodeURIComponent(trip?.title || '')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
 

@@ -44,7 +44,9 @@ export const createEmptyInstallmentTrip = (): InstallmentTrip => ({
   id: crypto.randomUUID(),
   title: '',
   location: '',
-  totalPrice: 0,
+  // Use correct property names from InstallmentTrip interface in types.ts
+  providerTotalPrice: 0,
+  profitMargin: 0,
   description: '',
   images: [`https://picsum.photos/seed/${Date.now()}/800/600`],
   departureDate: '2026-01-01',
