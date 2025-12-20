@@ -27,18 +27,18 @@ const Footer: React.FC = () => {
                 <div className="bg-white p-1 rounded-full shadow-2xl border-4 border-lime-500/20 w-32 h-32 flex items-center justify-center overflow-hidden">
                     <img 
                       src={LOGO_URL} 
-                      alt="ABRAS Travel" 
+                      alt="Floripa Fácil" 
                       className="h-full w-full object-contain rounded-full"
                       onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
                     />
                 </div>
                 <div>
-                    <h4 className="text-3xl font-black text-lime-400 leading-none tracking-tighter uppercase italic">ABRAS TRAVEL</h4>
+                    <h4 className="text-3xl font-black text-lime-400 leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</h4>
                     <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-[0.3em] font-black">Tu Conexión Directa con el Paraíso</p>
                 </div>
             </div>
             <p className="text-gray-400 text-lg leading-relaxed max-w-md font-medium">
-              Agencia de viajes líder en el receptivo brasileño. Facilitamos el acceso a las mejores experiencias con un servicio moderno, seguro y personalizado.
+              Agencia líder en turismo receptivo en Florianópolis. Facilitamos el acceso a las mejores experiencias con un servicio moderno, seguro y personalizado.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="md:col-span-4">
-            <h4 className="font-black text-xl mb-10 text-white uppercase tracking-tighter italic">Contacto ABRAS</h4>
+            <h4 className="font-black text-xl mb-10 text-white uppercase tracking-tighter italic">Contacto</h4>
             <div className="space-y-6">
                 <div className="flex items-center gap-4 group cursor-pointer">
                     <div className="w-10 h-10 bg-lime-500/10 rounded-xl flex items-center justify-center text-lime-400 group-hover:bg-lime-500 group-hover:text-green-950 transition-all">📍</div>
@@ -66,7 +66,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-white/5 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">© {new Date().getFullYear()} ABRAS Travel — Todos los derechos reservados.</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">© {new Date().getFullYear()} Floripa Fácil — Todos los derechos reservados.</p>
           <div className="flex gap-8">
               <button onClick={openTerms} className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors">Legales</button>
           </div>

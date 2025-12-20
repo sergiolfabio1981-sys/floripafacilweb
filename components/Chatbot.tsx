@@ -9,7 +9,7 @@ const FLORI_AVATAR = "https://images.unsplash.com/photo-1544717302-de2939b7ef71?
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 'welcome', role: 'model', text: '¡Olá! Soy Flori, tu guía inteligente de ABRAS Travel. 🌴 ¿Cómo puedo ayudarte hoy? Consultame por traslados VIP, alquiler de autos o los mejores paseos. ✈️🚗🌊' }
+    { id: 'welcome', role: 'model', text: '¡Olá! Soy Flori, tu guía inteligente de Floripa Fácil. 🌴 ¿Cómo puedo ayudarte hoy? Consultame por traslados VIP, alquiler de autos o los mejores paseos por la isla. ✈️🚗🌊' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -71,7 +71,7 @@ const Chatbot: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-sm uppercase tracking-widest leading-none">Flori AI</h3>
-                <p className="text-[9px] text-lime-100 font-bold uppercase mt-1">Asistente ABRAS Travel</p>
+                <p className="text-[9px] text-lime-100 font-bold uppercase mt-1">Especialista Floripa Fácil</p>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-transform hover:rotate-90 p-1">
@@ -134,7 +134,7 @@ const Chatbot: React.FC = () => {
         {!isOpen && (
             <div className="absolute -top-12 right-0 bg-white text-green-700 px-4 py-2 rounded-2xl shadow-xl font-black text-[10px] uppercase tracking-widest animate-bounce border-2 border-green-50 flex items-center gap-2 whitespace-nowrap">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                ¡Consultas ABRAS Travel!
+                ¡Consultas Floripa Fácil!
             </div>
         )}
         <button 

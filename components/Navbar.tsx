@@ -37,7 +37,7 @@ const Navbar: React.FC = () => {
     if (imgStatus === 'error') {
       return (
         <div className="h-full w-full bg-gradient-to-br from-green-600 to-lime-500 flex items-center justify-center text-white font-black text-xs">
-          AT
+          FF
         </div>
       );
     }
@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
     return (
       <img 
         src={imgStatus === 'fallback' ? LOGO_FALLBACK_URL : LOGO_URL} 
-        alt="ABRAS Travel" 
+        alt="Floripa Fácil" 
         className="h-full w-full object-contain"
         onLoad={() => setImgStatus('ok')}
         onError={() => {
@@ -66,8 +66,8 @@ const Navbar: React.FC = () => {
                         {renderLogoImage()}
                     </div>
                     <div className="ml-3 flex flex-col justify-center">
-                        <span className="font-black text-green-700 text-lg leading-none tracking-tighter uppercase italic">ABRAS Travel</span>
-                        <span className="font-bold text-gray-400 text-[9px] tracking-[0.2em] uppercase">Experiencias Premium</span>
+                        <span className="font-black text-green-700 text-lg leading-none tracking-tighter uppercase italic">Floripa Fácil</span>
+                        <span className="font-bold text-gray-400 text-[9px] tracking-[0.2em] uppercase">Turismo Receptivo</span>
                     </div>
                 </Link>
             </div>

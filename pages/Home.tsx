@@ -80,7 +80,7 @@ const Home: React.FC = () => {
                         <img 
                           src={LOGO_URL} 
                           className="w-full h-full object-contain" 
-                          alt="Logo ABRAS" 
+                          alt="Logo Floripa Fácil" 
                           onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
                         />
                     </div>
@@ -99,23 +99,23 @@ const Home: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-50 to-transparent z-20"></div>
       </div>
 
-      {/* BRAND INTRODUCTION ABRAS TRAVEL */}
+      {/* BRAND INTRODUCTION FLORIPA FÁCIL */}
       <section className="max-w-7xl mx-auto px-4 -mt-12 relative z-30">
           <div className="bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border border-gray-100 flex flex-col md:flex-row items-center gap-10">
               <div className="flex-shrink-0 bg-slate-50 p-4 rounded-full border-4 border-lime-100 shadow-inner w-56 h-56 flex items-center justify-center overflow-hidden">
                   <img 
                     src={LOGO_URL} 
                     className="w-full h-full object-contain rounded-full shadow-lg" 
-                    alt="ABRAS Travel" 
+                    alt="Floripa Fácil" 
                     onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
                   />
               </div>
               <div className="text-center md:text-left flex-1">
                   <h3 className="text-3xl font-black text-gray-800 uppercase tracking-tighter mb-4 italic">
-                    Viajá diferente con ABRAS Travel
+                    Viajá diferente con Floripa Fácil
                   </h3>
                   <p className="text-gray-500 text-lg leading-relaxed mb-8 font-medium">
-                    En <span className="text-green-600 font-bold">ABRAS Travel</span>, elevamos tu experiencia de viaje. Consultá con <span className="text-lime-600 font-bold">Flori AI</span> para armar tu itinerario o contactá a nuestros asesores directos por WhatsApp para una atención personalizada.
+                    En <span className="text-green-600 font-bold">Floripa Fácil</span>, elevamos tu experiencia en el sur de Brasil. Consultá con <span className="text-lime-600 font-bold">Flori AI</span> para armar tu itinerario o contactá a nuestros asesores directos para una atención 100% personalizada.
                   </p>
                   <div className="flex flex-col sm:flex-row items-center gap-4">
                       <a 
@@ -159,7 +159,7 @@ const Home: React.FC = () => {
           <div className="mb-24">
             <div className="flex items-center gap-4 mb-10">
                 <div className="h-1 w-12 bg-lime-500 rounded-full"></div>
-                <h2 className="text-4xl font-black text-gray-800 tracking-tighter uppercase italic">Elegidos ABRAS</h2>
+                <h2 className="text-4xl font-black text-gray-800 tracking-tighter uppercase italic">Elegidos Floripa Fácil</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {visibleOffers.slice(0,3).map(item => <TripCard key={item.id} trip={item} />)}

@@ -1,6 +1,6 @@
 {
-  "name": "ABRAS Travel - Tu Agencia de Viajes",
-  "description": "Plataforma moderna para la gestión de servicios turísticos, traslados y experiencias exclusivas en Brasil y el mundo con ABRAS Travel.",
+  "name": "Floripa Fácil - Tu Viaje a Medida",
+  "description": "Plataforma premium para la gestión de servicios turísticos, traslados y experiencias exclusivas en Florianópolis y el sur de Brasil.",
   "requestFramePermissions": [
     "camera",
     "geolocation"

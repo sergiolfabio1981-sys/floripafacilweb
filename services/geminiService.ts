@@ -3,27 +3,33 @@ import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 
 let chatSession: Chat | null = null;
 
-const SYSTEM_INSTRUCTION = `Eres "Flori", la asistente virtual inteligente de "ABRAS Travel". 
-Tu personalidad: Mujer brasileña, rubia, piel trigueña, carismática, experta en turismo y muy resolutiva. 
+const SYSTEM_INSTRUCTION = `Eres "Flori", la asistente virtual experta de "Floripa Fácil". 
+Tu personalidad: Mujer brasileña, carismática, rubia, piel trigueña, profesional del turismo y muy resolutiva.
 
 Tu misión: 
-1. Ayudar a los viajeros a planificar su viaje ideal con "ABRAS Travel".
-2. Promover nuestros servicios: Traslados VIP, Alquiler de Autos (Rent a Car ABRAS) y Excursiones exclusivas.
-3. Ser concisa y clara. Usa emojis para que la charla sea dinámica (🌴, 🚗, ✨, ✈️).
+1. Ayudar a los viajeros a planificar su viaje con "Floripa Fácil".
+2. Promover traslados VIP, Rent a Car FF y excursiones exclusivas en Florianópolis y el sur de Brasil.
+3. Responder de forma breve, amable y con muchos emojis (🌴, 🚗, ✨, 🌊).
 
 Conversión:
-- Si el usuario quiere reservar, pide su nombre y WhatsApp para que el equipo humano de ABRAS Travel cierre los detalles.
-- Menciona que las reservas se confirman con un 40% de seña.
+- Si el usuario muestra interés en reservar, solicita su nombre y WhatsApp para que el equipo humano cierre la reserva.
+- Recuerda que las reservas se confirman con un 40% de seña.
 
 Conocimiento:
-- Eres experta en Florianópolis, Bombinhas, Camboriú y todo el litoral sur de Brasil.
-- Sabes recomendar las mejores playas según el perfil del viajero.`;
+- Eres experta en Florianópolis (42 playas), Bombinhas, Camboriú e Itapema.`;
 
 export const getChatSession = (): Chat => {
+  // Siempre creamos una instancia fresca si no existe para asegurar que use la API_KEY del entorno
   if (chatSession) return chatSession;
 
-  // IMPORTANTE: La API_KEY se obtiene EXCLUSIVAMENTE de process.env.API_KEY
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API_KEY no configurada.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  
+  // Usamos 'gemini-3-flash-preview' por ser el modelo más estable y rápido para chats
   chatSession = ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
@@ -48,10 +54,14 @@ export const sendMessageToFlori = async function* (message: string) {
     }
   } catch (error: any) {
     console.error("Error en Flori AI:", error);
-    if (error?.message?.includes("Requested entity was not found")) {
-      yield "Lo siento, hay un problema técnico con mi conexión. Por favor, contacta a un asesor humano mientras me reinicio. 🌴";
+    
+    // Si la sesión falla por cualquier motivo, la reseteamos para el próximo intento
+    chatSession = null;
+
+    if (error?.message?.includes("API key not valid") || error?.message?.includes("invalid")) {
+      yield "Parece que hay un tema con mi configuración de seguridad. Por favor, avísale al administrador. 🌴";
     } else {
-      yield "Disculpame, tuve un pequeño inconveniente técnico. ¿Podrías repetirme tu consulta? 🌊";
+      yield "¡Hola! Tuve un pequeño tropiezo con la conexión, pero ya estoy aquí. ¿Cómo puedo ayudarte con tu viaje a Floripa? 🌴✨";
     }
   }
 };
