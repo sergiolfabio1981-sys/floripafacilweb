@@ -1,6 +1,12 @@
 
 export type UserRole = 'admin' | 'seller';
 
+export interface Destination {
+  id: string;
+  name: string;
+  active: boolean;
+}
+
 export interface DestinationGuide {
   id: string;
   name: string;
