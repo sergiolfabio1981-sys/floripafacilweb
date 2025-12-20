@@ -14,7 +14,7 @@ export interface DestinationGuide {
   description: string;
   images: string[];
   videoUrl?: string;
-  highlights: string[]; // Lista de actividades o tips
+  highlights: string[];
   active: boolean;
 }
 
@@ -27,17 +27,6 @@ export interface Seller {
   totalSales: number;
   active: boolean;
   role: 'seller';
-}
-
-export interface Provider {
-  id: string;
-  name: string;
-  category: 'Transporte' | 'Alojamiento' | 'Excursiones' | 'Otros';
-  contactName: string;
-  phone: string;
-  email: string;
-  location: string;
-  notes: string;
 }
 
 export interface Sale {
@@ -72,6 +61,13 @@ export interface Trip {
   specialLabel?: string;
   durationLabel?: string;
   type?: 'trip';
+  // Campos Detallados Booking Style
+  highlights?: string[];
+  included?: string[];
+  notIncluded?: string[];
+  meetingPoint?: string;
+  importantInfo?: string;
+  cancellationPolicy?: string;
 }
 
 export interface Apartment {
@@ -152,6 +148,13 @@ export interface Excursion {
   reviewsCount?: number;
   discount?: number;
   specialLabel?: string;
+  // Campos Detallados Booking Style
+  highlights?: string[];
+  included?: string[];
+  notIncluded?: string[];
+  meetingPoint?: string;
+  importantInfo?: string;
+  cancellationPolicy?: string;
 }
 
 export interface InstallmentTrip {

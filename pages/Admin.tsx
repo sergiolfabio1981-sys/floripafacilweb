@@ -118,7 +118,6 @@ const Admin: React.FC = () => {
       e.preventDefault();
       setIsSaving(true);
       try {
-          // SCRUBBING: Limpiar objeto para evitar error PGRST205 (columnas inexistentes)
           const cleanItem = { ...editingItem };
           
           if (modalType === 'inventory') {
@@ -145,7 +144,7 @@ const Admin: React.FC = () => {
           alert("Guardado correctamente.");
       } catch (err: any) {
           console.error(err);
-          alert(`Error al guardar (PGRST): Asegúrate que todos los campos sean correctos. Detalle: ${err.message}`);
+          alert(`Error al guardar: Asegúrate que todos los campos sean correctos. Detalle: ${err.message}`);
       } finally { setIsSaving(false); }
   };
 
@@ -315,17 +314,18 @@ const Admin: React.FC = () => {
           )}
       </main>
 
-      {/* MODAL UNIVERSAL DE EDICIÓN */}
+      {/* MODAL UNIVERSAL DE EDICIÓN ACTUALIZADO */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
-                <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Editando {modalType}</h3>
+            <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
+                <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
+                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Editando {modalType} - {editingItem.title || editingItem.name}</h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
                 
-                <form onSubmit={handleSave} className="p-10 overflow-y-auto space-y-6">
+                <form onSubmit={handleSave} className="p-10 overflow-y-auto space-y-8">
                     {modalType === 'inventory' && (
+                        <>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre del Producto</label>
@@ -340,23 +340,86 @@ const Admin: React.FC = () => {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo Proveedor (USD)</label>
-                                <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerNight || 0} onChange={e=>setEditingItem({...editingItem, providerPrice: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2" required />
+                                <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerNight || editingItem.providerPricePerDay || 0} onChange={e=>setEditingItem({...editingItem, providerPrice: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2" required />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Margen Ganancia (USD)</label>
-                                <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerNight || 0} onChange={e=>setEditingItem({...editingItem, profitMargin: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2" required />
-                            </div>
-                            <div className="md:col-span-2 space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">URL Imagen Principal</label>
-                                <input value={editingItem.images?.[0]} onChange={e=>setEditingItem({...editingItem, images: [e.target.value]})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2" />
-                            </div>
-                            <div className="md:col-span-2 flex items-center gap-3">
-                                <input type="checkbox" checked={editingItem.isOffer} onChange={e=>setEditingItem({...editingItem, isOffer: e.target.checked})} className="w-5 h-5 accent-green-500" />
-                                <label className="text-xs font-black uppercase text-slate-600">Marcar como Oferta Destacada</label>
+                                <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerNight || editingItem.profitMarginPerDay || 0} onChange={e=>setEditingItem({...editingItem, profitMargin: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2" required />
                             </div>
                         </div>
+
+                        {/* SECCIÓN BOOKING STYLE - NUEVOS CAMPOS */}
+                        <div className="space-y-6 pt-6 border-t">
+                            <h4 className="font-black text-slate-800 uppercase tracking-widest text-sm">Información Detallada (Booking Style)</h4>
+                            
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lo más destacado (Una frase por línea)</label>
+                                <textarea 
+                                    value={editingItem.highlights?.join('\n') || ''} 
+                                    onChange={e=>setEditingItem({...editingItem, highlights: e.target.value.split('\n')})} 
+                                    className="w-full bg-slate-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-32"
+                                    placeholder="Ej: Paisaje único\nGuía local experto"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-green-600 uppercase tracking-widest">Qué Incluye (Una por línea)</label>
+                                    <textarea 
+                                        value={editingItem.included?.join('\n') || ''} 
+                                        onChange={e=>setEditingItem({...editingItem, included: e.target.value.split('\n')})} 
+                                        className="w-full bg-green-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-32"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-red-400 uppercase tracking-widest">Qué NO Incluye (Una por línea)</label>
+                                    <textarea 
+                                        value={editingItem.notIncluded?.join('\n') || ''} 
+                                        onChange={e=>setEditingItem({...editingItem, notIncluded: e.target.value.split('\n')})} 
+                                        className="w-full bg-red-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-32"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Punto de Encuentro / Pick Up</label>
+                                <input value={editingItem.meetingPoint || ''} onChange={e=>setEditingItem({...editingItem, meetingPoint: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 focus:border-green-500" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Información Importante (Requisitos, qué llevar)</label>
+                                <textarea 
+                                    value={editingItem.importantInfo || ''} 
+                                    onChange={e=>setEditingItem({...editingItem, importantInfo: e.target.value})} 
+                                    className="w-full bg-slate-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-40"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">URL Imágenes (Una por línea)</label>
+                                <textarea 
+                                    value={editingItem.images?.join('\n') || ''} 
+                                    onChange={e=>setEditingItem({...editingItem, images: e.target.value.split('\n')})} 
+                                    className="w-full bg-slate-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-32"
+                                />
+                            </div>
+                            <div className="flex flex-col justify-center gap-4">
+                                <div className="flex items-center gap-3">
+                                    <input type="checkbox" checked={editingItem.isOffer} onChange={e=>setEditingItem({...editingItem, isOffer: e.target.checked})} className="w-6 h-6 accent-green-500" />
+                                    <label className="text-xs font-black uppercase text-slate-600">Marcar como Oferta Destacada</label>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Etiqueta Especial (Ej: "Agotándose")</label>
+                                    <input value={editingItem.specialLabel || ''} onChange={e=>setEditingItem({...editingItem, specialLabel: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" />
+                                </div>
+                            </div>
+                        </div>
+                        </>
                     )}
 
+                    {/* Otros modalTypes se mantienen igual... */}
                     {modalType === 'hero' && (
                         <div className="space-y-6">
                             <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Título Hero" />
@@ -367,15 +430,15 @@ const Admin: React.FC = () => {
 
                     {modalType === 'destination' && (
                          <div className="space-y-6">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre del Destino (Ciudad/Estado)</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre del Destino</label>
                             <input value={editingItem.name} onChange={e=>setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" required />
                          </div>
                     )}
 
-                    <div className="pt-8 border-t flex justify-end gap-4">
+                    <div className="pt-8 border-t flex justify-end gap-4 shrink-0">
                         <button type="button" onClick={()=>setIsModalOpen(false)} className="px-8 py-4 font-black uppercase text-[10px] tracking-widest text-slate-400 hover:text-slate-600">Cancelar</button>
                         <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:bg-green-700 transition-all disabled:opacity-50">
-                            {isSaving ? 'Guardando...' : 'Confirmar Cambios'}
+                            {isSaving ? 'Guardando...' : 'Confirmar y Publicar'}
                         </button>
                     </div>
                 </form>
