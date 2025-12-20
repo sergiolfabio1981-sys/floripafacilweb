@@ -13,16 +13,39 @@ IMPORTANTE:
 - Si el usuario muestra interés real, solicita su nombre y WhatsApp para pasarle con un asesor humano.
 - Las reservas se confirman con un 40% de seña.`;
 
+/**
+ * Intenta obtener la API KEY de múltiples fuentes para mayor robustez
+ */
+const getApiKey = (): string | undefined => {
+  // 1. Intento estándar solicitado por el sistema
+  if (typeof process !== 'undefined' && process.env) {
+    if (process.env.API_KEY) return process.env.API_KEY;
+    // Soporte para el error tipográfico detectado en la captura del usuario
+    if ((process.env as any).API_KEI) return (process.env as any).API_KEI;
+  }
+  
+  // 2. Intento vía import.meta (común en Vite/Vercel)
+  const metaEnv = (import.meta as any).env;
+  if (metaEnv) {
+    if (metaEnv.VITE_API_KEY) return metaEnv.VITE_API_KEY;
+    if (metaEnv.API_KEY) return metaEnv.API_KEY;
+    if (metaEnv.API_KEI) return metaEnv.API_KEI;
+  }
+
+  return undefined;
+};
+
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    // Verificamos tanto la forma correcta como el error tipográfico detectado en la captura
-    const apiKey = process.env.API_KEY || (process.env as any).API_KEI;
+    const apiKey = getApiKey();
     
     if (!apiKey) {
-      yield "¡Olá! Detecto que la clave API no está llegando correctamente. Por favor, asegúrate de que la variable en Vercel se llame exactamente API_KEY (con Y griega). 🌴✨";
+      console.warn("Flori AI: No se detectó ninguna API_KEY en el entorno.");
+      yield "¡Olá! Sigo sin poder conectar con mi cerebro (API KEY). 🌴\n\nHe detectado que en tu Vercel la variable se llama **API_KEI**. Por favor, cámbiala a **API_KEY** (con Y griega) en Settings -> Environment Variables y haz un **Redeploy** manual. ✨";
       return;
     }
 
+    // Inicializamos la IA con la clave detectada
     const ai = new GoogleGenAI({ apiKey });
     const chat = ai.chats.create({
       model: 'gemini-3-flash-preview',
@@ -42,12 +65,13 @@ export const sendMessageToFlori = async function* (message: string) {
       }
     }
   } catch (error: any) {
-    console.error("Error en Flori AI:", error);
+    console.error("Error crítico en Flori AI:", error);
     
-    if (error?.message?.includes("API_KEY") || error?.message?.includes("key") || error?.message?.includes("403")) {
-      yield "¡Olá! Mi clave de acceso parece no ser válida o no tener permisos. Revisa que sea una clave de Gemini activa en Google AI Studio. 🌊";
+    const errorMsg = error?.message || "";
+    if (errorMsg.includes("API_KEY") || errorMsg.includes("403") || errorMsg.includes("key")) {
+      yield "¡Olá! Mi clave de acceso parece no ser válida. Asegúrate de haber copiado la clave completa desde Google AI Studio y que el nombre en Vercel sea exactamente **API_KEY**. 🌊✨";
     } else {
-      yield "¡Olá! Tuve un pequeño contratiempo con mi conexión. ¿Podrías intentar escribirme de nuevo? 🌊✨";
+      yield "¡Olá! Tuve un pequeño problema de conexión con la isla. ¿Podrías intentar escribirme de nuevo? 🌊🌴";
     }
   }
 };
