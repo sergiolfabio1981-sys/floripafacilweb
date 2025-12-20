@@ -1,4 +1,3 @@
-
 import { Trip } from '../types';
 import { INITIAL_TRIPS } from '../constants';
 import { supabase } from './supabase';
@@ -31,23 +30,17 @@ export const getTrips = async (): Promise<Trip[]> => {
     const { data, error } = await supabase.from('trips').select('*');
     
     if (error) {
-      console.error('Error fetching trips de Supabase:', JSON.stringify(error));
+      console.warn('Supabase: Table "trips" might not exist yet. Using local data.', error.message);
       return INITIAL_TRIPS; 
     }
     
     if (!data || data.length === 0) {
-        try {
-            const { error: seedError } = await supabase.from('trips').insert(INITIAL_TRIPS.map(({type, ...t}) => t));
-            if (seedError) console.warn("Error al sembrar DB:", JSON.stringify(seedError));
-        } catch (seedErr) {
-            console.warn("Fallo crítico al sembrar:", JSON.stringify(seedErr));
-        }
         return INITIAL_TRIPS;
     }
     
     return data.map(t => ({...t, type: 'trip'})) as Trip[];
   } catch (err: any) {
-    console.error('Error inesperado en getTrips:', JSON.stringify(err));
+    console.error('Unexpected error in getTrips:', err);
     return INITIAL_TRIPS;
   }
 };
@@ -55,9 +48,7 @@ export const getTrips = async (): Promise<Trip[]> => {
 export const getTripById = async (id: string): Promise<Trip | undefined> => {
   try {
     const { data, error } = await supabase.from('trips').select('*').eq('id', id).single();
-    if (error) {
-        return INITIAL_TRIPS.find(t => t.id === id);
-    }
+    if (error) return INITIAL_TRIPS.find(t => t.id === id);
     return {...data, type: 'trip'} as Trip;
   } catch {
     return INITIAL_TRIPS.find(t => t.id === id);
@@ -67,18 +58,12 @@ export const getTripById = async (id: string): Promise<Trip | undefined> => {
 export const saveTrip = async (trip: any): Promise<void> => {
   const payload = getSanitizedPayload(trip);
   const { error } = await supabase.from('trips').upsert(payload);
-  if (error) {
-    console.error('Error al guardar en Supabase:', JSON.stringify(error));
-    throw new Error(error.message || "Error al conectar con la base de datos");
-  }
+  if (error) throw error;
 };
 
 export const deleteTrip = async (id: string): Promise<void> => {
   const { error } = await supabase.from('trips').delete().eq('id', id);
-  if (error) {
-      console.error('Error al eliminar viaje:', JSON.stringify(error));
-      throw error;
-  }
+  if (error) throw error;
 };
 
 export const createEmptyTrip = (): Trip => ({
