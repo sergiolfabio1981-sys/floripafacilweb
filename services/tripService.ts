@@ -29,22 +29,25 @@ const getSanitizedPayload = (trip: any) => {
 export const getTrips = async (): Promise<Trip[]> => {
   try {
     const { data, error } = await supabase.from('trips').select('*');
+    
     if (error) {
-      // Convertimos el objeto de error a string para evitar el "[object Object]"
-      console.error('Error fetching trips de Supabase:', JSON.stringify(error, null, 2));
+      console.error('Error fetching trips de Supabase:', JSON.stringify(error));
       return INITIAL_TRIPS; 
     }
+    
     if (!data || data.length === 0) {
-        const { error: seedError } = await supabase.from('trips').insert(INITIAL_TRIPS.map(t => {
-            const { type, ...clean } = t;
-            return clean;
-        }));
-        if (seedError) console.warn("Seed error:", seedError.message);
+        try {
+            const { error: seedError } = await supabase.from('trips').insert(INITIAL_TRIPS.map(({type, ...t}) => t));
+            if (seedError) console.warn("Error al sembrar DB:", JSON.stringify(seedError));
+        } catch (seedErr) {
+            console.warn("Fallo crítico al sembrar:", JSON.stringify(seedErr));
+        }
         return INITIAL_TRIPS;
     }
+    
     return data.map(t => ({...t, type: 'trip'})) as Trip[];
   } catch (err: any) {
-    console.error('Error inesperado en getTrips:', err.message || err);
+    console.error('Error inesperado en getTrips:', JSON.stringify(err));
     return INITIAL_TRIPS;
   }
 };
@@ -53,7 +56,6 @@ export const getTripById = async (id: string): Promise<Trip | undefined> => {
   try {
     const { data, error } = await supabase.from('trips').select('*').eq('id', id).single();
     if (error) {
-        console.warn(`Trip ${id} no encontrado en DB, usando constantes.`);
         return INITIAL_TRIPS.find(t => t.id === id);
     }
     return {...data, type: 'trip'} as Trip;
@@ -66,15 +68,15 @@ export const saveTrip = async (trip: any): Promise<void> => {
   const payload = getSanitizedPayload(trip);
   const { error } = await supabase.from('trips').upsert(payload);
   if (error) {
-    console.error('Error al guardar en Supabase:', JSON.stringify(error, null, 2));
-    throw error;
+    console.error('Error al guardar en Supabase:', JSON.stringify(error));
+    throw new Error(error.message || "Error al conectar con la base de datos");
   }
 };
 
 export const deleteTrip = async (id: string): Promise<void> => {
   const { error } = await supabase.from('trips').delete().eq('id', id);
   if (error) {
-      console.error('Error al eliminar viaje:', JSON.stringify(error, null, 2));
+      console.error('Error al eliminar viaje:', JSON.stringify(error));
       throw error;
   }
 };
