@@ -14,51 +14,70 @@ const PayPalButton: React.FC = () => {
       try {
         const paypal = (window as any).paypal;
         
-        // Verificar si el SDK está disponible y tiene la función de HostedButtons
-        if (!paypal || !paypal.HostedButtons) {
+        // Verificación exhaustiva de la existencia del SDK
+        if (!paypal) {
           if (isMounted) {
-            timeoutId = window.setTimeout(renderButton, 1000);
+            // Reintentar brevemente si el script aún no carga
+            timeoutId = window.setTimeout(renderButton, 1500);
           }
+          return;
+        }
+
+        if (!paypal.HostedButtons) {
+          console.warn("PayPal SDK loaded but HostedButtons component is missing.");
+          setIsLoading(false);
           return;
         }
 
         if (!containerRef.current) return;
 
-        // Limpiar contenedor previo
-        containerRef.current.innerHTML = '';
-        
-        const uniqueId = `paypal-btn-${Math.random().toString(36).substr(2, 9)}`;
-        const innerContainer = document.createElement('div');
-        innerContainer.id = uniqueId;
-        containerRef.current.appendChild(innerContainer);
-
-        // Renderizar con manejo de errores interno del SDK
-        await paypal.HostedButtons({
-          hostedButtonId: "EBQS2ACWE7UZW",
-        }).render(`#${uniqueId}`).catch((err: any) => {
-          console.warn("PayPal Render Warning:", err);
-          // No lanzamos error fatal aquí porque a veces el SDK se recupera solo
-        });
-        
-        if (isMounted) {
-          setIsLoading(false);
-          setError(null);
+        // Limpieza total del contenedor para evitar colisiones del SDK v5
+        while (containerRef.current.firstChild) {
+            containerRef.current.removeChild(containerRef.current.firstChild);
         }
+        
+        const uniqueId = `paypal-container-${Math.random().toString(36).substr(2, 9)}`;
+        const innerDiv = document.createElement('div');
+        innerDiv.id = uniqueId;
+        containerRef.current.appendChild(innerDiv);
+
+        // Envoltorio para capturar errores de acceso al host/DOM del SDK
+        try {
+            await paypal.HostedButtons({
+              hostedButtonId: "EBQS2ACWE7UZW",
+            }).render(`#${uniqueId}`);
+            
+            if (isMounted) {
+              setIsLoading(false);
+              setError(null);
+            }
+        } catch (renderError: any) {
+            // Aquí capturamos específicamente errores de "Can not read window host" o excepciones internas
+            console.error("PayPal SDK Render Error:", renderError);
+            if (isMounted) {
+                setError("El entorno de seguridad bloqueó la pasarela de pagos.");
+                setIsLoading(false);
+            }
+        }
+        
       } catch (err: any) {
-        console.error("PayPal critical error:", err);
+        console.error("PayPal critical initialization error:", err);
         if (isMounted) {
-          setError("El servicio de pagos no está disponible en este momento.");
+          setError("Servicio de pagos momentáneamente fuera de línea.");
           setIsLoading(false);
         }
       }
     };
 
-    timeoutId = window.setTimeout(renderButton, 500);
+    // Retrasar inicio para asegurar que el DOM y scripts externos estén estables
+    timeoutId = window.setTimeout(renderButton, 1000);
 
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
-      if (containerRef.current) containerRef.current.innerHTML = '';
+      if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+      }
     };
   }, []);
 
@@ -72,33 +91,41 @@ const PayPalButton: React.FC = () => {
 
         <div className="bg-white p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center shadow-sm min-h-[160px]">
             {error ? (
-                <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl text-orange-700 text-[10px] text-center max-w-xs">
-                    <p className="font-bold mb-1">Nota del Sistema</p>
-                    <p>{error} Por favor, contáctenos por WhatsApp para coordinar el pago.</p>
+                <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl text-center max-w-sm">
+                    <p className="text-amber-800 font-bold text-xs mb-2">Aviso del Sistema</p>
+                    <p className="text-amber-700 text-[10px] mb-4">No pudimos cargar el botón de pago automático debido a la configuración de seguridad de tu navegador o red.</p>
+                    <a 
+                        href="https://wa.me/5491140632644?text=Hola! No pude completar el pago por la web, necesito ayuda con una reserva."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-green-700 transition-colors"
+                    >
+                        Pagar vía WhatsApp
+                    </a>
                 </div>
             ) : (
                 <div 
                     ref={containerRef} 
-                    className="w-full z-0 relative text-center"
+                    className="w-full z-0 relative"
                     style={{ minHeight: '140px', colorScheme: 'only light' }} 
                 >
                     {isLoading && (
                         <div className="animate-pulse flex flex-col items-center justify-center py-8">
                             <div className="h-10 w-48 bg-gray-100 rounded-lg mb-2"></div>
-                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Cargando pasarela de pago...</p>
+                            <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Iniciando pasarela segura...</p>
                         </div>
                     )}
                 </div>
             )}
             
             {!error && (
-              <div className="flex items-center gap-3 mt-4 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+              <div className="flex items-center gap-3 mt-4 opacity-40 grayscale">
                   <div className="flex gap-2">
                       <img src="https://img.icons8.com/color/48/000000/visa.png" className="h-4" alt="Visa" />
                       <img src="https://img.icons8.com/color/48/000000/mastercard.png" className="h-4" alt="Mastercard" />
-                      <img src="https://img.icons8.com/color/48/000000/amex.png" className="h-4" alt="Amex" />
+                      <img src="https://img.icons8.com/color/48/000000/paypal.png" className="h-4" alt="PayPal" />
                   </div>
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest border-l pl-3 border-gray-200">ABRAS Travel Checkout</span>
+                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest border-l pl-3 border-gray-200">ABRAS Checkout</span>
               </div>
             )}
         </div>
