@@ -14,68 +14,46 @@ IMPORTANTE:
 - Las reservas se confirman con un 40% de seña.`;
 
 /**
- * Función ultra-robusta para capturar la API KEY en cualquier entorno
+ * Función para enviar mensajes a Flori usando la API de Gemini.
+ * Sigue estrictamente las guías de @google/genai.
  */
-const getApiKey = (): string | undefined => {
-  // 1. Intentar desde process.env (estándar de Node/Vercel)
-  if (typeof process !== 'undefined' && process.env) {
-    if (process.env.API_KEY) return process.env.API_KEY;
-    if ((process.env as any).API_KEI) return (process.env as any).API_KEI;
-    if ((process.env as any).VITE_API_KEY) return (process.env as any).VITE_API_KEY;
-  }
-  
-  // 2. Intentar desde import.meta (estándar de Vite)
-  const metaEnv = (import.meta as any).env;
-  if (metaEnv) {
-    if (metaEnv.VITE_API_KEY) return metaEnv.VITE_API_KEY;
-    if (metaEnv.API_KEY) return metaEnv.API_KEY;
-    if (metaEnv.API_KEI) return metaEnv.API_KEI;
-  }
-
-  return undefined;
-};
-
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    const apiKey = getApiKey();
-    
-    // Log de diagnóstico para el desarrollador (Visible en F12)
-    console.log("Flori AI Debug:", {
-      hasKey: !!apiKey,
-      keyLength: apiKey?.length || 0,
-      envType: typeof process !== 'undefined' ? 'Node/Process' : 'Browser/Vite'
-    });
+    // La API KEY debe obtenerse exclusivamente de process.env.API_KEY
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
-      yield "¡Olá! Sigo sin poder acceder a mi clave de acceso. 🌴\n\n**IMPORTANTE:** Después de crear la variable `API_KEY` en Vercel, debes ir a la pestaña **'Deployments'**, elegir tu último despliegue y seleccionar **'Redeploy'**. Si no lo haces, el código viejo seguirá corriendo sin la clave. ✨";
+      console.error("Error: process.env.API_KEY no está definida.");
+      yield "¡Olá! Mi sistema no detecta la clave de acceso (API_KEY). 🌴\n\nPor favor, verifica en el panel de Vercel que la variable se llame exactamente **API_KEY** y que hayas realizado un **Redeploy** manual de la aplicación. ✨";
       return;
     }
 
+    // Se crea la instancia justo antes de usarla para asegurar que tome el valor actual
     const ai = new GoogleGenAI({ apiKey });
-    const chat = ai.chats.create({
+    
+    // Usamos el modelo gemini-3-flash-preview para tareas de chat rápidas
+    const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
+      contents: message,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.8,
+        temperature: 0.7,
       },
     });
 
-    const result = await chat.sendMessageStream({ message });
-
-    for await (const chunk of result) {
-      const response = chunk as GenerateContentResponse;
-      if (response.text) {
-        yield response.text;
-      }
+    // Extraemos el texto de la respuesta (response.text es una propiedad, no un método)
+    const text = response.text;
+    if (text) {
+      yield text;
     }
   } catch (error: any) {
     console.error("Error crítico en Flori AI:", error);
     
-    const errorMsg = error?.message || "";
-    if (errorMsg.includes("API_KEY") || errorMsg.includes("403") || errorMsg.includes("key")) {
-      yield "¡Olá! Mi clave de acceso parece no ser válida o ha expirado. Por favor, verifica que la clave de Google AI Studio sea correcta. 🌊";
+    // Manejo de errores amigable
+    if (error?.message?.includes("API_KEY") || error?.message?.includes("403")) {
+      yield "¡Olá! Mi clave de acceso parece ser inválida. Por favor, revisa la configuración en Google AI Studio y Vercel. 🌊";
     } else {
-      yield "¡Olá! Tuve un pequeño problema de conexión. ¿Podrías intentar escribirme de nuevo? 🌊✨";
+      yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊✨";
     }
   }
 };
