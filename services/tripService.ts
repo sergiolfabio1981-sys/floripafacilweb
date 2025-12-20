@@ -18,7 +18,7 @@ const getSanitizedPayload = (trip: any) => {
         baseCurrency: trip.baseCurrency || 'USD',
         specialLabel: trip.specialLabel || '',
         durationLabel: trip.durationLabel || '',
-        // Campos nuevos (Booking Style) - Se envían solo si existen
+        // Campos nuevos (Booking Style)
         highlights: Array.isArray(trip.highlights) ? trip.highlights : [],
         included: Array.isArray(trip.included) ? trip.included : [],
         notIncluded: Array.isArray(trip.notIncluded) ? trip.notIncluded : [],
@@ -32,18 +32,21 @@ export const getTrips = async (): Promise<Trip[]> => {
   try {
     const { data, error } = await supabase.from('trips').select('*');
     if (error) {
-      console.error('Error fetching trips:', error);
+      console.error('Error fetching trips:', error.message || error);
       return INITIAL_TRIPS; 
     }
     if (!data || data.length === 0) {
+        // Intento de sembrado automático si la tabla está vacía
         const { error: seedError } = await supabase.from('trips').insert(INITIAL_TRIPS.map(t => {
             const { type, ...clean } = t;
             return clean;
         }));
+        if (seedError) console.warn("Seed error:", seedError.message);
         return INITIAL_TRIPS;
     }
     return data.map(t => ({...t, type: 'trip'})) as Trip[];
-  } catch (err) {
+  } catch (err: any) {
+    console.error('Unexpected error in getTrips:', err.message || err);
     return INITIAL_TRIPS;
   }
 };
@@ -51,7 +54,10 @@ export const getTrips = async (): Promise<Trip[]> => {
 export const getTripById = async (id: string): Promise<Trip | undefined> => {
   try {
     const { data, error } = await supabase.from('trips').select('*').eq('id', id).single();
-    if (error) return INITIAL_TRIPS.find(t => t.id === id);
+    if (error) {
+        console.warn(`Trip ${id} not found in DB, checking constants.`);
+        return INITIAL_TRIPS.find(t => t.id === id);
+    }
     return {...data, type: 'trip'} as Trip;
   } catch {
     return INITIAL_TRIPS.find(t => t.id === id);
@@ -62,7 +68,7 @@ export const saveTrip = async (trip: any): Promise<void> => {
   const payload = getSanitizedPayload(trip);
   const { error } = await supabase.from('trips').upsert(payload);
   if (error) {
-    console.error('Supabase Save Error (PGRST205?):', error);
+    console.error('Supabase Save Error:', error.message || error);
     throw error;
   }
 };

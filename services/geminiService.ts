@@ -29,9 +29,9 @@ export const getChatSession = (): Chat => {
 
   const ai = new GoogleGenAI({ apiKey });
   
-  // Usamos 'gemini-3-flash-preview' por ser el modelo más estable y rápido para chats
+  // Usamos 'gemini-flash-latest' por ser el alias más estable y compatible para chats rápidos
   chatSession = ai.chats.create({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-flash-latest',
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       temperature: 0.8,
@@ -59,9 +59,11 @@ export const sendMessageToFlori = async function* (message: string) {
     chatSession = null;
 
     if (error?.message?.includes("API key not valid") || error?.message?.includes("invalid")) {
-      yield "Parece que hay un tema con mi configuración de seguridad. Por favor, avísale al administrador. 🌴";
+      yield "Parece que hay un tema con mi configuración de seguridad (Clave de API). Por favor, avísale al administrador. 🌴";
+    } else if (error?.message?.includes("not found")) {
+      yield "Estoy reconfigurando mi sistema de navegación... ¿Podrías repetirme tu pregunta en un momento? 🌊✨";
     } else {
-      yield "¡Hola! Tuve un pequeño tropiezo con la conexión, pero ya estoy aquí. ¿Cómo puedo ayudarte con tu viaje a Floripa? 🌴✨";
+      yield "¡Olá! Tuve un pequeño tropiezo con la conexión, pero ya estoy aquí. ¿Cómo puedo ayudarte con tu viaje a Floripa? 🌴✨";
     }
   }
 };
