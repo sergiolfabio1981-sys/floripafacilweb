@@ -1,6 +1,6 @@
 {
-  "name": "Floripa Fácil - Hub Gestión",
-  "description": "Plataforma de turismo receptivo para Floripa Fácil con gestión de vendedores, proveedores, métricas de rendimiento y cotizador de itinerarios personalizados.",
+  "name": "Floripa Fácil - Hub de Turismo Receptivo",
+  "description": "Plataforma premium para la gestión de servicios turísticos en Brasil, incluyendo cotizaciones de traslados, autos y hotelería con el sello Floripa Fácil.",
   "requestFramePermissions": [
     "camera",
     "geolocation"

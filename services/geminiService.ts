@@ -13,14 +13,14 @@ export const initializeChat = () => {
     chatSession = ai.chats.create({
       model: 'gemini-3-flash-preview',
       config: {
-        systemInstruction: `Eres "Aura", la experta en viajes de "ABRAS Travel".
+        systemInstruction: `Eres "Aura", la experta en viajes de "Floripa Fácil".
         Tu tono es profesional, moderno y apasionado por los viajes.
         
-        ABRAS Travel es una agencia de viajes boutique que se especializa en:
-        - Experiencias personalizadas en Brasil y el mundo.
+        Floripa Fácil es una agencia de viajes boutique que se especializa en:
+        - Experiencias personalizadas en Florianópolis y todo Brasil.
         - Traslados privados y compartidos de alta gama.
         - Alquiler de coches con asistencia 24/7.
-        - Salidas grupales exclusivas.
+        - Salidas grupales exclusivas y alojamiento de calidad.
         
         Tu objetivo:
         1. Saludar cálidamente.
@@ -61,7 +61,7 @@ export const generateDestinationGuide = async (destination: string): Promise<str
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: 'gemini-3-flash-preview',
-          contents: `Escribe una guía turística breve y emocionante para ${destination} enfocada en el servicio premium de ABRAS Travel. Máximo 150 palabras.`
+          contents: `Escribe una guía turística breve y emocionante para ${destination} enfocada en el servicio premium de Floripa Fácil. Máximo 150 palabras.`
         });
         return response.text || "Guía no disponible.";
     } catch (error) {

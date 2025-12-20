@@ -5,6 +5,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { usePlanner } from '../contexts/PlannerContext';
 
+const LOGO_URL = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png";
+
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
@@ -37,21 +39,23 @@ const Navbar: React.FC = () => {
     <nav className="bg-white shadow-md sticky top-0 z-50 border-b-4 border-lime-500">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-            <div className="flex-shrink-0 flex items-center h-full py-2">
+            <div className="flex-shrink-0 flex items-center h-full py-1">
                 <Link to="/" className="group h-full flex items-center">
-                    {!imgError ? (
-                        <img 
-                            src="https://i.postimg.cc/9f0v8G0D/Logo-Floripa-Facil-Dark.png" 
-                            alt="ABRAS Travel" 
-                            className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105 max-h-[75px] rounded-full shadow-sm"
-                            onError={() => setImgError(true)}
-                        />
-                    ) : (
-                        <div className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center text-white font-black text-xl shadow-lg">AB</div>
-                    )}
+                    <div className="relative h-14 w-14 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300 border border-gray-100">
+                        {!imgError ? (
+                            <img 
+                                src={LOGO_URL} 
+                                alt="Floripa Fácil" 
+                                className="h-full w-full object-contain"
+                                onError={() => setImgError(true)}
+                            />
+                        ) : (
+                            <div className="h-full w-full bg-green-600 flex items-center justify-center text-white font-black text-xs">FF</div>
+                        )}
+                    </div>
                     <div className="ml-3 flex flex-col justify-center">
-                        <span className="font-black text-green-700 text-xl leading-none tracking-tighter">ABRAS</span>
-                        <span className="font-bold text-gray-400 text-[10px] tracking-[0.2em] uppercase">Travel Agency</span>
+                        <span className="font-black text-green-700 text-lg leading-none tracking-tighter uppercase">Floripa Fácil</span>
+                        <span className="font-bold text-gray-400 text-[9px] tracking-[0.2em] uppercase">Turismo Receptivo</span>
                     </div>
                 </Link>
             </div>

@@ -103,7 +103,7 @@ export const generateMultiServicePDF = async (
       doc.text(`${currency} ${reservation.toLocaleString()}`, 190, y + 22, { align: 'right' });
 
       doc.setTextColor(200, 0, 0);
-      doc.text("SALDO EN BRASIL (60%):", 115, y + 35);
+      doc.text("SALDO EN DESTINO (60%):", 115, y + 35);
       const balance = total - reservation;
       doc.text(`${currency} ${balance.toLocaleString()}`, 190, y + 35, { align: 'right' });
 
@@ -119,7 +119,7 @@ export const generateMultiServicePDF = async (
         doc.text(`CONSULTAS: ${seller.name} - ${seller.phone}`, 105, footerY + 5, { align: 'center' });
       }
 
-      doc.save(`Cotizacion_FloripaFacil_${Date.now()}.pdf`);
+      doc.save(`Presupuesto_FloripaFacil_${Date.now()}.pdf`);
   } catch (err) {
       console.error(err);
       alert("Error al generar PDF");

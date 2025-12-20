@@ -35,7 +35,7 @@ const Planner: React.FC = () => {
     }
 
     if (!currentUser) {
-      alert("Debes estar logueado como agente de ABRAS para registrar ventas oficiales.");
+      alert("Debes estar logueado como agente de Floripa Fácil para registrar ventas oficiales.");
       return;
     }
 
@@ -59,7 +59,7 @@ const Planner: React.FC = () => {
 
       if (error) throw error;
 
-      alert("¡Venta registrada con éxito en el sistema de ABRAS! Tu comisión del 40% ha sido calculada.");
+      alert("¡Venta registrada con éxito en el sistema de Floripa Fácil! Tu comisión del 40% ha sido calculada.");
       clearPlanner();
       navigate('/admin');
     } catch (err) {
@@ -71,7 +71,7 @@ const Planner: React.FC = () => {
   };
 
   const handleWhatsApp = () => {
-    let message = `*SOLICITUD DE RESERVA - ABRAS TRAVEL*\n\n`;
+    let message = `*SOLICITUD DE RESERVA - FLORIPA FÁCIL*\n\n`;
     if (currentUser) message += `*Agente:* ${currentUser.name}\n\n`;
     if (clientName) message += `*Cliente:* ${clientName}\n\n`;
     
@@ -82,7 +82,7 @@ const Planner: React.FC = () => {
     message += `\n💰 *TOTAL:* ${formatPrice(totalValue)}\n`;
     message += `💳 *RESERVA (40%):* ${formatPrice(reservationValue)}\n`;
     message += `📌 *SALDO EN DESTINO:* ${formatPrice(totalValue - reservationValue)}\n\n`;
-    message += `_Cotizado mediante la plataforma ABRAS Travel_`;
+    message += `_Cotizado mediante la plataforma Floripa Fácil_`;
     
     window.open(`https://wa.me/5491140632644?text=${encodeURIComponent(message)}`, "_blank");
   };
@@ -93,7 +93,7 @@ const Planner: React.FC = () => {
         <div className="text-center bg-white p-12 rounded-[3rem] shadow-xl max-w-md border border-gray-100">
             <div className="text-8xl mb-6">🎒</div>
             <h2 className="text-3xl font-black text-gray-800 mb-4 tracking-tighter uppercase">Tu itinerario está vacío</h2>
-            <p className="text-gray-400 mb-8 font-medium italic">Suma experiencias y traslados para armar tu viaje ideal con ABRAS Travel.</p>
+            <p className="text-gray-400 mb-8 font-medium italic">Suma experiencias y traslados para armar tu viaje ideal con Floripa Fácil.</p>
             <Link to="/" className="bg-green-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-green-700 transition-all uppercase tracking-widest shadow-lg">Explorar Destinos</Link>
         </div>
       </div>

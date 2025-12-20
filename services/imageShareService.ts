@@ -14,7 +14,7 @@ export const generateShareImage = async (item: ListingItem, formattedPrice: stri
   document.body.appendChild(container);
 
   const mainImage = item.images[0];
-  const logoUrl = "https://i.postimg.cc/9f0v8G0D/Logo-Floripa-Facil-Dark.png"; // Usar el logo de ABRAS
+  const logoUrl = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png"; 
   
   let duration = "TEMPORADA 2025/2026";
   if ('durationLabel' in item && item.durationLabel) duration = item.durationLabel;
@@ -46,7 +46,7 @@ export const generateShareImage = async (item: ListingItem, formattedPrice: stri
         <div style="margin: 60px 80px; padding: 60px; background-color: #f0fdf4; border-radius: 40px; border: 3px solid #dcfce7; text-align: center;">
             <h3 style="font-size: 36px; color: #166534; font-weight: 700; margin-bottom: 20px;">Tu próxima aventura comienza aquí</h3>
             <div style="font-size: 110px; font-weight: 900; color: #16a34a; line-height: 1;">${formattedPrice}</div>
-            <p style="font-size: 24px; color: #64748b; margin-top: 30px; font-style: italic;">* Consulta financiación y disponibilidad con ABRAS Travel</p>
+            <p style="font-size: 24px; color: #64748b; margin-top: 30px; font-style: italic;">* Consulta financiación y disponibilidad con Floripa Fácil</p>
         </div>
 
         <div style="width: 100%; background-color: #064e3b; padding: 60px 80px; display: flex; justify-content: space-between; align-items: center; color: #ffffff;">
@@ -55,17 +55,15 @@ export const generateShareImage = async (item: ListingItem, formattedPrice: stri
                  <p style="font-size: 48px; font-weight: 900;">+54 9 11 4063 2644</p>
              </div>
              <div style="text-align: right;">
-                 <p style="font-size: 24px; font-weight: 700;">www.abrastravel.com</p>
-                 <p style="font-size: 18px; color: #a3e635;">#ViajaConABRAS</p>
+                 <p style="font-size: 24px; font-weight: 700;">www.floripafacil.com</p>
+                 <p style="font-size: 18px; color: #a3e635;">#FloripaFacil</p>
              </div>
         </div>
     </div>
   `;
 
   try {
-      // Esperar a que las imágenes se carguen
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const canvas = await html2canvas(container, {
           useCORS: true,
           scale: 1,
@@ -74,15 +72,14 @@ export const generateShareImage = async (item: ListingItem, formattedPrice: stri
           width: 1080,
           windowWidth: 1080
       });
-      
       const image = canvas.toDataURL("image/jpeg", 0.9);
       const link = document.createElement('a');
       link.href = image;
-      link.download = `Flyer_ABRAS_${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
+      link.download = `Flyer_FloripaFacil_${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
       link.click();
   } catch (error) {
       console.error("Flyer generation error:", error);
-      alert("Hubo un problema al generar la imagen. Intenta capturar pantalla o contactarnos.");
+      alert("Problema al generar flyer.");
   } finally {
       if (document.body.contains(container)) document.body.removeChild(container);
   }

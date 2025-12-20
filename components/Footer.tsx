@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getTermsAndConditions } from '../services/settingsService';
 
+const LOGO_URL = "https://i.ibb.co/L6WvF7X/Logo-Floripa-Facil.png";
+
 const Footer: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [termsContent, setTermsContent] = useState('');
@@ -17,70 +19,75 @@ const Footer: React.FC = () => {
 
   return (
     <>
-    <footer className="bg-slate-950 text-white border-t-8 border-lime-500">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-4 mb-6">
-                {!imgError ? (
-                    <img 
-                        src="https://i.postimg.cc/9f0v8G0D/Logo-Floripa-Facil-Dark.png" 
-                        alt="Floripa Fácil" 
-                        className="h-20 rounded-full border-2 border-lime-500/30 shadow-lg" 
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="w-20 h-20 bg-lime-500 rounded-full flex items-center justify-center text-slate-950 font-black text-2xl">FF</div>
-                )}
+    <footer className="bg-slate-950 text-white border-t-8 border-lime-500 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-20 relative">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-lime-500/10 rounded-full blur-[100px]"></div>
+
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-16 relative z-10">
+          <div className="md:col-span-5">
+            <div className="flex flex-col items-start gap-6 mb-8">
+                <div className="bg-white p-1 rounded-full shadow-2xl border-4 border-lime-500/20 w-32 h-32 flex items-center justify-center overflow-hidden">
+                    {!imgError ? (
+                        <img 
+                            src={LOGO_URL} 
+                            alt="Floripa Fácil" 
+                            className="h-full w-full object-contain rounded-full" 
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="h-full w-full bg-green-600 flex items-center justify-center text-white font-black text-2xl">FF</div>
+                    )}
+                </div>
                 <div>
-                    <h4 className="text-2xl font-black text-lime-400 leading-none">FLORIPA FÁCIL</h4>
-                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Turismo Receptivo</p>
+                    <h4 className="text-3xl font-black text-lime-400 leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</h4>
+                    <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-[0.3em] font-black">Turismo Receptivo Boutique</p>
                 </div>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-md">
-              Expertos en el litoral catarinense y principales polos turísticos de Brasil. Traslados in/out, excursiones exclusivas y movilidad garantizada para que tu única preocupación sea disfrutar del sol.
+            <p className="text-gray-400 text-lg leading-relaxed max-w-md font-medium">
+              Especialistas en el litoral catarinense. Nuestra misión es facilitarte el acceso a las mejores playas y experiencias de Brasil con seguridad, confort y estilo.
             </p>
           </div>
 
-          <div>
-            <h4 className="font-bold text-lg mb-6 text-lime-400">Nuestros Servicios</h4>
-            <ul className="space-y-4 text-sm text-gray-400">
-              <li><Link to="/excursions" className="hover:text-white transition">Excursiones y Tours</Link></li>
-              <li><Link to="/excursions" className="hover:text-white transition">Transfers Aeropuerto</Link></li>
-              <li><Link to="/contact" className="hover:text-white transition">Alquiler de Coches</Link></li>
-              <li><Link to="/accommodations" className="hover:text-white transition">Alojamientos</Link></li>
+          <div className="md:col-span-3">
+            <h4 className="font-black text-xl mb-10 text-white uppercase tracking-tighter italic">Navegación</h4>
+            <ul className="space-y-5">
+              <li><Link to="/excursions" className="text-gray-400 hover:text-lime-400 transition-colors font-bold uppercase text-xs tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-lime-500 rounded-full"></span> Traslados</Link></li>
+              <li><Link to="/trips" className="text-gray-400 hover:text-lime-400 transition-colors font-bold uppercase text-xs tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-lime-500 rounded-full"></span> Tours & Paseos</Link></li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-bold text-lg mb-6 text-lime-400">Contacto Directo</h4>
-            <div className="space-y-4 text-sm text-gray-400">
-                <p className="flex items-center gap-2">📍 Florianópolis, SC, Brasil</p>
-                <p className="flex items-center gap-2">📞 +54 9 11 4063 2644</p>
-                <p className="flex items-center gap-2">✉️ hola@floripafacil.com</p>
-                <div className="pt-4 flex gap-4">
-                    <a href="#" className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-lime-500 hover:text-green-950 transition-all">Ig</a>
-                    <a href="#" className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-lime-500 hover:text-green-950 transition-all">Fb</a>
+          <div className="md:col-span-4">
+            <h4 className="font-black text-xl mb-10 text-white uppercase tracking-tighter italic">Contacto Receptivo</h4>
+            <div className="space-y-6">
+                <div className="flex items-center gap-4 group cursor-pointer">
+                    <div className="w-10 h-10 bg-lime-500/10 rounded-xl flex items-center justify-center text-lime-400 group-hover:bg-lime-500 group-hover:text-green-950 transition-all">📍</div>
+                    <span className="text-gray-400 font-bold text-sm">Florianópolis, SC, Brasil</span>
+                </div>
+                <div className="flex items-center gap-4 group cursor-pointer">
+                    <div className="w-10 h-10 bg-lime-500/10 rounded-xl flex items-center justify-center text-lime-400 group-hover:bg-lime-500 group-hover:text-green-950 transition-all">📞</div>
+                    <span className="text-gray-400 font-bold text-sm">+54 9 11 4063 2644</span>
                 </div>
             </div>
           </div>
         </div>
-        <div className="border-t border-gray-900 mt-12 pt-8 text-center text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} Floripa Fácil - Todos los derechos reservados.</p>
-          <button onClick={openTerms} className="mt-2 hover:text-white">Bases y Condiciones de Uso</button>
+
+        <div className="border-t border-white/5 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">© {new Date().getFullYear()} Floripa Fácil — Marca Registrada.</p>
+          <div className="flex gap-8">
+              <button onClick={openTerms} className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors">Legales</button>
+          </div>
         </div>
       </div>
     </footer>
 
     {isModalOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[80vh]">
-                <div className="p-4 border-b flex justify-between items-center bg-green-50 rounded-t-2xl">
-                    <h3 className="font-bold text-lg text-green-900">Bases y Condiciones</h3>
-                    <button onClick={()=>setIsModalOpen(false)} className="text-gray-500 text-2xl">&times;</button>
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden animate-pop-in">
+                <div className="p-8 border-b flex justify-between items-center bg-slate-50">
+                    <h3 className="font-black text-2xl text-slate-800 uppercase tracking-tighter italic">Bases y Condiciones</h3>
+                    <button onClick={()=>setIsModalOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm text-gray-400 hover:text-red-500 transition-colors">&times;</button>
                 </div>
-                <div className="p-6 overflow-y-auto flex-1 text-sm text-gray-600 whitespace-pre-wrap">{termsContent}</div>
-                <div className="p-4 border-t text-right"><button onClick={()=>setIsModalOpen(false)} className="px-6 py-2 bg-green-600 text-white rounded-lg font-bold">Cerrar</button></div>
+                <div className="p-10 overflow-y-auto flex-1 text-slate-500 font-medium leading-relaxed whitespace-pre-wrap">{termsContent}</div>
             </div>
         </div>
     )}
