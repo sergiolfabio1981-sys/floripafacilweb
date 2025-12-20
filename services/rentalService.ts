@@ -11,7 +11,12 @@ export const getRentals = async (): Promise<Apartment[]> => {
       return [];
     }
 
-    return (data as Apartment[]) || [];
+    return (data as Apartment[]).map(r => ({
+        ...r,
+        images: r.images || [],
+        amenities: r.amenities || [],
+        type: 'rental'
+    }));
   } catch (err) {
     return [];
   }
@@ -21,7 +26,13 @@ export const getRentalById = async (id: string): Promise<Apartment | undefined> 
   try {
     const { data, error } = await supabase.from('rentals').select('*').eq('id', id).single();
     if (error) return undefined;
-    return data as Apartment;
+    const rental = data as Apartment;
+    return {
+        ...rental,
+        images: rental.images || [],
+        amenities: rental.amenities || [],
+        type: 'rental'
+    };
   } catch {
     return undefined;
   }
@@ -31,10 +42,14 @@ export const saveRental = async (rental: Apartment): Promise<void> => {
   const rentalToSave = {
       ...rental,
       images: Array.isArray(rental.images) ? rental.images : [],
-      amenities: Array.isArray(rental.amenities) ? rental.amenities : []
+      amenities: Array.isArray(rental.amenities) ? rental.amenities : [],
+      type: 'rental'
   };
   const { error } = await supabase.from('rentals').upsert(rentalToSave);
-  if (error) console.error('Error saving rental:', error);
+  if (error) {
+      console.error('Error saving rental:', error);
+      throw error;
+  }
 };
 
 export const deleteRental = async (id: string): Promise<void> => {
@@ -46,7 +61,6 @@ export const createEmptyRental = (): Apartment => ({
   id: crypto.randomUUID(),
   title: '',
   location: '',
-  // Use correct property names from Apartment interface in types.ts
   providerPricePerNight: 0,
   profitMarginPerNight: 0,
   description: '',

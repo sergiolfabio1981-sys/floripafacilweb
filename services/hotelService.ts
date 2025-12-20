@@ -11,11 +11,11 @@ export const getHotels = async (): Promise<Hotel[]> => {
       return [];
     }
 
-    // Ensure arrays are arrays and not null
     return (data as Hotel[]).map(h => ({
         ...h,
         images: h.images || [],
-        amenities: h.amenities || []
+        amenities: h.amenities || [],
+        type: 'hotel'
     }));
   } catch (err) {
     return [];
@@ -26,12 +26,12 @@ export const getHotelById = async (id: string): Promise<Hotel | undefined> => {
   try {
     const { data, error } = await supabase.from('hotels').select('*').eq('id', id).single();
     if (error) return undefined;
-    // Ensure arrays
     const hotel = data as Hotel;
     return {
         ...hotel,
         images: hotel.images || [],
-        amenities: hotel.amenities || []
+        amenities: hotel.amenities || [],
+        type: 'hotel'
     };
   } catch {
     return undefined;
@@ -42,7 +42,8 @@ export const saveHotel = async (hotel: Hotel): Promise<void> => {
   const hotelToSave = {
       ...hotel,
       images: Array.isArray(hotel.images) ? hotel.images : [],
-      amenities: Array.isArray(hotel.amenities) ? hotel.amenities : []
+      amenities: Array.isArray(hotel.amenities) ? hotel.amenities : [],
+      type: 'hotel'
   };
   const { error } = await supabase.from('hotels').upsert(hotelToSave);
   if (error) {
@@ -60,7 +61,6 @@ export const createEmptyHotel = (): Hotel => ({
   id: crypto.randomUUID(),
   title: '',
   location: '',
-  // Use correct property names from Hotel interface in types.ts
   providerPricePerNight: 0,
   profitMarginPerNight: 0,
   description: '',
