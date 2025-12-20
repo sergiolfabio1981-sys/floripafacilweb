@@ -4,8 +4,6 @@ import { Trip, CarRental, Excursion, Seller, Sale, DestinationGuide, Destination
 import { getTrips, saveTrip, deleteTrip, createEmptyTrip } from '../services/tripService';
 import { getCarRentals, saveCarRental, deleteCarRental, createEmptyCarRental } from '../services/carRentalService';
 import { getExcursions, saveExcursion, deleteExcursion, createEmptyExcursion } from '../services/excursionService';
-import { getHotels, saveHotel, deleteHotel, createEmptyHotel } from '../services/hotelService';
-import { getRentals, saveRental, deleteRental, createEmptyRental } from '../services/rentalService';
 import { getGuides, saveGuide, deleteGuide, createEmptyGuide } from '../services/guideService';
 import { getDestinations, saveDestination, deleteDestination, createEmptyDestination } from '../services/destinationService';
 import { getSellers, saveSeller, deleteSeller, createEmptySeller } from '../services/sellerService';
@@ -24,7 +22,7 @@ const Admin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState<string>('inventory');
-  const [inventoryCategory, setInventoryCategory] = useState<'tours' | 'transfers' | 'cars' | 'lodging'>('tours');
+  const [inventoryCategory, setInventoryCategory] = useState<'tours' | 'transfers' | 'cars'>('tours');
   const [dbStatus, setDbStatus] = useState<string>('checking...');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -50,14 +48,12 @@ const Admin: React.FC = () => {
       setDbStatus('Cargando...');
       try {
           if (activeTab === 'inventory') {
-              const [trips, cars, excursions, hotels, rentals] = await Promise.all([
+              const [trips, cars, excursions] = await Promise.all([
                   getTrips().then(items => items.map(i => ({ ...i, type: 'trip' }))),
                   getCarRentals().then(items => items.map(i => ({ ...i, type: 'car' }))),
-                  getExcursions().then(items => items.map(i => ({ ...i, type: 'excursion' }))),
-                  getHotels().then(items => items.map(i => ({ ...i, type: 'hotel' }))),
-                  getRentals().then(items => items.map(i => ({ ...i, type: 'rental' })))
+                  getExcursions().then(items => items.map(i => ({ ...i, type: 'excursion' })))
               ]);
-              setInventory([...trips, ...cars, ...excursions, ...hotels, ...rentals]);
+              setInventory([...trips, ...cars, ...excursions]);
               setDestinations(await getDestinations());
           } else if (activeTab === 'home') {
               setHeroSlides(await getHeroSlides());
@@ -79,10 +75,17 @@ const Admin: React.FC = () => {
       }
   };
 
+  // FUNCIÓN DE LIMPIEZA PARA SUPABASE
+  const scrubItem = (item: any) => {
+      const { type, calculatedPrice, calculatedProfit, ...cleaned } = item;
+      return cleaned;
+  };
+
   const handleSyncDefaults = async () => {
-      if (!window.confirm("¿Deseas restaurar destinos (Camboriú, Bombinhas) y productos de ejemplo?")) return;
+      if (!window.confirm("¿Deseas realizar la CARGA MASIVA de productos iniciales? Esto actualizará Tours, Traslados y Autos.")) return;
       setIsSaving(true);
       try {
+          // 1. Destinos
           const defaultDests = [
               { id: 'dest-1', name: 'Florianópolis', active: true },
               { id: 'dest-2', name: 'Bombinhas', active: true },
@@ -90,20 +93,21 @@ const Admin: React.FC = () => {
           ];
           await supabase.from('destinations').upsert(defaultDests);
           
-          // Scrub INITIAL_TRIPS to prevent schema mismatch errors
-          const cleanTrips = INITIAL_TRIPS.map(({type, ...t}) => t);
-          const cleanExcursions = INITIAL_EXCURSIONS.map(({type, ...e}) => e);
-          const cleanCars = INITIAL_CARS.map(({type, ...c}) => c);
+          // 2. Carga masiva
+          const cleanTrips = INITIAL_TRIPS.map(scrubItem);
+          const cleanExcursions = INITIAL_EXCURSIONS.map(scrubItem);
+          const cleanCars = INITIAL_CARS.map(scrubItem);
 
-          await supabase.from('trips').upsert(cleanTrips);
-          await supabase.from('excursions').upsert(cleanExcursions);
-          await supabase.from('cars').upsert(cleanCars);
+          await Promise.all([
+            supabase.from('trips').upsert(cleanTrips),
+            supabase.from('excursions').upsert(cleanExcursions),
+            supabase.from('cars').upsert(cleanCars)
+          ]);
 
-          alert("Base de datos sincronizada. Los destinos han vuelto.");
+          alert("¡CARGA MASIVA EXITOSA! Se han sincronizado Tours, Traslados y Autos.");
           loadData();
       } catch (err: any) {
-          alert("Error al sincronizar: " + (err.message || 'Error desconocido'));
-          console.error(err);
+          alert("Error al sincronizar datos: " + (err.message || 'Error desconocido'));
       } finally { setIsSaving(false); }
   };
 
@@ -118,26 +122,16 @@ const Admin: React.FC = () => {
     }
   };
 
-  // FUNCIÓN CRÍTICA: Limpiar campos antes de enviar a Supabase para evitar PGRST205
-  const scrubItem = (item: any) => {
-      const { type, calculatedPrice, calculatedProfit, ...cleaned } = item;
-      return cleaned;
-  };
-
   const handleSave = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSaving(true);
       try {
           const cleanItem = scrubItem(editingItem);
-          console.log("Intentando guardar:", cleanItem);
-          
           if (modalType === 'inventory') {
-              const type = editingItem.type; // Usamos el type del original
+              const type = editingItem.type; 
               if (type === 'trip') await saveTrip(cleanItem);
               else if (type === 'car') await saveCarRental(cleanItem);
               else if (type === 'excursion') await saveExcursion(cleanItem);
-              else if (type === 'hotel') await saveHotel(cleanItem);
-              else if (type === 'rental') await saveRental(cleanItem);
           } else if (modalType === 'hero') {
               await saveHeroSlide(cleanItem);
           } else if (modalType === 'banner') {
@@ -149,15 +143,11 @@ const Admin: React.FC = () => {
           } else if (modalType === 'seller') {
               await saveSeller(cleanItem);
           }
-          
           await loadData();
           setIsModalOpen(false);
-          alert("¡Cambios guardados con éxito!");
+          alert("¡Cambios guardados!");
       } catch (err: any) {
-          console.error("Error detallado de Supabase:", err);
-          let msg = "Error al guardar.";
-          if (err.code === "PGRST205") msg = "Error PGRST205: La base de datos no tiene una de las columnas enviadas. Verifica que no hayas agregado campos especiales si no existen en Supabase.";
-          alert(`${msg}\nDetalle: ${err.message || 'Consulta la consola'}`);
+          alert(`Error al guardar: ${err.message}`);
       } finally { setIsSaving(false); }
   };
 
@@ -172,7 +162,6 @@ const Admin: React.FC = () => {
         case 'tours': return inventory.filter(i => i.type === 'trip');
         case 'transfers': return inventory.filter(i => i.type === 'excursion');
         case 'cars': return inventory.filter(i => i.type === 'car');
-        case 'lodging': return inventory.filter(i => i.type === 'hotel' || i.type === 'rental');
         default: return inventory;
     }
   };
@@ -210,7 +199,13 @@ const Admin: React.FC = () => {
               <button onClick={()=>setActiveTab('sales')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sales' ? 'bg-green-600 shadow-lg scale-105' : 'hover:bg-white/5 text-gray-400'}`}>💰 Ventas</button>
               <button onClick={()=>setActiveTab('sellers')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sellers' ? 'bg-green-600 shadow-lg scale-105' : 'hover:bg-white/5 text-gray-400'}`}>👥 Vendedores</button>
               <div className="pt-4 mt-4 border-t border-white/5">
-                <button onClick={handleSyncDefaults} className="w-full text-left px-6 py-4 text-[10px] font-black text-amber-400 hover:bg-amber-400/10 rounded-2xl uppercase tracking-widest">⚙️ Reparar Base de Datos</button>
+                <button 
+                    onClick={handleSyncDefaults} 
+                    disabled={isSaving}
+                    className={`w-full text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all ${isSaving ? 'text-gray-500 bg-gray-800' : 'text-amber-400 hover:bg-amber-400/10'}`}
+                >
+                    {isSaving ? '⏳ Procesando...' : '⚙️ Reparar Base de Datos'}
+                </button>
                 <button onClick={()=>{localStorage.removeItem('abras_user'); window.location.reload();}} className="w-full text-left px-6 py-4 text-[10px] font-black text-red-400 hover:bg-red-400/10 rounded-2xl uppercase tracking-widest mt-2">🚪 Cerrar Sesión</button>
               </div>
           </nav>
@@ -223,7 +218,7 @@ const Admin: React.FC = () => {
                     <div>
                         <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Control de Inventario</h1>
                         <div className="flex gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide">
-                            {['tours', 'transfers', 'cars', 'lodging'].map(cat => (
+                            {['tours', 'transfers', 'cars'].map(cat => (
                                 <button key={cat} onClick={()=>setInventoryCategory(cat as any)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${inventoryCategory === cat ? 'bg-slate-800 text-white shadow-lg' : 'bg-white border-2 text-slate-400'}`}>{cat}</button>
                             ))}
                         </div>
@@ -330,7 +325,7 @@ const Admin: React.FC = () => {
           )}
       </main>
 
-      {/* MODAL UNIVERSAL DE EDICIÓN - REFORZADO */}
+      {/* MODAL UNIVERSAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
@@ -358,128 +353,53 @@ const Admin: React.FC = () => {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Precio Costo (USD)</label>
-                                <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerNight || editingItem.providerPricePerDay || 0} onChange={e=>{
+                                <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>{
                                     const val = Number(e.target.value);
-                                    if(editingItem.type==='hotel'||editingItem.type==='rental') setEditingItem({...editingItem, providerPricePerNight: val});
-                                    else if(editingItem.type==='car') setEditingItem({...editingItem, providerPricePerDay: val});
+                                    if(editingItem.type==='car') setEditingItem({...editingItem, providerPricePerDay: val});
                                     else setEditingItem({...editingItem, providerPrice: val});
                                 }} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Margen (USD)</label>
-                                <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerNight || editingItem.profitMarginPerDay || 0} onChange={e=>{
+                                <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerDay || 0} onChange={e=>{
                                     const val = Number(e.target.value);
-                                    if(editingItem.type==='hotel'||editingItem.type==='rental') setEditingItem({...editingItem, profitMarginPerNight: val});
-                                    else if(editingItem.type==='car') setEditingItem({...editingItem, profitMarginPerDay: val});
+                                    if(editingItem.type==='car') setEditingItem({...editingItem, profitMarginPerDay: val});
                                     else setEditingItem({...editingItem, profitMargin: val});
                                 }} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                             </div>
                         </div>
 
-                        {/* SECCIÓN BOOKING STYLE - CON ADVERTENCIA */}
                         <div className="space-y-6 pt-6 border-t bg-slate-50/50 p-6 rounded-3xl">
-                            <div className="flex justify-between items-center">
-                                <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">Detalles Pro (Estilo Booking)</h4>
-                                <span className="text-[9px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded">⚠️ Requiere columnas en Supabase</span>
-                            </div>
-                            
+                            <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">Detalles del Servicio</h4>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lo más destacado (Una frase por línea)</label>
-                                <textarea 
-                                    value={editingItem.highlights?.join('\n') || ''} 
-                                    onChange={e=>setEditingItem({...editingItem, highlights: e.target.value.split('\n').filter(l=>l!=='')})} 
-                                    className="w-full bg-white p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-24 text-sm"
-                                    placeholder="Ej: Vista panorámica\nTraslado VIP"
-                                />
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lo más destacado</label>
+                                <textarea value={editingItem.highlights?.join('\n') || ''} onChange={e=>setEditingItem({...editingItem, highlights: e.target.value.split('\n').filter(l=>l!=='')})} className="w-full bg-white p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-24 text-sm" placeholder="Ej: Traslado VIP\nChofer Bilingüe" />
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-green-600 uppercase tracking-widest">Incluye (Uno por línea)</label>
-                                    <textarea 
-                                        value={editingItem.included?.join('\n') || ''} 
-                                        onChange={e=>setEditingItem({...editingItem, included: e.target.value.split('\n').filter(l=>l!=='')})} 
-                                        className="w-full bg-white p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-24 text-sm"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-red-400 uppercase tracking-widest">No Incluye (Uno por línea)</label>
-                                    <textarea 
-                                        value={editingItem.notIncluded?.join('\n') || ''} 
-                                        onChange={e=>setEditingItem({...editingItem, notIncluded: e.target.value.split('\n').filter(l=>l!=='')})} 
-                                        className="w-full bg-white p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-24 text-sm"
-                                    />
-                                </div>
-                            </div>
-                            
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción Extensa</label>
-                                <textarea 
-                                    value={editingItem.description} 
-                                    onChange={e=>setEditingItem({...editingItem, description: e.target.value})} 
-                                    className="w-full bg-white p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-32 text-sm"
-                                />
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción</label>
+                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-32 text-sm" />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">URL Imágenes (Una por línea)</label>
-                                <textarea 
-                                    value={editingItem.images?.join('\n') || ''} 
-                                    onChange={e=>setEditingItem({...editingItem, images: e.target.value.split('\n').filter(l=>l!=='')})} 
-                                    className="w-full bg-slate-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-24 text-sm"
-                                />
+                                <textarea value={editingItem.images?.join('\n') || ''} onChange={e=>setEditingItem({...editingItem, images: e.target.value.split('\n').filter(l=>l!=='')})} className="w-full bg-slate-50 p-4 rounded-2xl font-medium border-2 focus:border-green-500 h-24 text-sm" />
                             </div>
                             <div className="flex flex-col justify-center gap-6">
                                 <div className="flex items-center gap-3 bg-white p-4 rounded-2xl border-2 border-slate-100">
                                     <input type="checkbox" checked={editingItem.isOffer} onChange={e=>setEditingItem({...editingItem, isOffer: e.target.checked})} className="w-6 h-6 accent-green-600 cursor-pointer" />
                                     <label className="text-xs font-black uppercase text-slate-600">Marcar como OFERTA DESTACADA</label>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Etiqueta (Ej: "Agotándose")</label>
-                                    <input value={editingItem.specialLabel || ''} onChange={e=>setEditingItem({...editingItem, specialLabel: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 focus:border-green-500" />
-                                </div>
                             </div>
                         </div>
                         </>
                     )}
 
-                    {modalType === 'hero' && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Título" />
-                                <input value={editingItem.ctaText} onChange={e=>setEditingItem({...editingItem, ctaText: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Texto Botón" />
-                            </div>
-                            <textarea value={editingItem.subtitle} onChange={e=>setEditingItem({...editingItem, subtitle: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Bajada de texto" rows={3} />
-                            <input value={editingItem.image} onChange={e=>setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="URL Imagen (Unsplash, etc)" />
-                        </div>
-                    )}
-
-                    {modalType === 'banner' && (
-                        <div className="space-y-6">
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Título Banner" />
-                                <input value={editingItem.badge} onChange={e=>setEditingItem({...editingItem, badge: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Etiqueta (Ej: ÚLTIMO MOMENTO)" />
-                             </div>
-                             <input value={editingItem.image} onChange={e=>setEditingItem({...editingItem, image: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="URL Imagen" />
-                             <input value={editingItem.link} onChange={e=>setEditingItem({...editingItem, link: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2" placeholder="Link de redirección" />
-                        </div>
-                    )}
-
-                    {modalType === 'destination' && (
-                         <div className="space-y-6">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre Ciudad / Zona</label>
-                            <input value={editingItem.name} onChange={e=>setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 focus:border-green-500" required />
-                         </div>
-                    )}
-
                     <div className="pt-8 border-t flex justify-end gap-4 shrink-0">
                         <button type="button" onClick={()=>setIsModalOpen(false)} className="px-8 py-4 font-black uppercase text-[10px] tracking-widest text-slate-400 hover:text-slate-600">Cancelar</button>
-                        <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:bg-green-700 transition-all disabled:opacity-50 flex items-center gap-3">
-                            {isSaving ? (
-                                <><div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div> Guardando...</>
-                            ) : 'Confirmar y Publicar'}
+                        <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:bg-green-700 transition-all disabled:opacity-50">
+                            {isSaving ? 'Guardando...' : 'Confirmar y Publicar'}
                         </button>
                     </div>
                 </form>

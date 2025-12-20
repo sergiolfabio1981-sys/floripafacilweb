@@ -3,9 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ListingItem, HeroSlide, PromoBanner } from '../types';
 import { getTrips } from '../services/tripService';
-import { getRentals } from '../services/rentalService';
 import { getExcursions } from '../services/excursionService';
-import { getHotels } from '../services/hotelService';
 import { getCarRentals } from '../services/carRentalService';
 import { getHeroSlides, getPromoBanners } from '../services/heroService';
 import { usePlanner } from '../contexts/PlannerContext';
@@ -29,16 +27,14 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const [slides, banners, trips, rentals, excursions, hotels, cars] = await Promise.all([
-                getHeroSlides(), getPromoBanners(), getTrips(), getRentals(), getExcursions(), getHotels(), getCarRentals()
+            const [slides, banners, trips, excursions, cars] = await Promise.all([
+                getHeroSlides(), getPromoBanners(), getTrips(), getExcursions(), getCarRentals()
             ]);
             setHeroSlides(slides);
             setPromoBanners(banners);
             const fullInventory = [
                 ...trips.map(t => ({...t, type: 'trip' as const})),
-                ...rentals.map(r => ({...r, type: 'rental' as const})),
                 ...excursions.map(e => ({...e, type: 'excursion' as const})),
-                ...hotels.map(h => ({...h, type: 'hotel' as const})),
                 ...cars.map(c => ({...c, type: 'car' as const}))
             ];
             setCombinedOffers(fullInventory.filter(item => item.isOffer));
@@ -175,9 +171,7 @@ const Home: React.FC = () => {
                         {id: 'all', label: 'Todos', icon: '🌐'},
                         {id: 'car', label: 'Autos', icon: '🚗'},
                         {id: 'trip', label: 'Paquetes', icon: '📦'},
-                        {id: 'excursion', label: 'Traslados', icon: '🚐'},
-                        {id: 'hotel', label: 'Hoteles', icon: '🏨'},
-                        {id: 'rental', label: 'Casas', icon: '🏠'}
+                        {id: 'excursion', label: 'Traslados', icon: '🚐'}
                     ].map(cat => (
                         <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 ${activeCategory === cat.id ? 'bg-green-600 text-white shadow-xl' : 'bg-white text-gray-500 border-2 border-gray-100 hover:border-lime-200'}`}>
                             <span>{cat.icon}</span> {cat.label}

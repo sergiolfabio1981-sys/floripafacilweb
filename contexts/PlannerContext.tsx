@@ -9,8 +9,8 @@ export interface PlannerItem {
   days?: number;
   date?: string;
   details?: string;
-  calculatedPrice: number; // Suma total (Costo + Margen)
-  calculatedProfit: number; // Ganancia total para la agencia en este item
+  calculatedPrice: number; 
+  calculatedProfit: number; 
 }
 
 interface PlannerContextProps {
@@ -19,7 +19,7 @@ interface PlannerContextProps {
   removeItem: (id: string) => void;
   clearPlanner: () => void;
   totalValue: number;
-  totalProfit: number; // Nueva
+  totalProfit: number; 
   reservationValue: number;
 }
 
@@ -29,26 +29,18 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [selectedItems, setSelectedItems] = useState<PlannerItem[]>([]);
 
   const addItem = (item: ListingItem, quantity: number, days: number = 1, date?: string, details?: string) => {
-    // 1. Determinar costo y margen base
     let baseCost = 0;
     let baseProfit = 0;
 
     if (item.type === 'car') {
         baseCost = item.providerPricePerDay;
         baseProfit = item.profitMarginPerDay;
-    } else if (item.type === 'rental' || item.type === 'hotel') {
-        baseCost = (item as any).providerPricePerNight;
-        baseProfit = (item as any).profitMarginPerNight;
-    } else if (item.type === 'installment' || item.type === 'worldcup') {
-        baseCost = (item as any).providerTotalPrice;
-        baseProfit = (item as any).profitMargin;
     } else {
         baseCost = (item as any).providerPrice;
         baseProfit = (item as any).profitMargin;
     }
 
-    // 2. Calcular totales según multiplicadores (pax o días)
-    const multiplier = (item.type === 'car' || item.type === 'rental' || item.type === 'hotel') ? (days || 1) : quantity;
+    const multiplier = (item.type === 'car') ? (days || 1) : quantity;
     
     const calculatedPrice = (baseCost + baseProfit) * multiplier;
     const calculatedProfit = baseProfit * multiplier;

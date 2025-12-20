@@ -49,121 +49,90 @@ export const INITIAL_PROMO_BANNERS: PromoBanner[] = [
   }
 ];
 
-export const INITIAL_GUIDES: DestinationGuide[] = [
-  {
-    id: 'guide-florianopolis',
-    name: 'Florianópolis',
-    summary: 'La Isla de la Magia: 42 playas y una cultura azoriana vibrante.',
-    description: `Floripa Fácil te lleva a conocer la isla de una manera diferente. Desde el norte sofisticado hasta el sur virgen.`,
-    images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=2070&auto=format&fit=crop'],
-    highlights: ['Playa Joaquina', 'Santo Antonio de Lisboa', 'Mercado Público'],
-    active: true
-  }
-];
-
-// --- TOURS Y PAQUETES (TRIPS) ---
-// Precios calculados: Proveedor + 50% Margen
 export const INITIAL_TRIPS: Trip[] = [
   {
-    id: 'tour-escuna-anhitomerim',
-    title: 'Paseo en Escuna: Isla Anhatomirim y Delfines',
+    id: 'trip-1',
+    title: 'Tour Escuna: Isla Anhatomirim',
     location: 'Florianópolis, SC',
-    providerPrice: 30,
-    profitMargin: 15,
-    description: 'Navega por la bahía norte, visita la fortaleza histórica de Anhatomirim y disfruta del avistamiento de delfines en su hábitat natural. Incluye parada para almuerzo en la costa.',
-    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop', 'https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=2070&auto=format&fit=crop'],
+    providerPrice: 28,
+    profitMargin: 12,
+    description: 'Navegación histórica con avistaje de delfines y visita a fortalezas.',
+    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070'],
     isOffer: true,
     availableDates: ['Diario'],
     baseCurrency: 'USD',
     type: 'trip',
-    highlights: ['Avistaje de Delfines', 'Fuerte Histórico', 'Navegación Panorámica'],
-    included: ['Guía bilingüe', 'Tasa de embarque', 'Seguro'],
-    notIncluded: ['Almuerzo', 'Bebidas'],
-    meetingPoint: 'Trapiche de Canasvieiras'
+    highlights: ['Delfines', 'Historia', 'Baño en mar']
   },
   {
-    id: 'tour-unipraias-camboriu',
-    title: 'Parque Unipraias y City Tour Balneario',
+    id: 'trip-2',
+    title: 'Parque Unipraias Completo',
     location: 'Camboriú, SC',
-    providerPrice: 40,
-    profitMargin: 20,
-    description: 'Descubre la "Dubai brasileña" desde las alturas en el teleférico de Unipraias. Recorrido por la Av. Atlántica y visita a la Playa de Laranjeiras.',
-    images: ['https://images.unsplash.com/photo-1612361730058-297597984f93?q=80&w=2070&auto=format&fit=crop'],
+    providerPrice: 35,
+    profitMargin: 15,
+    description: 'Teleférico, senderos ecológicos y la mejor vista de Balneario Camboriú.',
+    images: ['https://images.unsplash.com/photo-1612361730058-297597984f93?q=80&w=2070'],
     isOffer: false,
     availableDates: ['Martes', 'Jueves', 'Sábados'],
     baseCurrency: 'USD',
-    type: 'trip',
-    highlights: ['Teleférico', 'Playa Laranjeiras', 'Vistas Panorámicas'],
-    included: ['Traslado ida y vuelta', 'Ticket Teleférico', 'Guía'],
-    meetingPoint: 'Pick up en hoteles céntricos de Camboriú'
+    type: 'trip'
   },
   {
-    id: 'tour-bombinhas-4x4',
-    title: 'Safari 4x4 Playas de Bombinhas',
+    id: 'trip-3',
+    title: 'Safari 4x4 Bombinhas',
     location: 'Bombinhas, SC',
-    providerPrice: 36,
-    profitMargin: 18,
-    description: 'Aventura total recorriendo las playas más escondidas de Bombinhas en vehículos 4x4. Visitamos Mirante de Bombas, Quatro Ilhas y Mariscal.',
-    images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop'],
+    providerPrice: 30,
+    profitMargin: 15,
+    description: 'Recorrido por las playas más vírgenes en vehículos todoterreno.',
+    images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070'],
     isOffer: true,
     availableDates: ['Diario'],
     baseCurrency: 'USD',
-    type: 'trip',
-    highlights: ['Acceso a playas vírgenes', 'Miradores fotográficos', 'Aventura off-road'],
-    included: ['Vehículo 4x4', 'Conductor/Guía', 'Agua mineral'],
-    meetingPoint: 'Centro de Bombinhas'
+    type: 'trip'
   }
 ];
 
-// --- TRASLADOS Y EXCURSIONES CORTAS (EXCURSIONS) ---
 export const INITIAL_EXCURSIONS: Excursion[] = [
   {
-    id: 'transfer-fln-canasvieiras',
-    title: 'Transfer Aeropuerto FLN a Canasvieiras / Ingleses',
+    id: 'exc-1',
+    title: 'Transfer Aeropuerto FLN a Canasvieiras',
     location: 'Florianópolis, SC',
-    providerPrice: 20,
+    providerPrice: 15,
     profitMargin: 10,
-    description: 'Servicio de traslado compartido o privado desde el Aeropuerto Internacional de Florianópolis (Hercilio Luz) hacia el norte de la isla.',
-    images: ['https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop'],
+    description: 'Traslado privado en Sedán con AC.',
+    images: ['https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021'],
     isOffer: false,
-    duration: '45 - 60 min',
-    availableDates: ['Diario'],
+    duration: '45 min',
+    availableDates: ['24/7'],
     baseCurrency: 'USD',
-    type: 'excursion',
-    highlights: ['Espera con cartel', 'Vehículos con AC', 'Asistencia de equipaje'],
-    included: ['Traslado directo', 'Seguro de pasajero'],
-    meetingPoint: 'Puerta de arribos nacionales/internacionales'
+    type: 'excursion'
   },
   {
-    id: 'transfer-fln-bombinhas',
-    title: 'Transfer Aeropuerto FLN a Bombinhas / Mariscal',
+    id: 'exc-2',
+    title: 'Bautismo de Buceo en Isla Arvoredo',
     location: 'Bombinhas, SC',
-    providerPrice: 50,
-    profitMargin: 25,
-    description: 'Traslado confortable hacia la capital del buceo. Trayecto por BR-101 con conductores profesionales.',
-    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop'],
+    providerPrice: 60,
+    profitMargin: 30,
+    description: 'Primera experiencia submarina en reserva biológica.',
+    images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070'],
     isOffer: true,
-    duration: '1h 30min',
+    duration: '4 horas',
     availableDates: ['Diario'],
     baseCurrency: 'USD',
-    type: 'excursion',
-    highlights: ['Ruta segura', 'Conexión directa', 'WiFi a bordo (sujeto a disponibilidad)'],
-    included: ['Peajes', 'Traslado puerta a puerta'],
-    meetingPoint: 'Aeropuerto FLN'
+    type: 'excursion'
   }
 ];
 
-// --- ALQUILER DE AUTOS (CARS) ---
 export const INITIAL_CARS: CarRental[] = [
   {
-    id: 'car-onix-economico',
-    title: 'Chevrolet Onix o similar',
+    id: 'car-1',
+    title: 'Chevrolet Onix',
     brand: 'Chevrolet',
     category: 'Económico',
-    providerPricePerDay: 24,
-    profitMarginPerDay: 12,
-    description: 'El vehículo ideal para parejas o grupos pequeños que buscan economía y agilidad para recorrer las 42 playas de la isla.',
-    images: ['https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=2070&auto=format&fit=crop'],
+    providerPricePerDay: 25,
+    profitMarginPerDay: 15,
+    description: 'Ideal para parejas.',
+    images: ['https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=2070'],
     transmission: 'Manual',
     fuel: 'Nafta',
     doors: 4,
@@ -171,36 +140,16 @@ export const INITIAL_CARS: CarRental[] = [
     largeSuitcases: 1,
     smallSuitcases: 2,
     hasAC: true,
-    location: 'Florianópolis / Aeropuerto',
+    location: 'Florianópolis',
     isOffer: true,
-    baseCurrency: 'USD',
-    type: 'car'
-  },
-  {
-    id: 'car-renegade-suv',
-    title: 'Jeep Renegade SUV',
-    brand: 'Jeep',
-    category: 'SUV',
-    providerPricePerDay: 44,
-    profitMarginPerDay: 22,
-    description: 'Potencia y confort para terrenos más exigentes o viajes largos por el litoral catarinense.',
-    images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop'],
-    transmission: 'Automático',
-    fuel: 'Nafta',
-    doors: 4,
-    passengers: 5,
-    largeSuitcases: 2,
-    smallSuitcases: 2,
-    hasAC: true,
-    location: 'Florianópolis / Camboriú',
-    isOffer: false,
     baseCurrency: 'USD',
     type: 'car'
   }
 ];
 
-export const INITIAL_RENTALS: Apartment[] = [];
 export const INITIAL_HOTELS: Hotel[] = [];
+export const INITIAL_RENTALS: Apartment[] = [];
+export const INITIAL_GUIDES: DestinationGuide[] = [];
 export const INITIAL_INSTALLMENT_TRIPS: InstallmentTrip[] = [];
 export const INITIAL_WORLDCUP_TRIPS: WorldCupTrip[] = [];
 export const INITIAL_GROUP_TRIPS: GroupTrip[] = [];
