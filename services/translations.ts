@@ -6,7 +6,8 @@ export const translations = {
       trips: 'Paquetes',
       rentals: 'Alquileres',
       hotels: 'Hoteles',
-      excursions: 'Excursiones',
+      excursions: 'Traslados',
+      cars: 'Autos'
     },
     card: {
       night: 'noche',
@@ -19,7 +20,7 @@ export const translations = {
       of: 'de',
       offer: 'OFERTA',
       rental: 'ALQUILER',
-      excursion: 'EXCURSIÓN',
+      excursion: 'TRASLADO',
       hotel: 'HOTEL',
       details: 'Ver Detalle',
       ask: 'Consultar'
@@ -64,7 +65,8 @@ export const translations = {
       trips: 'Pacotes',
       rentals: 'Aluguéis',
       hotels: 'Hotéis',
-      excursions: 'Passeios',
+      excursions: 'Traslados',
+      cars: 'Carros'
     },
     card: {
       night: 'noite',
@@ -77,7 +79,7 @@ export const translations = {
       of: 'de',
       offer: 'OFERTA',
       rental: 'ALUGUEL',
-      excursion: 'PASSEIO',
+      excursion: 'TRASLADO',
       hotel: 'HOTEL',
       details: 'Ver Detalhes',
       ask: 'Consultar'
@@ -94,7 +96,7 @@ export const translations = {
       departures: 'Próximas Saídas',
       reserve: 'Reservar Agora',
       selectDate: 'Selecione uma data',
-      completeData: 'Completar Dados',
+      completeData: 'Completar Datos',
       fullName: 'Nome Completo',
       email: 'E-mail',
       birthDate: 'Data de Nascimento',
@@ -108,8 +110,8 @@ export const translations = {
       bedrooms: 'Quartos',
       guests: 'Hóspedes',
       featured: 'Destaques',
-      priceLow: 'Menor Preço',
-      priceHigh: 'Maior Preço'
+      priceLow: 'Menor Precio',
+      priceHigh: 'Mayor Precio'
     },
     results: {
       no_trips: 'Nenhum resultado encontrado',
@@ -122,7 +124,8 @@ export const translations = {
       trips: 'Packages',
       rentals: 'Rentals',
       hotels: 'Hotels',
-      excursions: 'Tours',
+      excursions: 'Transfers',
+      cars: 'Cars'
     },
     card: {
       night: 'night',
@@ -135,7 +138,7 @@ export const translations = {
       of: 'of',
       offer: 'OFFER',
       rental: 'RENTAL',
-      excursion: 'TOUR',
+      excursion: 'TRANSFER',
       hotel: 'HOTEL',
       details: 'View Details',
       ask: 'Ask us'

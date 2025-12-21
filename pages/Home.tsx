@@ -72,13 +72,15 @@ const Home: React.FC = () => {
             <div key={slide.id} className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
                 <img src={slide.image} className="w-full h-full object-cover brightness-[0.4]" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                    <div className="w-40 h-40 mb-6 bg-white/10 rounded-full flex items-center justify-center p-2 border-4 border-white/20 shadow-2xl backdrop-blur-sm overflow-hidden">
-                        <img 
-                          src={LOGO_URL} 
-                          className="w-full h-full object-contain" 
-                          alt="Logo Floripa Fácil" 
-                          onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
-                        />
+                    <div className="w-40 h-40 mb-6 bg-white/10 rounded-full flex items-center justify-center p-2 border-4 border-white/20 shadow-2xl backdrop-blur-sm overflow-hidden text-white font-black italic text-2xl">
+                        {LOGO_URL ? (
+                          <img 
+                            src={LOGO_URL} 
+                            className="w-full h-full object-contain" 
+                            alt="Logo Floripa Fácil" 
+                            onError={(e) => (e.target as HTMLImageElement).src = LOGO_FALLBACK_URL}
+                          />
+                        ) : 'FF'}
                     </div>
                     <h2 className="text-5xl md:text-7xl font-black text-white mb-4 animate-fade-in-up uppercase tracking-tighter italic">
                       {slide.title}
@@ -95,7 +97,7 @@ const Home: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-50 to-transparent z-20"></div>
       </div>
 
-      {/* BRAND INTRODUCTION FLORIPA FÁCIL */}
+      {/* BRAND INTRODUCTION */}
       <section className="max-w-7xl mx-auto px-4 -mt-12 relative z-30">
           <div className="bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border border-gray-100 flex flex-col md:flex-row items-center gap-10">
               <div className="flex-shrink-0 bg-slate-50 p-4 rounded-full border-4 border-lime-100 shadow-inner w-56 h-56 flex items-center justify-center overflow-hidden">
