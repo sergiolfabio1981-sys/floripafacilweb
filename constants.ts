@@ -83,18 +83,17 @@ export const INITIAL_EXCURSIONS: Excursion[] = [
   }
 ];
 
-// DATA IMPORTADA DE MOVIDA (Precios convertidos BRL Mensual -> USD Diario)
-// 1 BRL = 260 ARS | 1 USD = 1220 ARS
-// Ejemplo Mobi: (2100 BRL / 30) = 70 BRL/día -> 70 * 260 = 18.200 ARS -> 18.200 / 1220 = 14.90 USD
+// DATA EXTRAÍDA DE MOVIDA FROTAS
+// Cálculo: (Precio Mensual BRL / 30) * $260 ARS -> Luego convertido a USD (Base 1220) para gestión de márgenes.
 export const INITIAL_CARS: CarRental[] = [
   {
     id: 'mov-mobi',
-    title: 'Mobi 1.0 - Grupo B',
+    title: 'Fiat Mobi - Grupo B (Económico)',
     brand: 'Fiat',
     category: 'Económico',
-    providerPricePerDay: 14.90,
-    profitMarginPerDay: 8.10,
-    description: 'El vehículo más ágil para estacionar en las playas concurridas de Floripa. Consumo ultra bajo.',
+    providerPricePerDay: 14.90, // Aprox $18.200 ARS
+    profitMarginPerDay: 8.50,
+    description: 'Perfecto para la ciudad y accesos a playas. Muy económico y fácil de estacionar. Aire acondicionado incluido.',
     images: ['https://images.unsplash.com/photo-1621993202323-f438eec639ff?q=80&w=1000'],
     transmission: 'Manual',
     fuel: 'Nafta',
@@ -103,19 +102,19 @@ export const INITIAL_CARS: CarRental[] = [
     largeSuitcases: 1,
     smallSuitcases: 1,
     hasAC: true,
-    location: 'Aeropuerto Florianópolis / Entrega en Hotel',
+    location: 'Aeropuerto Florianópolis',
     isOffer: true,
     baseCurrency: 'USD',
     type: 'car'
   },
   {
     id: 'mov-polo',
-    title: 'Polo 1.0 TSI - Grupo C',
+    title: 'VW Polo - Grupo C (Compacto)',
     brand: 'Volkswagen',
     category: 'Compacto',
-    providerPricePerDay: 19.20,
-    profitMarginPerDay: 10.80,
-    description: 'Confort y tecnología alemana. Ideal para parejas o familias pequeñas que buscan seguridad en ruta.',
+    providerPricePerDay: 19.50, 
+    profitMarginPerDay: 10.50,
+    description: 'Moderno, seguro y con excelente conectividad. Motor TSI de alta eficiencia para rutas brasileñas.',
     images: ['https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=1000'],
     transmission: 'Manual',
     fuel: 'Nafta',
@@ -124,19 +123,19 @@ export const INITIAL_CARS: CarRental[] = [
     largeSuitcases: 1,
     smallSuitcases: 2,
     hasAC: true,
-    location: 'Base Floripa Centro / Aeropuerto',
+    location: 'Entrega en Hotel / Aeropuerto',
     isOffer: false,
     baseCurrency: 'USD',
     type: 'car'
   },
   {
     id: 'mov-cronos',
-    title: 'Cronos 1.3 AT - Grupo BS',
+    title: 'Fiat Cronos - Grupo BS (Sedán)',
     brand: 'Fiat',
     category: 'Sedán',
-    providerPricePerDay: 22.50,
-    profitMarginPerDay: 12.50,
-    description: 'Espacio de baúl inigualable (525L). La opción preferida de las familias argentinas con mucho equipaje.',
+    providerPricePerDay: 22.80,
+    profitMarginPerDay: 12.20,
+    description: 'El sedán más espacioso de su categoría. Ideal para familias con maletas grandes que viajan desde Argentina.',
     images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1000'],
     transmission: 'Automático',
     fuel: 'Nafta',
@@ -152,12 +151,12 @@ export const INITIAL_CARS: CarRental[] = [
   },
   {
     id: 'mov-tcross',
-    title: 'T-Cross 200 TSI - Grupo SX',
+    title: 'VW T-Cross - Grupo SX (SUV)',
     brand: 'Volkswagen',
     category: 'SUV',
-    providerPricePerDay: 32.80,
-    profitMarginPerDay: 17.20,
-    description: 'SUV compacta premium con motor turbo. Potencia y altura ideal para explorar playas del sur y norte.',
+    providerPricePerDay: 33.50,
+    profitMarginPerDay: 16.50,
+    description: 'SUV de última generación. Máximo confort y despeje del suelo, ideal para explorar playas del sur como Matadeiro.',
     images: ['https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1000'],
     transmission: 'Automático',
     fuel: 'Nafta',
@@ -166,19 +165,19 @@ export const INITIAL_CARS: CarRental[] = [
     largeSuitcases: 2,
     smallSuitcases: 2,
     hasAC: true,
-    location: 'Entregas Personalizadas',
+    location: 'VIP Delivery',
     isOffer: true,
     baseCurrency: 'USD',
     type: 'car'
   },
   {
     id: 'mov-compass',
-    title: 'Compass Limited - Grupo LE',
+    title: 'Jeep Compass - Grupo LE (SUV Special)',
     brand: 'Jeep',
     category: 'Luxury',
-    providerPricePerDay: 48.50,
-    profitMarginPerDay: 26.50,
-    description: 'Lujo, robustez y máxima seguridad. Para quienes no aceptan menos que la excelencia en sus vacaciones.',
+    providerPricePerDay: 49.00,
+    profitMarginPerDay: 26.00,
+    description: 'Experiencia premium total. Robustez Jeep con tecnología de lujo para las vacaciones más exclusivas.',
     images: ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1000'],
     transmission: 'Automático',
     fuel: 'Nafta',
@@ -187,7 +186,7 @@ export const INITIAL_CARS: CarRental[] = [
     largeSuitcases: 3,
     smallSuitcases: 2,
     hasAC: true,
-    location: 'VIP Delivery Aeropuerto',
+    location: 'Aeropuerto Internacional FLN',
     isOffer: false,
     baseCurrency: 'USD',
     type: 'car'

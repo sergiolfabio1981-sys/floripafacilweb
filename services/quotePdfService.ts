@@ -40,7 +40,6 @@ export const generateQuotePDF = async (data: QuoteData) => {
       doc.text(`Página ${pageNumber}`, 200, 290, { align: 'right' });
   };
 
-  // --- PAGE 1: PORTADA ---
   doc.setFillColor(...greenPrimary);
   doc.rect(0, 0, 210, 45, 'F');
   
@@ -76,7 +75,6 @@ export const generateQuotePDF = async (data: QuoteData) => {
   doc.text(data.destination.toUpperCase(), 105, 275, { align: 'center' });
   addFooter(1);
 
-  // --- PAGE 2: SERVICIOS ---
   doc.addPage();
   doc.setFillColor(...greenPrimary);
   doc.rect(0, 0, 210, 20, 'F');

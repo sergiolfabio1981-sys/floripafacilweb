@@ -46,7 +46,6 @@ const Planner: React.FC = () => {
       const commissionAmount = totalProfit * sellerCommissionRate;
       const itemsSummary = selectedItems.map(i => i.item.title);
 
-      // 1. Registrar Venta
       const { error } = await supabase.from('sales').insert({
         seller_id: currentUser.id,
         seller_name: currentUser.name,
@@ -61,7 +60,6 @@ const Planner: React.FC = () => {
 
       if (error) throw error;
 
-      // 2. Enviar Notificación al Administrador
       await sendMessage({
           sender_name: currentUser.name,
           sender_id: currentUser.id,
@@ -70,7 +68,7 @@ const Planner: React.FC = () => {
           type: 'booking'
       });
 
-      alert("¡Venta registrada con éxito en el sistema! Se ha enviado una notificación al administrador.");
+      alert("¡Venta registrada con éxito! Se ha enviado una notificación al administrador.");
       clearPlanner();
       navigate('/admin');
     } catch (err) {
@@ -82,7 +80,7 @@ const Planner: React.FC = () => {
   };
 
   const handleWhatsApp = () => {
-    let message = `*SOLICITUD DE RESERVA - ABRAS TRAVEL*\n\n`;
+    let message = `*SOLICITUD DE RESERVA - FLORIPA FÁCIL*\n\n`;
     if (currentUser) message += `*Agente:* ${currentUser.name}\n\n`;
     if (clientName) message += `*Cliente:* ${clientName}\n\n`;
     
@@ -93,7 +91,7 @@ const Planner: React.FC = () => {
     message += `\n💰 *TOTAL:* ${formatPrice(totalValue)}\n`;
     message += `💳 *RESERVA (40%):* ${formatPrice(reservationValue)}\n`;
     message += `📌 *SALDO EN DESTINO:* ${formatPrice(totalValue - reservationValue)}\n\n`;
-    message += `_Cotizado mediante la plataforma ABRAS Travel_`;
+    message += `_Cotizado mediante la plataforma Floripa Fácil_`;
     
     window.open(`https://wa.me/5491140632644?text=${encodeURIComponent(message)}`, "_blank");
   };
