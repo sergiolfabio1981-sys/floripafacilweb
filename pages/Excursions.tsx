@@ -70,7 +70,8 @@ const Excursions: React.FC = () => {
             <div className="space-y-6">
                 {filteredExcursions.map(exc => {
                     const price = exc.providerPrice + exc.profitMargin;
-                    const totalPrice = price * (passengers > 4 ? Math.ceil(passengers/4) : 1); // Lógica simple de vehículos extra
+                    const vehiclesNeeded = passengers > 4 ? Math.ceil(passengers/4) : 1;
+                    const totalPrice = price * vehiclesNeeded;
                     
                     return (
                         <div key={exc.id} className="bg-white rounded-[2rem] shadow-lg border border-gray-100 overflow-hidden flex flex-col md:flex-row group hover:border-green-200 transition-all">
@@ -112,13 +113,13 @@ const Excursions: React.FC = () => {
 
                                 <div className="mt-auto pt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
                                     <div className="text-gray-400 text-[10px] font-medium max-w-xs">
-                                        Vehículo privado con aire acondicionado. El chofer lo esperará con un cartel en la zona de arribos.
+                                        Vehículo privado con aire acondicionado. Chofer profesional te espera en arribos.
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-[10px] font-black text-gray-400 uppercase">Precio Total</p>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase">Desde (Solo Ida)</p>
                                         <p className="text-4xl font-black text-green-700 tracking-tighter">{formatPrice(totalPrice, exc.baseCurrency)}</p>
                                         <Link to={`/excursions/${exc.id}`} className="mt-2 inline-block bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 transition-all shadow-lg">
-                                            Reservar ahora
+                                            Seleccionar y Sumar Vuelta
                                         </Link>
                                     </div>
                                 </div>
