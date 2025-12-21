@@ -127,9 +127,9 @@ const Admin: React.FC = () => {
       e.preventDefault();
       setIsSaving(true);
       try {
+          const type = editingItem.type; 
           const cleanItem = scrubItem(editingItem);
           if (modalType === 'inventory') {
-              const type = editingItem.type; 
               if (type === 'trip') await saveTrip(cleanItem);
               else if (type === 'car') await saveCarRental(cleanItem);
               else if (type === 'excursion') await saveExcursion(cleanItem);
@@ -344,7 +344,7 @@ const Admin: React.FC = () => {
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
                 <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Editando Producto</h3>
+                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Editando {editingItem.type === 'car' ? 'Vehículo' : 'Producto'}</h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
                 
@@ -352,23 +352,136 @@ const Admin: React.FC = () => {
                     {modalType === 'inventory' && (
                         <form onSubmit={handleSave} className="space-y-8">
                             {editingItem.type === 'car' && (
-                                <div className="bg-lime-50 p-6 rounded-[2.5rem] border-2 border-lime-200">
-                                    <h4 className="text-xs font-black text-green-800 uppercase tracking-widest mb-4">🚀 Conversor Movida ($260 ARS / Real)</h4>
+                                <div className="bg-lime-50 p-6 rounded-[2.5rem] border-2 border-lime-200 mb-8">
+                                    <h4 className="text-xs font-black text-green-800 uppercase tracking-widest mb-4">🚀 Calculadora de Importación Movida</h4>
                                     <div className="flex flex-col md:flex-row gap-4 items-end">
                                         <div className="flex-1 space-y-1">
-                                            <label className="text-[9px] font-bold text-green-700 uppercase ml-2">Precio Mensual Movida (BRL)</label>
-                                            <input type="number" className="w-full bg-white p-3 rounded-xl font-bold border-2 border-lime-100" value={monthlyBrlProvider} onChange={e=>setMonthlyBrlProvider(Number(e.target.value))} />
+                                            <label className="text-[9px] font-bold text-green-700 uppercase ml-2">Monto Mensual del Proveedor (BRL)</label>
+                                            <input type="number" className="w-full bg-white p-3 rounded-xl font-bold border-2 border-lime-100" value={monthlyBrlProvider} onChange={e=>setMonthlyBrlProvider(Number(e.target.value))} placeholder="Ej: 2100" />
                                         </div>
-                                        <button type="button" onClick={applyProviderConversion} className="bg-green-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase">Calcular</button>
+                                        <button type="button" onClick={applyProviderConversion} className="bg-green-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">Convertir a Costo Diario</button>
                                     </div>
+                                    <p className="text-[9px] text-green-600 mt-2 italic font-bold">Este botón calcula el costo diario en USD basándose en la tasa de $260 ARS por Real.</p>
                                 </div>
                             )}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase">Nombre</label><input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" /></div>
-                                <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase">Localidad</label><input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" /></div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título / Modelo</label>
+                                    <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
+                                </div>
+                                {editingItem.type === 'car' && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Marca</label>
+                                        <input value={editingItem.brand} onChange={e=>setEditingItem({...editingItem, brand: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" placeholder="Ej: Fiat, VW..." />
+                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad / Punto Entrega</label>
+                                    <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
+                                </div>
+                                {editingItem.type === 'car' && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Categoría (Grupo Movida)</label>
+                                        <input value={editingItem.category} onChange={e=>setEditingItem({...editingItem, category: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" placeholder="Ej: Económico (Grupo B)" />
+                                    </div>
+                                )}
                             </div>
+
+                            {editingItem.type === 'car' && (
+                                <>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Transmisión</label>
+                                            <select value={editingItem.transmission} onChange={e=>setEditingItem({...editingItem, transmission: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold">
+                                                <option value="Manual">Manual</option>
+                                                <option value="Automático">Automático</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Combustible</label>
+                                            <select value={editingItem.fuel} onChange={e=>setEditingItem({...editingItem, fuel: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold">
+                                                <option value="Nafta">Nafta</option>
+                                                <option value="Diesel">Diesel</option>
+                                                <option value="Híbrido">Híbrido</option>
+                                                <option value="Eléctrico">Eléctrico</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Pasajeros</label>
+                                            <input type="number" value={editingItem.passengers} onChange={e=>setEditingItem({...editingItem, passengers: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Aire Ac.</label>
+                                            <select value={editingItem.hasAC ? "true" : "false"} onChange={e=>setEditingItem({...editingItem, hasAC: e.target.value === "true"})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold">
+                                                <option value="true">Sí</option>
+                                                <option value="false">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Maletas Grandes</label>
+                                            <input type="number" value={editingItem.largeSuitcases} onChange={e=>setEditingItem({...editingItem, largeSuitcases: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Maletas Chicas</label>
+                                            <input type="number" value={editingItem.smallSuitcases} onChange={e=>setEditingItem({...editingItem, smallSuitcases: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-green-700 uppercase ml-2">Costo Proveedor Diario (USD)</label>
+                                    <input type="number" step="0.01" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>{
+                                        const val = Number(e.target.value);
+                                        if(editingItem.type === 'car') setEditingItem({...editingItem, providerPricePerDay: val});
+                                        else setEditingItem({...editingItem, providerPrice: val});
+                                    }} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-green-100" />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-blue-700 uppercase ml-2">Margen de Ganancia (USD)</label>
+                                    <input type="number" step="0.01" value={editingItem.profitMargin || editingItem.profitMarginPerDay || 0} onChange={e=>{
+                                        const val = Number(e.target.value);
+                                        if(editingItem.type === 'car') setEditingItem({...editingItem, profitMarginPerDay: val});
+                                        else setEditingItem({...editingItem, profitMargin: val});
+                                    }} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-blue-100" />
+                                </div>
+                                <div className="col-span-full">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase text-center italic">
+                                        Precio Final al Cliente: {formatPrice((editingItem.providerPrice || editingItem.providerPricePerDay || 0) + (editingItem.profitMargin || editingItem.profitMarginPerDay || 0))}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Descripción</label>
+                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none focus:border-green-500 border-2 border-transparent transition-all" />
+                            </div>
+
+                            <div className="space-y-6">
+                                <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b pb-2">Gestión de Imágenes</h4>
+                                <div className="flex gap-4">
+                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold" placeholder="Pegar URL de la imagen..." />
+                                    <button type="button" onClick={addImageToEditingItem} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase">Añadir</button>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {editingItem.images?.map((img: string, idx: number) => (
+                                        <div key={idx} className="relative group rounded-2xl overflow-hidden aspect-video shadow-md">
+                                            <img src={img} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
+                                            <button type="button" onClick={()=>removeImageFromEditingItem(idx)} className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center font-black uppercase text-[10px]">Eliminar</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="flex justify-end gap-4 border-t pt-8">
-                                <button type="submit" className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-widest">Guardar Cambios</button>
+                                <button type="button" onClick={()=>setIsModalOpen(false)} className="px-10 py-4 font-black text-slate-400 uppercase text-[10px]">Cancelar</button>
+                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:bg-green-700 disabled:opacity-50">
+                                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                                </button>
                             </div>
                         </form>
                     )}
