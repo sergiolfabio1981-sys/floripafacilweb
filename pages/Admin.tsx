@@ -27,6 +27,7 @@ const Admin: React.FC = () => {
   const [messageFilter, setMessageFilter] = useState<'all' | 'contact' | 'booking' | 'internal'>('all');
   const [dbStatus, setDbStatus] = useState<string>('checking...');
   const [isSaving, setIsSaving] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState('');
 
   // Data States
   const [sales, setSales] = useState<Sale[]>([]);
@@ -165,6 +166,7 @@ const Admin: React.FC = () => {
       setModalType(type);
       setEditingItem(item);
       setIsModalOpen(true);
+      setNewImageUrl('');
   };
 
   const handleReadMessage = async (msg: AppMessage) => {
@@ -173,6 +175,25 @@ const Admin: React.FC = () => {
           loadData();
       }
       openEdit('reply', msg);
+  };
+
+  const addImageToEditingItem = () => {
+    if (!newImageUrl) return;
+    const currentImages = editingItem.images || [];
+    setEditingItem({
+        ...editingItem,
+        images: [...currentImages, newImageUrl]
+    });
+    setNewImageUrl('');
+  };
+
+  const removeImageFromEditingItem = (index: number) => {
+    const currentImages = [...(editingItem.images || [])];
+    currentImages.splice(index, 1);
+    setEditingItem({
+        ...editingItem,
+        images: currentImages
+    });
   };
 
   const filteredMessages = messages.filter(m => messageFilter === 'all' || m.type === messageFilter);
@@ -288,7 +309,16 @@ const Admin: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                    <button onClick={()=>openEdit('inventory', createEmptyTrip())} className="bg-green-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-green-700 transition-all">+ Crear Nuevo</button>
+                    <button 
+                        onClick={() => {
+                            if (inventoryCategory === 'tours') openEdit('inventory', createEmptyTrip());
+                            else if (inventoryCategory === 'transfers') openEdit('inventory', createEmptyExcursion());
+                            else openEdit('inventory', createEmptyCarRental());
+                        }} 
+                        className="bg-green-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-green-700 transition-all"
+                    >
+                        + Crear Nuevo
+                    </button>
                   </div>
                   
                   <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
@@ -309,9 +339,9 @@ const Admin: React.FC = () => {
                                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="p-6">
                                         <div className="flex items-center gap-4">
-                                            <img src={item.images?.[0]} className="w-14 h-14 rounded-2xl object-cover shadow-sm" />
+                                            <img src={item.images?.[0] || 'https://via.placeholder.com/150'} className="w-14 h-14 rounded-2xl object-cover shadow-sm" />
                                             <div>
-                                                <p className="font-black text-slate-800 text-sm leading-tight">{item.title}</p>
+                                                <p className="font-black text-slate-800 text-sm leading-tight">{item.brand ? `${item.brand} ${item.title}` : item.title}</p>
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase">{item.location}</p>
                                             </div>
                                         </div>
@@ -324,7 +354,7 @@ const Admin: React.FC = () => {
                                     </td>
                                     <td className="p-6 text-right space-x-2">
                                         <button onClick={()=>openEdit('inventory', item)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-green-100 hover:text-green-600 transition-all shadow-sm">✏️</button>
-                                        <button onClick={async ()=>{if(window.confirm('¿Eliminar definitivamente?')) {await deleteTrip(item.id); loadData();}}} className="p-2 bg-slate-100 text-slate-300 rounded-xl hover:bg-red-100 hover:text-red-600 transition-all">🗑️</button>
+                                        <button onClick={async ()=>{if(window.confirm('¿Eliminar definitivamente?')) {await (item.type === 'trip' ? deleteTrip(item.id) : item.type === 'car' ? deleteCarRental(item.id) : deleteExcursion(item.id)); loadData();}}} className="p-2 bg-slate-100 text-slate-300 rounded-xl hover:bg-red-100 hover:text-red-600 transition-all">🗑️</button>
                                     </td>
                                 </tr>
                               ))}
@@ -334,7 +364,6 @@ const Admin: React.FC = () => {
               </div>
           )}
 
-          {/* ... Resto de Tabs (home, destinations, etc) se mantienen igual ... */}
           {activeTab === 'sales' && (
               <div className="space-y-8 animate-fade-in">
                   <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Registro de Ventas</h1>
@@ -370,7 +399,7 @@ const Admin: React.FC = () => {
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
                 <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
                     <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">
-                        {modalType === 'reply' ? `Mensaje de: ${editingItem.sender_name}` : `Editando ${modalType}`}
+                        {modalType === 'reply' ? `Mensaje de: ${editingItem.sender_name}` : `Editando ${editingItem.title || 'Nuevo'}`}
                     </h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
@@ -407,20 +436,68 @@ const Admin: React.FC = () => {
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre Comercial</label>
                                     <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500 transition-all" required />
                                 </div>
+                                {editingItem.type === 'car' && (
+                                     <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Marca</label>
+                                        <input value={editingItem.brand} onChange={e=>setEditingItem({...editingItem, brand: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500 transition-all" required />
+                                    </div>
+                                )}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Destino / Localidad</label>
                                     <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Precio Costo (USD)</label>
-                                    <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>setEditingItem({...editingItem, providerPrice: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
+                                    <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>setEditingItem({...editingItem, providerPrice: Number(e.target.value), providerPricePerDay: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Margen (USD)</label>
-                                    <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerDay || 0} onChange={e=>setEditingItem({...editingItem, profitMargin: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
+                                    <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerDay || 0} onChange={e=>setEditingItem({...editingItem, profitMargin: Number(e.target.value), profitMarginPerDay: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-4">
+
+                            {/* GESTIÓN DE IMÁGENES */}
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Galería de Fotos</label>
+                                <div className="flex gap-4">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Pegar URL de imagen aquí..." 
+                                        className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 border-slate-100 focus:border-lime-500"
+                                        value={newImageUrl}
+                                        onChange={e => setNewImageUrl(e.target.value)}
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={addImageToEditingItem}
+                                        className="bg-lime-500 text-green-950 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-md hover:bg-lime-400 transition-all"
+                                    >
+                                        Añadir
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4">
+                                    {editingItem.images?.map((img: string, idx: number) => (
+                                        <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border-2 border-slate-100 shadow-sm">
+                                            <img src={img} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
+                                            <button 
+                                                type="button"
+                                                onClick={() => removeImageFromEditingItem(idx)}
+                                                className="absolute top-1 right-1 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {(!editingItem.images || editingItem.images.length === 0) && (
+                                        <div className="col-span-full py-8 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 text-xs font-bold uppercase">
+                                            No hay imágenes cargadas
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-4 border-t pt-8">
                                 <button type="submit" className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:bg-green-700 transition-all">Guardar Producto</button>
                             </div>
                         </form>
