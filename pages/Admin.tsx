@@ -14,7 +14,7 @@ import { useCurrency } from '../contexts/CurrencyContext';
 import { LOGO_URL, INITIAL_TRIPS, INITIAL_EXCURSIONS, INITIAL_CARS } from '../constants';
 
 const Admin: React.FC = () => {
-  const { formatPrice } = useCurrency();
+  const { formatPrice, convertPrice } = useCurrency();
   const [user, setUser] = useState<Seller | null>(() => {
       const saved = localStorage.getItem('abras_user');
       return saved ? JSON.parse(saved) : null;
@@ -29,7 +29,12 @@ const Admin: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
 
-  const [monthlyBrlProvider, setMonthlyBrlProvider] = useState<number>(0);
+  // Estados para la calculadora de precios en el modal
+  const [inputHelper, setInputHelper] = useState({
+      brlCost: 0,
+      usdCost: 0,
+      targetMarginUsd: 0
+  });
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [inventory, setInventory] = useState<any[]>([]);
@@ -165,17 +170,45 @@ const Admin: React.FC = () => {
   const openEdit = (type: any, item: any) => {
       setModalType(type);
       setEditingItem(item);
+      
+      // Inicializar ayuda de precios basada en el item actual
+      const currentPrice = item.providerPrice || item.providerPricePerDay || 0;
+      const currentMargin = item.profitMargin || item.profitMarginPerDay || 0;
+      
+      // Cálculo inverso: USD to BRL para el asistente
+      const brlEquivalent = (currentPrice * 1220) / 260;
+
+      setInputHelper({
+          brlCost: Number(brlEquivalent.toFixed(2)),
+          usdCost: currentPrice,
+          targetMarginUsd: currentMargin
+      });
+
       setIsModalOpen(true);
       setNewImageUrl('');
-      setMonthlyBrlProvider(0);
   };
 
-  const handleReadMessage = async (msg: AppMessage) => {
-      if (!msg.is_read) {
-          await markAsRead(msg.id);
-          loadData();
+  // Función mágica de conversión para el asistente
+  const updatePriceFromBrl = (brl: number) => {
+      const arsValue = brl * 260; // Tasa solicitada
+      const usdValue = arsValue / 1220; // Tasa mercado sistema
+      
+      setInputHelper(prev => ({ ...prev, brlCost: brl, usdCost: Number(usdValue.toFixed(2)) }));
+      
+      if (editingItem.type === 'car') {
+          setEditingItem({ ...editingItem, providerPricePerDay: Number(usdValue.toFixed(2)) });
+      } else {
+          setEditingItem({ ...editingItem, providerPrice: Number(usdValue.toFixed(2)) });
       }
-      openEdit('reply', msg);
+  };
+
+  const updateMargin = (usdMargin: number) => {
+      setInputHelper(prev => ({ ...prev, targetMarginUsd: usdMargin }));
+      if (editingItem.type === 'car') {
+          setEditingItem({ ...editingItem, profitMarginPerDay: usdMargin });
+      } else {
+          setEditingItem({ ...editingItem, profitMargin: usdMargin });
+      }
   };
 
   const addImageToEditingItem = () => {
@@ -197,39 +230,8 @@ const Admin: React.FC = () => {
     });
   };
 
-  const applyProviderConversion = () => {
-      if (monthlyBrlProvider <= 0) return;
-      const dailyBrl = monthlyBrlProvider / 30;
-      const dailyArs = dailyBrl * 260; 
-      const dailyUsd = dailyArs / 1220; 
-      
-      setEditingItem({
-          ...editingItem,
-          providerPricePerDay: Number(dailyUsd.toFixed(2))
-      });
-      alert(`Costo diario ajustado a la tasa de $260 ARS x Real.`);
-  };
-
   const filteredMessages = messages.filter(m => messageFilter === 'all' || m.type === messageFilter);
   const unreadCount = messages.filter(m => !m.is_read).length;
-
-  if (!user) {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
-            <form onSubmit={handleLogin} className="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md animate-pop-in">
-                <div className="text-center mb-8">
-                    <img src={LOGO_URL} className="h-32 mx-auto mb-4 rounded-full border-4 border-lime-500 bg-white p-2" alt="Logo" />
-                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Acceso Floripa Fácil</h2>
-                </div>
-                <div className="space-y-4">
-                  <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none focus:border-green-500 font-bold" required />
-                  <input type="password" placeholder="Contraseña" value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none focus:border-green-500 font-bold" required />
-                  <button className="w-full bg-green-600 text-white py-5 rounded-2xl font-black hover:bg-green-700 transition-all uppercase tracking-widest text-sm shadow-xl">Entrar al Sistema</button>
-                </div>
-            </form>
-        </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -257,40 +259,6 @@ const Admin: React.FC = () => {
       </aside>
 
       <main className="flex-1 p-6 md:p-12 overflow-y-auto">
-          {activeTab === 'messages' && (
-              <div className="space-y-8 animate-fade-in">
-                  <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Centro de Comunicaciones</h1>
-                  <div className="flex gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide">
-                      {[{id: 'all', label: 'Todos', icon: '📥'}, {id: 'contact', label: 'Clientes', icon: '👤'}, {id: 'booking', label: 'Reservas', icon: '✅'}, {id: 'internal', label: 'Interno', icon: '💬'}].map(cat => (
-                          <button key={cat.id} onClick={()=>setMessageFilter(cat.id as any)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${messageFilter === cat.id ? 'bg-slate-800 text-white shadow-lg' : 'bg-white border-2 text-slate-400'}`}>
-                              <span>{cat.icon}</span> {cat.label}
-                          </button>
-                      ))}
-                  </div>
-                  <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                      {filteredMessages.map(msg => (
-                          <div key={msg.id} onClick={() => handleReadMessage(msg)} className={`p-6 flex flex-col md:flex-row items-start md:items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group ${!msg.is_read ? 'bg-green-50/30' : ''}`}>
-                              <div className="flex items-center gap-4 flex-1">
-                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-xl ${msg.type === 'contact' ? 'bg-blue-100 text-blue-600' : msg.type === 'booking' ? 'bg-green-100 text-green-600' : 'bg-purple-100 text-purple-600'}`}>
-                                      {msg.type === 'contact' ? '✉️' : msg.type === 'booking' ? '💰' : '💬'}
-                                  </div>
-                                  <div>
-                                      <div className="flex items-center gap-2">
-                                          <p className="font-black text-slate-800 text-sm uppercase tracking-tight">{msg.sender_name}</p>
-                                          {!msg.is_read && <span className="w-2 h-2 bg-green-500 rounded-full"></span>}
-                                      </div>
-                                      <p className="text-xs font-bold text-slate-500">{msg.subject}</p>
-                                  </div>
-                              </div>
-                              <div className="mt-4 md:mt-0 text-right">
-                                  <p className="text-[10px] font-black text-slate-300 uppercase">{new Date(msg.created_at).toLocaleDateString()}</p>
-                              </div>
-                          </div>
-                      ))}
-                  </div>
-              </div>
-          )}
-
           {activeTab === 'inventory' && (
               <div className="space-y-8 animate-fade-in">
                   <div className="flex flex-col md:flex-row justify-between items-end gap-6">
@@ -309,7 +277,7 @@ const Admin: React.FC = () => {
                           <thead>
                               <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                   <th className="p-6">Producto</th>
-                                  <th className="p-6 text-right">Precio Actual</th>
+                                  <th className="p-6 text-right">Precio Actual (ARS)</th>
                                   <th className="p-6 text-right">Acciones</th>
                               </tr>
                           </thead>
@@ -326,7 +294,7 @@ const Admin: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="p-6 text-right font-black text-green-700">
-                                        {formatPrice((item.providerPrice || item.providerPricePerDay || 0) + (item.profitMargin || item.profitMarginPerDay || 0))}
+                                        {formatPrice((item.providerPrice || item.providerPricePerDay || 0) + (item.profitMargin || item.profitMarginPerDay || 0), 'USD')}
                                     </td>
                                     <td className="p-6 text-right">
                                         <button onClick={()=>openEdit('inventory', item)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-green-100 hover:text-green-600 transition-all shadow-sm">✏️</button>
@@ -344,121 +312,72 @@ const Admin: React.FC = () => {
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
                 <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Editando {editingItem.type === 'car' ? 'Vehículo' : 'Producto'}</h3>
+                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Carga de Precios y Datos</h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
                 
                 <div className="p-10 overflow-y-auto space-y-8">
                     {modalType === 'inventory' && (
                         <form onSubmit={handleSave} className="space-y-8">
-                            {editingItem.type === 'car' && (
-                                <div className="bg-lime-50 p-6 rounded-[2.5rem] border-2 border-lime-200 mb-8">
-                                    <h4 className="text-xs font-black text-green-800 uppercase tracking-widest mb-4">🚀 Calculadora de Importación Movida</h4>
-                                    <div className="flex flex-col md:flex-row gap-4 items-end">
-                                        <div className="flex-1 space-y-1">
-                                            <label className="text-[9px] font-bold text-green-700 uppercase ml-2">Monto Mensual del Proveedor (BRL)</label>
-                                            <input type="number" className="w-full bg-white p-3 rounded-xl font-bold border-2 border-lime-100" value={monthlyBrlProvider} onChange={e=>setMonthlyBrlProvider(Number(e.target.value))} placeholder="Ej: 2100" />
-                                        </div>
-                                        <button type="button" onClick={applyProviderConversion} className="bg-green-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg">Convertir a Costo Diario</button>
-                                    </div>
-                                    <p className="text-[9px] text-green-600 mt-2 italic font-bold">Este botón calcula el costo diario en USD basándose en la tasa de $260 ARS por Real.</p>
+                            
+                            {/* ASISTENTE DE CARGA MULTIMONEDA */}
+                            <div className="bg-gradient-to-br from-green-50 to-lime-50 p-8 rounded-[3rem] border-2 border-green-200 shadow-inner">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <span className="text-2xl">💰</span>
+                                    <h4 className="text-sm font-black text-green-800 uppercase tracking-widest">Asistente de Carga (Conversión Automática)</h4>
                                 </div>
-                            )}
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2">1. Costo Proveedor (BRL Reales)</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="number" 
+                                                className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-green-100 focus:border-green-500 outline-none transition-all" 
+                                                value={inputHelper.brlCost} 
+                                                onChange={e => updatePriceFromBrl(Number(e.target.value))}
+                                                placeholder="Ej: 100"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-green-300">R$</span>
+                                        </div>
+                                        <p className="text-[9px] text-green-600/70 font-bold px-2 italic">Convertido a $260 ARS x Real</p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2">2. Margen de Ganancia (USD Dólar)</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="number" 
+                                                className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-blue-100 focus:border-blue-500 outline-none transition-all" 
+                                                value={inputHelper.targetMarginUsd} 
+                                                onChange={e => updateMargin(Number(e.target.value))}
+                                                placeholder="Ej: 15"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-blue-300">USD</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white/60 p-6 rounded-[2rem] border border-green-100 flex flex-col justify-center">
+                                        <span className="text-[9px] font-black text-gray-400 uppercase mb-2 block">El cliente verá en la web:</span>
+                                        <div className="text-2xl font-black text-green-700 tracking-tighter">
+                                            {formatPrice(inputHelper.usdCost + inputHelper.targetMarginUsd, 'USD')}
+                                        </div>
+                                        <div className="text-[10px] font-bold text-gray-400 mt-1">
+                                            (Base: {Number(inputHelper.usdCost + inputHelper.targetMarginUsd).toFixed(2)} USD)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título / Modelo</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título del Servicio</label>
                                     <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
                                 </div>
-                                {editingItem.type === 'car' && (
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Marca</label>
-                                        <input value={editingItem.brand} onChange={e=>setEditingItem({...editingItem, brand: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" placeholder="Ej: Fiat, VW..." />
-                                    </div>
-                                )}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad / Punto Entrega</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad</label>
                                     <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
                                 </div>
-                                {editingItem.type === 'car' && (
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Categoría (Grupo Movida)</label>
-                                        <input value={editingItem.category} onChange={e=>setEditingItem({...editingItem, category: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" placeholder="Ej: Económico (Grupo B)" />
-                                    </div>
-                                )}
-                            </div>
-
-                            {editingItem.type === 'car' && (
-                                <>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Transmisión</label>
-                                            <select value={editingItem.transmission} onChange={e=>setEditingItem({...editingItem, transmission: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold">
-                                                <option value="Manual">Manual</option>
-                                                <option value="Automático">Automático</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Combustible</label>
-                                            <select value={editingItem.fuel} onChange={e=>setEditingItem({...editingItem, fuel: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold">
-                                                <option value="Nafta">Nafta</option>
-                                                <option value="Diesel">Diesel</option>
-                                                <option value="Híbrido">Híbrido</option>
-                                                <option value="Eléctrico">Eléctrico</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Pasajeros</label>
-                                            <input type="number" value={editingItem.passengers} onChange={e=>setEditingItem({...editingItem, passengers: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Aire Ac.</label>
-                                            <select value={editingItem.hasAC ? "true" : "false"} onChange={e=>setEditingItem({...editingItem, hasAC: e.target.value === "true"})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold">
-                                                <option value="true">Sí</option>
-                                                <option value="false">No</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Maletas Grandes</label>
-                                            <input type="number" value={editingItem.largeSuitcases} onChange={e=>setEditingItem({...editingItem, largeSuitcases: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Maletas Chicas</label>
-                                            <input type="number" value={editingItem.smallSuitcases} onChange={e=>setEditingItem({...editingItem, smallSuitcases: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-green-700 uppercase ml-2">Costo Proveedor Diario (USD)</label>
-                                    <input type="number" step="0.01" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>{
-                                        const val = Number(e.target.value);
-                                        if(editingItem.type === 'car') setEditingItem({...editingItem, providerPricePerDay: val});
-                                        else setEditingItem({...editingItem, providerPrice: val});
-                                    }} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-green-100" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-blue-700 uppercase ml-2">Margen de Ganancia (USD)</label>
-                                    <input type="number" step="0.01" value={editingItem.profitMargin || editingItem.profitMarginPerDay || 0} onChange={e=>{
-                                        const val = Number(e.target.value);
-                                        if(editingItem.type === 'car') setEditingItem({...editingItem, profitMarginPerDay: val});
-                                        else setEditingItem({...editingItem, profitMargin: val});
-                                    }} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-blue-100" />
-                                </div>
-                                <div className="col-span-full">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase text-center italic">
-                                        Precio Final al Cliente: {formatPrice((editingItem.providerPrice || editingItem.providerPricePerDay || 0) + (editingItem.profitMargin || editingItem.profitMarginPerDay || 0))}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Descripción</label>
-                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none focus:border-green-500 border-2 border-transparent transition-all" />
                             </div>
 
                             <div className="space-y-6">
