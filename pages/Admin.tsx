@@ -29,6 +29,9 @@ const Admin: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
 
+  // Helper para importación de proveedores (BRL mensual -> Daily USD)
+  const [monthlyBrlProvider, setMonthlyBrlProvider] = useState<number>(0);
+
   // Data States
   const [sales, setSales] = useState<Sale[]>([]);
   const [inventory, setInventory] = useState<any[]>([]);
@@ -167,6 +170,7 @@ const Admin: React.FC = () => {
       setEditingItem(item);
       setIsModalOpen(true);
       setNewImageUrl('');
+      setMonthlyBrlProvider(0);
   };
 
   const handleReadMessage = async (msg: AppMessage) => {
@@ -194,6 +198,20 @@ const Admin: React.FC = () => {
         ...editingItem,
         images: currentImages
     });
+  };
+
+  const applyProviderConversion = () => {
+      if (monthlyBrlProvider <= 0) return;
+      // Lógica: Mensual BRL -> Diario BRL -> Diario ARS -> Diario USD (base del sistema)
+      const dailyBrl = monthlyBrlProvider / 30;
+      const dailyArs = dailyBrl * 260; // Tasa solicitada por el usuario
+      const dailyUsd = dailyArs / 1220; // Tasa base del sistema
+      
+      setEditingItem({
+          ...editingItem,
+          providerPricePerDay: Number(dailyUsd.toFixed(2))
+      });
+      alert(`Conversión aplicada: Costo diario estimado en USD ${dailyUsd.toFixed(2)}`);
   };
 
   const filteredMessages = messages.filter(m => messageFilter === 'all' || m.type === messageFilter);
@@ -431,6 +449,35 @@ const Admin: React.FC = () => {
 
                     {modalType === 'inventory' && (
                         <form onSubmit={handleSave} className="space-y-8">
+                            {/* CALCULADORA DE PROVEEDOR PARA AUTOS */}
+                            {editingItem.type === 'car' && (
+                                <div className="bg-lime-50 p-6 rounded-[2.5rem] border-2 border-lime-200">
+                                    <h4 className="text-xs font-black text-green-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        🚀 Calculadora de Importación (Proveedor)
+                                    </h4>
+                                    <div className="flex flex-col md:flex-row gap-4 items-end">
+                                        <div className="flex-1 space-y-1">
+                                            <label className="text-[9px] font-bold text-green-700 uppercase ml-2">Precio Mensual Proveedor (BRL)</label>
+                                            <input 
+                                                type="number" 
+                                                className="w-full bg-white p-3 rounded-xl font-bold border-2 border-lime-100 outline-none focus:border-green-500" 
+                                                placeholder="Ej: 3000 Reais"
+                                                value={monthlyBrlProvider}
+                                                onChange={e=>setMonthlyBrlProvider(Number(e.target.value))}
+                                            />
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={applyProviderConversion}
+                                            className="bg-green-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all shadow-md"
+                                        >
+                                            Calcular Costo Diario
+                                        </button>
+                                    </div>
+                                    <p className="text-[9px] text-green-600 mt-2 italic">* Se calcula: (Monto / 30 días) * $260 ARS. El resultado se guarda como costo diario base en USD.</p>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nombre Comercial</label>
@@ -447,11 +494,11 @@ const Admin: React.FC = () => {
                                     <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Precio Costo (USD)</label>
-                                    <input type="number" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>setEditingItem({...editingItem, providerPrice: Number(e.target.value), providerPricePerDay: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Costo Diario Base (USD)</label>
+                                    <input type="number" step="0.01" value={editingItem.providerPrice || editingItem.providerPricePerDay || 0} onChange={e=>setEditingItem({...editingItem, providerPrice: Number(e.target.value), providerPricePerDay: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Margen (USD)</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Margen de Ganancia Diario (USD)</label>
                                     <input type="number" value={editingItem.profitMargin || editingItem.profitMarginPerDay || 0} onChange={e=>setEditingItem({...editingItem, profitMargin: Number(e.target.value), profitMarginPerDay: Number(e.target.value)})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold outline-none border-2 focus:border-green-500" required />
                                 </div>
                             </div>

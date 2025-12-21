@@ -10,22 +10,20 @@ interface CurrencyContextProps {
   convertPrice: (amount: number, baseCurrency?: string) => number;
 }
 
-// Tasas de cambio aproximadas (Base ARS - Pesos Argentinos)
-// Se calcula: Cuántos ARS vale 1 unidad de la moneda destino.
+// Tasas de cambio actualizadas (Base ARS)
 const EXCHANGE_RATES = {
   ARS: 1,
-  USD: 1220, // 1 USD = 1220 ARS
-  BRL: 215,  // 1 BRL = 215 ARS
-  UYU: 31,   // 1 UYU = 31 ARS
-  CLP: 1.30, // 1 CLP = 1.30 ARS
-  COP: 0.28, // 1 COP = 0.28 ARS
-  MXN: 60    // 1 MXN = 60 ARS
+  USD: 1220, 
+  BRL: 260,  // Actualizado: 1 BRL = 260 ARS
+  UYU: 31,   
+  CLP: 1.30, 
+  COP: 0.28, 
+  MXN: 60    
 };
 
 const CurrencyContext = createContext<CurrencyContextProps | undefined>(undefined);
 
 export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Configuración por defecto: ARS (Pesos Argentinos)
   const [currency, setCurrencyState] = useState<Currency>('ARS');
 
   useEffect(() => {
@@ -34,7 +32,6 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (saved && supportedCurrencies.includes(saved)) {
       setCurrencyState(saved as Currency);
     } else {
-        // Forzar ARS como predeterminado si no hay nada guardado
         setCurrencyState('ARS');
     }
   }, []);
@@ -44,11 +41,9 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     localStorage.setItem('abras_currency', c);
   };
 
-  // Convert any base currency amount to the currently selected currency
   const convertPrice = (amount: number, baseCurrency: string = 'ARS'): number => {
     if (isNaN(amount) || amount === undefined) return 0;
 
-    // 1. Convert everything to ARS first (Common Denominator)
     let amountInArs = amount;
     
     if (baseCurrency === 'USD') {
@@ -59,15 +54,13 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
         amountInArs = amount * EXCHANGE_RATES.BRL;
     }
 
-    // 2. Convert ARS to Target Currency
     return amountInArs / EXCHANGE_RATES[currency];
   };
 
   const formatPrice = (amount: number, baseCurrency: string = 'ARS'): string => {
     const value = convertPrice(amount, baseCurrency);
     
-    // Configuraciones regionales para formato de números
-    let locale = 'es-AR'; // Default para ARS
+    let locale = 'es-AR';
     if (currency === 'USD') locale = 'en-US';
     if (currency === 'BRL') locale = 'pt-BR';
     if (currency === 'UYU') locale = 'es-UY';
@@ -75,7 +68,6 @@ export const CurrencyProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (currency === 'COP') locale = 'es-CO';
     if (currency === 'MXN') locale = 'es-MX';
 
-    // Monedas que generalmente no usan centavos
     const noFraction = ['CLP', 'COP', 'ARS']; 
     const maxDigits = noFraction.includes(currency) ? 0 : 2;
 
