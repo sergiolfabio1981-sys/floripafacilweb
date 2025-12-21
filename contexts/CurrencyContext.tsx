@@ -14,7 +14,7 @@ interface CurrencyContextProps {
 const EXCHANGE_RATES = {
   ARS: 1,
   USD: 1220, 
-  BRL: 260,  // Actualizado: 1 BRL = 260 ARS
+  BRL: 260,  // FIJO SEGÚN SOLICITUD: 1 BRL = 260 ARS
   UYU: 31,   
   CLP: 1.30, 
   COP: 0.28, 
