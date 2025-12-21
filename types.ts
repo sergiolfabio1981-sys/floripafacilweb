@@ -26,7 +26,7 @@ export interface Seller {
   commissionRate: number;
   totalSales: number;
   active: boolean;
-  role: 'seller';
+  role: 'seller' | 'admin';
 }
 
 export interface Sale {
@@ -40,6 +40,19 @@ export interface Sale {
   commissionAmount: number;
   date: string;
   items: string[];
+}
+
+export interface AppMessage {
+  id: string;
+  sender_name: string;
+  sender_id?: string; // Si es interno
+  receiver_id?: string; // Para mensajes directos, null = para todos los admins
+  subject: string;
+  body: string;
+  type: 'contact' | 'booking' | 'internal';
+  created_at: string;
+  is_read: boolean;
+  metadata?: any; // Para guardar datos extra de reservas
 }
 
 export interface Trip {
@@ -61,7 +74,6 @@ export interface Trip {
   specialLabel?: string;
   durationLabel?: string;
   type?: 'trip';
-  // Campos Detallados Booking Style
   highlights?: string[];
   included?: string[];
   notIncluded?: string[];
@@ -148,7 +160,6 @@ export interface Excursion {
   reviewsCount?: number;
   discount?: number;
   specialLabel?: string;
-  // Campos Detallados Booking Style
   highlights?: string[];
   included?: string[];
   notIncluded?: string[];
