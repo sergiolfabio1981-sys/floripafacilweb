@@ -32,6 +32,7 @@ const Admin: React.FC = () => {
   // Estados para la calculadora de precios en el modal
   const [inputHelper, setInputHelper] = useState({
       brlCost: 0,
+      arsCost: 0,
       usdCost: 0,
       targetMarginUsd: 0
   });
@@ -171,43 +172,60 @@ const Admin: React.FC = () => {
       setModalType(type);
       setEditingItem(item);
       
-      // Inicializar ayuda de precios basada en el item actual
-      const currentPrice = item.providerPrice || item.providerPricePerDay || 0;
-      const currentMargin = item.profitMargin || item.profitMarginPerDay || 0;
+      const currentPriceUsd = item.providerPrice || item.providerPricePerDay || 0;
+      const currentMarginUsd = item.profitMargin || item.profitMarginPerDay || 0;
       
-      // Cálculo inverso: USD to BRL para el asistente
-      const brlEquivalent = (currentPrice * 1220) / 260;
+      // Conversión para inicializar los campos
+      const currentArs = currentPriceUsd * 1220;
+      const currentBrl = currentArs / 260;
 
       setInputHelper({
-          brlCost: Number(brlEquivalent.toFixed(2)),
-          usdCost: currentPrice,
-          targetMarginUsd: currentMargin
+          brlCost: Number(currentBrl.toFixed(2)),
+          arsCost: Number(currentArs.toFixed(0)),
+          usdCost: currentPriceUsd,
+          targetMarginUsd: currentMarginUsd
       });
 
       setIsModalOpen(true);
       setNewImageUrl('');
   };
 
-  // Función mágica de conversión para el asistente
+  // Funciones de actualización del asistente
   const updatePriceFromBrl = (brl: number) => {
-      const arsValue = brl * 260; // Tasa solicitada
-      const usdValue = arsValue / 1220; // Tasa mercado sistema
-      
-      setInputHelper(prev => ({ ...prev, brlCost: brl, usdCost: Number(usdValue.toFixed(2)) }));
-      
+      const arsValue = brl * 260; 
+      const usdValue = arsValue / 1220; 
+      setInputHelper(prev => ({ ...prev, brlCost: brl, arsCost: Number(arsValue.toFixed(0)), usdCost: Number(usdValue.toFixed(2)) }));
+      syncItemPrice(Number(usdValue.toFixed(2)));
+  };
+
+  const updatePriceFromArs = (ars: number) => {
+      const usdValue = ars / 1220; 
+      const brlValue = ars / 260;
+      setInputHelper(prev => ({ ...prev, arsCost: ars, brlCost: Number(brlValue.toFixed(2)), usdCost: Number(usdValue.toFixed(2)) }));
+      syncItemPrice(Number(usdValue.toFixed(2)));
+  };
+
+  const updatePriceFromUsd = (usd: number) => {
+      const arsValue = usd * 1220;
+      const brlValue = arsValue / 260;
+      setInputHelper(prev => ({ ...prev, usdCost: usd, arsCost: Number(arsValue.toFixed(0)), brlCost: Number(brlValue.toFixed(2)) }));
+      syncItemPrice(usd);
+  };
+
+  const syncItemPrice = (usd: number) => {
       if (editingItem.type === 'car') {
-          setEditingItem({ ...editingItem, providerPricePerDay: Number(usdValue.toFixed(2)) });
+          setEditingItem(prev => ({ ...prev, providerPricePerDay: usd }));
       } else {
-          setEditingItem({ ...editingItem, providerPrice: Number(usdValue.toFixed(2)) });
+          setEditingItem(prev => ({ ...prev, providerPrice: usd }));
       }
   };
 
   const updateMargin = (usdMargin: number) => {
       setInputHelper(prev => ({ ...prev, targetMarginUsd: usdMargin }));
       if (editingItem.type === 'car') {
-          setEditingItem({ ...editingItem, profitMarginPerDay: usdMargin });
+          setEditingItem(prev => ({ ...prev, profitMarginPerDay: usdMargin }));
       } else {
-          setEditingItem({ ...editingItem, profitMargin: usdMargin });
+          setEditingItem(prev => ({ ...prev, profitMargin: usdMargin }));
       }
   };
 
@@ -232,6 +250,24 @@ const Admin: React.FC = () => {
 
   const filteredMessages = messages.filter(m => messageFilter === 'all' || m.type === messageFilter);
   const unreadCount = messages.filter(m => !m.is_read).length;
+
+  if (!user) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+            <form onSubmit={handleLogin} className="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md animate-pop-in">
+                <div className="text-center mb-8">
+                    <img src={LOGO_URL} className="h-32 mx-auto mb-4 rounded-full border-4 border-lime-500 bg-white p-2" alt="Logo" />
+                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Acceso Floripa Fácil</h2>
+                </div>
+                <div className="space-y-4">
+                  <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none focus:border-green-500 font-bold" required />
+                  <input type="password" placeholder="Contraseña" value={password} onChange={e=>setPassword(e.target.value)} className="w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none focus:border-green-500 font-bold" required />
+                  <button className="w-full bg-green-600 text-white py-5 rounded-2xl font-black hover:bg-green-700 transition-all uppercase tracking-widest text-sm shadow-xl">Entrar al Sistema</button>
+                </div>
+            </form>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -310,96 +346,187 @@ const Admin: React.FC = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
+            <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
                 <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Carga de Precios y Datos</h3>
+                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Gestión de Producto y Precios</h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
                 
                 <div className="p-10 overflow-y-auto space-y-8">
                     {modalType === 'inventory' && (
-                        <form onSubmit={handleSave} className="space-y-8">
+                        <form onSubmit={handleSave} className="space-y-10">
                             
-                            {/* ASISTENTE DE CARGA MULTIMONEDA */}
-                            <div className="bg-gradient-to-br from-green-50 to-lime-50 p-8 rounded-[3rem] border-2 border-green-200 shadow-inner">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <span className="text-2xl">💰</span>
-                                    <h4 className="text-sm font-black text-green-800 uppercase tracking-widest">Asistente de Carga (Conversión Automática)</h4>
+                            {/* ASISTENTE DE CARGA MULTIMONEDA ACTUALIZADO */}
+                            <div className="bg-gradient-to-br from-green-50 via-white to-blue-50 p-8 rounded-[3rem] border-2 border-green-200 shadow-xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16"></div>
+                                
+                                <div className="flex items-center gap-3 mb-8">
+                                    <span className="text-3xl">🧮</span>
+                                    <div>
+                                        <h4 className="text-sm font-black text-green-800 uppercase tracking-widest">Asistente de Precios Inteligente</h4>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Carga en cualquier moneda, el sistema sincroniza automáticamente.</p>
+                                    </div>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+                                    {/* CARGA EN PESOS (NUEVO) */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2">1. Costo Proveedor (BRL Reales)</label>
+                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2 flex items-center gap-2">
+                                            <span className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center text-[8px]">🇦🇷</span>
+                                            Costo Proveedor (ARS)
+                                        </label>
                                         <div className="relative">
                                             <input 
                                                 type="number" 
-                                                className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-green-100 focus:border-green-500 outline-none transition-all" 
+                                                className="w-full bg-white p-4 rounded-2xl font-black border-2 border-blue-100 focus:border-blue-500 outline-none transition-all text-blue-900" 
+                                                value={inputHelper.arsCost} 
+                                                onChange={e => updatePriceFromArs(Number(e.target.value))}
+                                                placeholder="Ej: 26000"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-blue-200">ARS</span>
+                                        </div>
+                                    </div>
+
+                                    {/* CARGA EN REALES */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2 flex items-center gap-2">
+                                            <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center text-[8px]">🇧🇷</span>
+                                            Costo Proveedor (BRL)
+                                        </label>
+                                        <div className="relative">
+                                            <input 
+                                                type="number" 
+                                                className="w-full bg-white p-4 rounded-2xl font-black border-2 border-green-100 focus:border-green-500 outline-none transition-all text-green-900" 
                                                 value={inputHelper.brlCost} 
                                                 onChange={e => updatePriceFromBrl(Number(e.target.value))}
                                                 placeholder="Ej: 100"
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-green-300">R$</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-green-200">R$</span>
                                         </div>
-                                        <p className="text-[9px] text-green-600/70 font-bold px-2 italic">Convertido a $260 ARS x Real</p>
                                     </div>
 
+                                    {/* MARGEN DE GANANCIA */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2">2. Margen de Ganancia (USD Dólar)</label>
+                                        <label className="text-[10px] font-black text-amber-600 uppercase ml-2 flex items-center gap-2">
+                                            <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center text-[8px]">📈</span>
+                                            Margen de Ganancia (USD)
+                                        </label>
                                         <div className="relative">
                                             <input 
                                                 type="number" 
-                                                className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-blue-100 focus:border-blue-500 outline-none transition-all" 
+                                                className="w-full bg-white p-4 rounded-2xl font-black border-2 border-amber-100 focus:border-amber-500 outline-none transition-all text-amber-900" 
                                                 value={inputHelper.targetMarginUsd} 
                                                 onChange={e => updateMargin(Number(e.target.value))}
                                                 placeholder="Ej: 15"
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-blue-300">USD</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-amber-200">USD</span>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/60 p-6 rounded-[2rem] border border-green-100 flex flex-col justify-center">
-                                        <span className="text-[9px] font-black text-gray-400 uppercase mb-2 block">El cliente verá en la web:</span>
-                                        <div className="text-2xl font-black text-green-700 tracking-tighter">
+                                    {/* VISTA PREVIA CLIENTE */}
+                                    <div className="bg-white p-6 rounded-3xl border-2 border-green-500 shadow-lg flex flex-col justify-center animate-pulse">
+                                        <span className="text-[9px] font-black text-green-600 uppercase mb-2 block text-center">Precio Final Web</span>
+                                        <div className="text-2xl font-black text-slate-800 tracking-tighter text-center">
                                             {formatPrice(inputHelper.usdCost + inputHelper.targetMarginUsd, 'USD')}
                                         </div>
-                                        <div className="text-[10px] font-bold text-gray-400 mt-1">
-                                            (Base: {Number(inputHelper.usdCost + inputHelper.targetMarginUsd).toFixed(2)} USD)
+                                        <div className="text-[9px] font-bold text-gray-400 mt-2 border-t pt-2 text-center">
+                                            Equiv: {(inputHelper.usdCost + inputHelper.targetMarginUsd).toFixed(2)} USD
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título del Servicio</label>
-                                    <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad</label>
-                                    <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
+                                <div className="mt-6 flex justify-center gap-8 border-t border-green-100 pt-4">
+                                    <p className="text-[9px] font-black text-gray-400 uppercase italic">Tasa Real: $260 ARS</p>
+                                    <p className="text-[9px] font-black text-gray-400 uppercase italic">Tasa Dólar: $1220 ARS</p>
                                 </div>
                             </div>
 
+                            {/* CAMPOS TÉCNICOS ESPECÍFICOS PARA AUTOS */}
+                            {editingItem.type === 'car' && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Marca del Vehículo</label>
+                                        <input value={editingItem.brand} onChange={e=>setEditingItem({...editingItem, brand: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500" placeholder="Ej: Fiat" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Modelo / Grupo</label>
+                                        <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500" placeholder="Ej: Mobi - Grupo B" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Categoría</label>
+                                        <select value={editingItem.category} onChange={e=>setEditingItem({...editingItem, category: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold">
+                                            {['Económico', 'Compacto', 'Sedán', 'SUV', 'Luxury'].map(c=><option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Transmisión</label>
+                                        <select value={editingItem.transmission} onChange={e=>setEditingItem({...editingItem, transmission: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold">
+                                            <option value="Manual">Manual</option>
+                                            <option value="Automático">Automático</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Punto de Entrega</label>
+                                        <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500" />
+                                    </div>
+                                    <div className="flex gap-4 items-center pt-6">
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" checked={editingItem.hasAC} onChange={e=>setEditingItem({...editingItem, hasAC: e.target.checked})} className="w-5 h-5 rounded text-green-600 focus:ring-green-500" />
+                                            <span className="text-[10px] font-black text-slate-500 uppercase">Aire Acondicionado</span>
+                                        </label>
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" checked={editingItem.isOffer} onChange={e=>setEditingItem({...editingItem, isOffer: e.target.checked})} className="w-5 h-5 rounded text-orange-600 focus:ring-orange-500" />
+                                            <span className="text-[10px] font-black text-slate-500 uppercase">Destacar Oferta</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* CAMPOS PARA OTROS PRODUCTOS */}
+                            {editingItem.type !== 'car' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título del Servicio</label>
+                                        <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad</label>
+                                        <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* GESTIÓN DE IMÁGENES POR URL */}
                             <div className="space-y-6">
-                                <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest border-b pb-2">Gestión de Imágenes</h4>
-                                <div className="flex gap-4">
-                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold" placeholder="Pegar URL de la imagen..." />
-                                    <button type="button" onClick={addImageToEditingItem} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase">Añadir</button>
+                                <div className="flex items-center justify-between border-b pb-4">
+                                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Galería de Imágenes</h4>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">{editingItem.images?.length || 0} fotos cargadas</span>
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="flex gap-4">
+                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-blue-500 outline-none" placeholder="Pegar enlace de la imagen (JPG/PNG)..." />
+                                    <button type="button" onClick={addImageToEditingItem} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-slate-900">Añadir Foto</button>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                     {editingItem.images?.map((img: string, idx: number) => (
-                                        <div key={idx} className="relative group rounded-2xl overflow-hidden aspect-video shadow-md">
+                                        <div key={idx} className="relative group rounded-2xl overflow-hidden aspect-square shadow-md border-2 border-white">
                                             <img src={img} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
-                                            <button type="button" onClick={()=>removeImageFromEditingItem(idx)} className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center font-black uppercase text-[10px]">Eliminar</button>
+                                            <div className="absolute inset-0 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={()=>removeImageFromEditingItem(idx)}>
+                                                <span className="text-xl">🗑️</span>
+                                                <span className="font-black uppercase text-[8px]">Eliminar</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Descripción Detallada</label>
+                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none focus:border-green-500 border-2 border-transparent transition-all" placeholder="Escribe los detalles que verá el cliente..." />
+                            </div>
+
                             <div className="flex justify-end gap-4 border-t pt-8">
-                                <button type="button" onClick={()=>setIsModalOpen(false)} className="px-10 py-4 font-black text-slate-400 uppercase text-[10px]">Cancelar</button>
-                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:bg-green-700 disabled:opacity-50">
-                                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                                <button type="button" onClick={()=>setIsModalOpen(false)} className="px-10 py-4 font-black text-slate-400 uppercase text-[10px] hover:text-slate-600">Cancelar</button>
+                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:bg-green-700 disabled:opacity-50 flex items-center gap-3">
+                                    {isSaving ? '💾 Procesando...' : '✔️ Guardar Cambios'}
                                 </button>
                             </div>
                         </form>
