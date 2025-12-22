@@ -4,7 +4,7 @@ import { INITIAL_TRIPS } from '../constants';
 import { supabase } from './supabase';
 
 const getSanitizedPayload = (trip: any) => {
-    // Solo permitimos columnas que sabemos que existen físicamente en la tabla 'trips'
+    // Solo incluimos las columnas que existen físicamente en la tabla 'trips' estándar
     return {
         id: trip.id,
         title: trip.title,
@@ -15,10 +15,8 @@ const getSanitizedPayload = (trip: any) => {
         images: Array.isArray(trip.images) ? trip.images : [],
         isOffer: !!trip.isOffer,
         availableDates: Array.isArray(trip.availableDates) ? trip.availableDates : [],
-        baseCurrency: trip.baseCurrency || 'USD',
-        specialLabel: trip.specialLabel || '',
-        durationLabel: trip.durationLabel || ''
-        // Se omiten intencionalmente meetingPoint, cancellationPolicy, etc., si dan error.
+        baseCurrency: trip.baseCurrency || 'USD'
+        // 'durationLabel' y 'specialLabel' eliminados por no existir en el esquema de la DB
     };
 };
 

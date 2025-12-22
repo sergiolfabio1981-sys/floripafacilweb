@@ -29,7 +29,6 @@ const Admin: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
 
-  // Estados para la calculadora de precios multimoneda
   const [inputHelper, setInputHelper] = useState({
       brlCost: 0,
       arsCost: 0,
@@ -88,11 +87,6 @@ const Admin: React.FC = () => {
       }
   };
 
-  const scrubItem = (item: any) => {
-      const { type, calculatedPrice, calculatedProfit, ...cleaned } = item;
-      return cleaned;
-  };
-
   const handleSyncDefaults = async () => {
       if (!window.confirm("¿Deseas CARGAR LA FLOTA Y DATOS INICIALES? Se actualizarán Tours, Traslados y Autos.")) return;
       setIsSaving(true);
@@ -130,12 +124,10 @@ const Admin: React.FC = () => {
       e.preventDefault();
       setIsSaving(true);
       try {
-          const type = editingItem.type; 
-          const cleanItem = scrubItem(editingItem);
           if (modalType === 'inventory') {
-              if (type === 'trip') await saveTrip(cleanItem);
-              else if (type === 'car') await saveCarRental(cleanItem);
-              else if (type === 'excursion') await saveExcursion(cleanItem);
+              if (editingItem.type === 'trip') await saveTrip(editingItem);
+              else if (editingItem.type === 'car') await saveCarRental(editingItem);
+              else if (editingItem.type === 'excursion') await saveExcursion(editingItem);
           } else if (modalType === 'reply') {
               await sendMessage({
                   sender_name: user?.name,
@@ -147,21 +139,21 @@ const Admin: React.FC = () => {
               });
               setReplyBody('');
           } else if (modalType === 'hero') {
-              await saveHeroSlide(cleanItem);
+              await saveHeroSlide(editingItem);
           } else if (modalType === 'banner') {
-              await savePromoBanner(cleanItem);
+              await savePromoBanner(editingItem);
           } else if (modalType === 'destination') {
-              await saveDestination(cleanItem);
+              await saveDestination(editingItem);
           } else if (modalType === 'guide') {
-              await saveGuide(cleanItem);
+              await saveGuide(editingItem);
           } else if (modalType === 'seller') {
-              await saveSeller(cleanItem);
+              await saveSeller(editingItem);
           }
           await loadData();
           setIsModalOpen(false);
-          alert("¡Acción completada!");
+          alert("¡Cambios guardados con éxito!");
       } catch (err: any) {
-          alert(`Error al guardar: ${err.message}. Verifique que el servidor acepte todas las columnas.`);
+          alert(`Error al guardar: ${err.message}. El sistema omitirá automáticamente los campos no compatibles.`);
       } finally { setIsSaving(false); }
   };
 
@@ -171,7 +163,6 @@ const Admin: React.FC = () => {
       
       const currentPriceUsd = item.providerPrice || item.providerPricePerDay || 0;
       const currentMarginUsd = item.profitMargin || item.profitMarginPerDay || 0;
-      
       const currentArs = currentPriceUsd * 1220;
       const currentBrl = currentArs / 260;
 
@@ -244,8 +235,8 @@ const Admin: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
             <form onSubmit={handleLogin} className="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md animate-pop-in">
                 <div className="text-center mb-8">
-                    <img src={LOGO_URL} className="h-32 mx-auto mb-4 rounded-full border-4 border-lime-500 bg-white p-2" alt="Logo" />
-                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Acceso Floripa Fácil</h2>
+                    <img src={LOGO_URL} className="h-32 mx-auto mb-4 rounded-full border-4 border-green-500 bg-white p-2" alt="Logo" />
+                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tighter italic leading-none">Acceso<br/>Floripa Fácil</h2>
                 </div>
                 <div className="space-y-4">
                   <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} className="w-full bg-slate-50 border-2 p-4 rounded-2xl outline-none focus:border-green-500 font-bold" required />
@@ -297,7 +288,7 @@ const Admin: React.FC = () => {
                           <thead>
                               <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                   <th className="p-6">Producto</th>
-                                  <th className="p-6 text-right">Precio Actual (USD)</th>
+                                  <th className="p-6 text-right">Precio Venta (USD)</th>
                                   <th className="p-6 text-right">Acciones</th>
                               </tr>
                           </thead>
@@ -328,11 +319,11 @@ const Admin: React.FC = () => {
           )}
       </main>
 
-      {isModalOpen && (
+      {isModalOpen && editingItem && (
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
                 <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Gestión de Producto Floripa Fácil</h3>
+                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Edición de Servicio - Floripa Fácil</h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
                 
@@ -340,73 +331,57 @@ const Admin: React.FC = () => {
                     {modalType === 'inventory' && (
                         <form onSubmit={handleSave} className="space-y-10">
                             
-                            {/* ASISTENTE DE CARGA MULTIMONEDA */}
                             <div className="bg-gradient-to-br from-green-50 via-white to-blue-50 p-8 rounded-[3rem] border-2 border-green-200 shadow-xl relative overflow-hidden">
                                 <div className="flex items-center gap-3 mb-8">
                                     <span className="text-3xl">🧮</span>
                                     <div>
-                                        <h4 className="text-sm font-black text-green-800 uppercase tracking-widest leading-none">Asistente de Precios Inteligente</h4>
-                                        <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Ingresa el costo en cualquier moneda y el sistema sincronizará los valores.</p>
+                                        <h4 className="text-sm font-black text-green-800 uppercase tracking-widest leading-none">Cálculo de Precios</h4>
                                     </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-                                    {/* CARGA EN PESOS */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2 flex items-center gap-2">Costo (ARS)</label>
+                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2">Costo (ARS)</label>
                                         <input 
                                             type="number" 
-                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-blue-100 focus:border-blue-500 outline-none" 
+                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-blue-100" 
                                             value={inputHelper.arsCost} 
                                             onChange={e => updatePriceFromArs(Number(e.target.value))}
-                                            placeholder="Ej: 52000"
                                         />
                                     </div>
 
-                                    {/* CARGA EN REALES */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2 flex items-center gap-2">Costo (BRL)</label>
+                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2">Costo (BRL)</label>
                                         <input 
                                             type="number" 
-                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-green-100 focus:border-green-500 outline-none" 
+                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-green-100" 
                                             value={inputHelper.brlCost} 
                                             onChange={e => updatePriceFromBrl(Number(e.target.value))}
-                                            placeholder="Ej: 200"
                                         />
                                     </div>
 
-                                    {/* MARGEN DE GANANCIA */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-amber-600 uppercase ml-2 flex items-center gap-2">Margen (USD)</label>
+                                        <label className="text-[10px] font-black text-amber-600 uppercase ml-2">Margen (USD)</label>
                                         <input 
                                             type="number" 
-                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-amber-100 focus:border-amber-500 outline-none" 
+                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-amber-100" 
                                             value={inputHelper.targetMarginUsd} 
                                             onChange={e => updateMargin(Number(e.target.value))}
-                                            placeholder="Ej: 15"
                                         />
                                     </div>
 
-                                    {/* VISTA PREVIA CLIENTE */}
-                                    <div className="bg-white p-6 rounded-3xl border-2 border-green-500 shadow-lg flex flex-col justify-center">
+                                    <div className="bg-white p-6 rounded-3xl border-2 border-green-500 flex flex-col justify-center">
                                         <span className="text-[9px] font-black text-green-600 uppercase mb-2 block text-center">Venta Web (USD)</span>
-                                        <div className="text-2xl font-black text-slate-800 tracking-tighter text-center">
+                                        <div className="text-2xl font-black text-slate-800 text-center leading-none">
                                             {formatPrice(inputHelper.usdCost + inputHelper.targetMarginUsd, 'USD')}
                                         </div>
-                                        <div className="text-[9px] font-bold text-gray-400 mt-2 border-t pt-2 text-center">
-                                            {formatPrice(inputHelper.usdCost + inputHelper.targetMarginUsd, 'ARS')}
-                                        </div>
                                     </div>
-                                </div>
-                                <div className="mt-6 flex justify-center gap-8 border-t border-green-100 pt-4">
-                                    <p className="text-[9px] font-black text-gray-400 uppercase italic">Tasa Real: $260 ARS</p>
-                                    <p className="text-[9px] font-black text-gray-400 uppercase italic">Tasa Dólar: $1220 ARS</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título del Servicio</label>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título</label>
                                     <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
                                 </div>
                                 <div className="space-y-2">
@@ -416,30 +391,30 @@ const Admin: React.FC = () => {
                             </div>
 
                             <div className="space-y-6">
-                                <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Galería de Fotos</h4>
+                                <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Galería</h4>
                                 <div className="flex gap-4">
-                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold" placeholder="Pegar URL de la imagen..." />
+                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl" placeholder="URL imagen..." />
                                     <button type="button" onClick={addImageToEditingItem} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px]">Añadir</button>
                                 </div>
                                 <div className="grid grid-cols-5 gap-4">
                                     {editingItem.images?.map((img: string, idx: number) => (
                                         <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden shadow-md">
                                             <img src={img} className="w-full h-full object-cover" alt="" />
-                                            <div className="absolute inset-0 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer font-black text-[10px] uppercase" onClick={()=>removeImageFromEditingItem(idx)}>Eliminar</div>
+                                            <div className="absolute inset-0 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer font-black text-[10px]" onClick={()=>removeImageFromEditingItem(idx)}>BORRAR</div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Descripción Detallada</label>
-                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none focus:border-green-500 border-2 border-transparent" />
+                                <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Descripción</label>
+                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none" />
                             </div>
 
                             <div className="flex justify-end gap-4 border-t pt-8">
                                 <button type="button" onClick={()=>setIsModalOpen(false)} className="px-10 py-4 font-black text-slate-400 uppercase text-[10px]">Cancelar</button>
-                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] shadow-xl hover:bg-green-700 disabled:opacity-50">
-                                    {isSaving ? 'Guardando...' : '💾 Guardar Cambios'}
+                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] shadow-xl hover:bg-green-700">
+                                    {isSaving ? 'Guardando...' : '💾 Guardar'}
                                 </button>
                             </div>
                         </form>

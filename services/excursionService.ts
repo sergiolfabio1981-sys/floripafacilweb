@@ -23,7 +23,7 @@ export const getExcursions = async (): Promise<Excursion[]> => {
   try {
     const { data, error } = await supabase.from('excursions').select('*');
     if (error) {
-      console.warn('Supabase: Table "excursions" might not exist yet. Using local data.', error.message);
+      console.warn('Supabase: Table "excursions" might not exist yet.', error.message);
       return INITIAL_EXCURSIONS;
     }
     if (!data || data.length === 0) return INITIAL_EXCURSIONS;
