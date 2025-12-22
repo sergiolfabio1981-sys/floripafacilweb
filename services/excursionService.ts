@@ -1,6 +1,23 @@
+
 import { Excursion } from '../types';
 import { INITIAL_EXCURSIONS } from '../constants';
 import { supabase } from './supabase';
+
+const getSanitizedPayload = (exc: any) => {
+    return {
+        id: exc.id,
+        title: exc.title,
+        location: exc.location,
+        providerPrice: exc.providerPrice || 0,
+        profitMargin: exc.profitMargin || 0,
+        description: exc.description || '',
+        images: Array.isArray(exc.images) ? exc.images : [],
+        isOffer: !!exc.isOffer,
+        duration: exc.duration || '',
+        availableDates: Array.isArray(exc.availableDates) ? exc.availableDates : [],
+        baseCurrency: exc.baseCurrency || 'USD'
+    };
+};
 
 export const getExcursions = async (): Promise<Excursion[]> => {
   try {
@@ -9,11 +26,7 @@ export const getExcursions = async (): Promise<Excursion[]> => {
       console.warn('Supabase: Table "excursions" might not exist yet. Using local data.', error.message);
       return INITIAL_EXCURSIONS;
     }
-
-    if (!data || data.length === 0) {
-        return INITIAL_EXCURSIONS;
-    }
-
+    if (!data || data.length === 0) return INITIAL_EXCURSIONS;
     return (data as Excursion[]).map(e => ({...e, type: 'excursion'})) || INITIAL_EXCURSIONS;
   } catch (err) {
     return INITIAL_EXCURSIONS;
@@ -31,7 +44,8 @@ export const getExcursionById = async (id: string): Promise<Excursion | undefine
 };
 
 export const saveExcursion = async (excursion: Excursion): Promise<void> => {
-  const { error } = await supabase.from('excursions').upsert(excursion);
+  const payload = getSanitizedPayload(excursion);
+  const { error } = await supabase.from('excursions').upsert(payload);
   if (error) throw error;
 };
 

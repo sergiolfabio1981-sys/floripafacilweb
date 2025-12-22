@@ -29,7 +29,7 @@ const Admin: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState('');
 
-  // Estados para la calculadora de precios en el modal
+  // Estados para la calculadora de precios multimoneda
   const [inputHelper, setInputHelper] = useState({
       brlCost: 0,
       arsCost: 0,
@@ -94,7 +94,7 @@ const Admin: React.FC = () => {
   };
 
   const handleSyncDefaults = async () => {
-      if (!window.confirm("¿Deseas CARGAR LA FLOTA DE MOVIDA y los datos iniciales? Se actualizarán Tours, Traslados y Autos.")) return;
+      if (!window.confirm("¿Deseas CARGAR LA FLOTA Y DATOS INICIALES? Se actualizarán Tours, Traslados y Autos.")) return;
       setIsSaving(true);
       try {
           const defaultDests = [
@@ -103,15 +103,12 @@ const Admin: React.FC = () => {
               { id: 'dest-3', name: 'Camboriú', active: true }
           ];
           await supabase.from('destinations').upsert(defaultDests);
-          const cleanTrips = INITIAL_TRIPS.map(scrubItem);
-          const cleanExcursions = INITIAL_EXCURSIONS.map(scrubItem);
-          const cleanCars = INITIAL_CARS.map(scrubItem);
           await Promise.all([
-            supabase.from('trips').upsert(cleanTrips),
-            supabase.from('excursions').upsert(cleanExcursions),
-            supabase.from('cars').upsert(cleanCars)
+            saveTrip(INITIAL_TRIPS[0]),
+            saveExcursion(INITIAL_EXCURSIONS[0]),
+            saveCarRental(INITIAL_CARS[0])
           ]);
-          alert("¡FLOTA MOVIDA Y DATOS SINCRONIZADOS!");
+          alert("¡DATOS SINCRONIZADOS CORRECTAMENTE!");
           loadData();
       } catch (err: any) {
           alert("Error al sincronizar datos: " + err.message);
@@ -164,7 +161,7 @@ const Admin: React.FC = () => {
           setIsModalOpen(false);
           alert("¡Acción completada!");
       } catch (err: any) {
-          alert(`Error: ${err.message}`);
+          alert(`Error al guardar: ${err.message}. Verifique que el servidor acepte todas las columnas.`);
       } finally { setIsSaving(false); }
   };
 
@@ -175,7 +172,6 @@ const Admin: React.FC = () => {
       const currentPriceUsd = item.providerPrice || item.providerPricePerDay || 0;
       const currentMarginUsd = item.profitMargin || item.profitMarginPerDay || 0;
       
-      // Conversión para inicializar los campos
       const currentArs = currentPriceUsd * 1220;
       const currentBrl = currentArs / 260;
 
@@ -190,7 +186,6 @@ const Admin: React.FC = () => {
       setNewImageUrl('');
   };
 
-  // Funciones de actualización del asistente
   const updatePriceFromBrl = (brl: number) => {
       const arsValue = brl * 260; 
       const usdValue = arsValue / 1220; 
@@ -203,13 +198,6 @@ const Admin: React.FC = () => {
       const brlValue = ars / 260;
       setInputHelper(prev => ({ ...prev, arsCost: ars, brlCost: Number(brlValue.toFixed(2)), usdCost: Number(usdValue.toFixed(2)) }));
       syncItemPrice(Number(usdValue.toFixed(2)));
-  };
-
-  const updatePriceFromUsd = (usd: number) => {
-      const arsValue = usd * 1220;
-      const brlValue = arsValue / 260;
-      setInputHelper(prev => ({ ...prev, usdCost: usd, arsCost: Number(arsValue.toFixed(0)), brlCost: Number(brlValue.toFixed(2)) }));
-      syncItemPrice(usd);
   };
 
   const syncItemPrice = (usd: number) => {
@@ -273,7 +261,7 @@ const Admin: React.FC = () => {
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       <aside className="w-full md:w-72 bg-slate-900 text-white flex flex-col h-screen md:sticky md:top-0">
           <div className="p-8 text-center border-b border-white/5">
-              <img src={LOGO_URL} className="w-20 h-20 mx-auto rounded-full mb-4 border-2 border-green-500 bg-white p-1 shadow-lg" />
+              <img src={LOGO_URL} className="w-20 h-20 mx-auto rounded-full mb-4 border-2 border-green-500 bg-white p-1 shadow-lg" alt="Logo" />
               <p className="text-[10px] font-black uppercase tracking-widest text-green-400">ESTADO: {dbStatus}</p>
           </div>
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -288,7 +276,7 @@ const Admin: React.FC = () => {
               <button onClick={()=>setActiveTab('sales')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sales' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>💰 Ventas</button>
               <button onClick={()=>setActiveTab('sellers')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sellers' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>👥 Vendedores</button>
               <div className="pt-4 mt-4 border-t border-white/5">
-                <button onClick={handleSyncDefaults} disabled={isSaving} className="w-full text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-amber-400 hover:bg-amber-400/10 rounded-2xl">⚙️ Sincronizar Flota Movida</button>
+                <button onClick={handleSyncDefaults} disabled={isSaving} className="w-full text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-amber-400 hover:bg-amber-400/10 rounded-2xl">⚙️ Sincronizar Datos FF</button>
                 <button onClick={()=>{localStorage.removeItem('abras_user'); window.location.reload();}} className="w-full text-left px-6 py-4 text-[10px] font-black text-red-400 hover:bg-red-400/10 rounded-2xl uppercase tracking-widest mt-2">🚪 Cerrar Sesión</button>
               </div>
           </nav>
@@ -297,15 +285,11 @@ const Admin: React.FC = () => {
       <main className="flex-1 p-6 md:p-12 overflow-y-auto">
           {activeTab === 'inventory' && (
               <div className="space-y-8 animate-fade-in">
-                  <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-                    <div>
-                        <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Inventario Floripa Fácil</h1>
-                        <div className="flex gap-2 mt-6 overflow-x-auto pb-2 scrollbar-hide">
-                            {['tours', 'transfers', 'cars'].map(cat => (
-                                <button key={cat} onClick={()=>setInventoryCategory(cat as any)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${inventoryCategory === cat ? 'bg-slate-800 text-white shadow-lg' : 'bg-white border-2 text-slate-400'}`}>{cat}</button>
-                            ))}
-                        </div>
-                    </div>
+                  <h1 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic">Inventario Floripa Fácil</h1>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                      {['tours', 'transfers', 'cars'].map(cat => (
+                          <button key={cat} onClick={()=>setInventoryCategory(cat as any)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${inventoryCategory === cat ? 'bg-slate-800 text-white shadow-lg' : 'bg-white border-2 text-slate-400'}`}>{cat}</button>
+                      ))}
                   </div>
                   
                   <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
@@ -313,7 +297,7 @@ const Admin: React.FC = () => {
                           <thead>
                               <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                   <th className="p-6">Producto</th>
-                                  <th className="p-6 text-right">Precio Actual (ARS)</th>
+                                  <th className="p-6 text-right">Precio Actual (USD)</th>
                                   <th className="p-6 text-right">Acciones</th>
                               </tr>
                           </thead>
@@ -322,10 +306,10 @@ const Admin: React.FC = () => {
                                 <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                                     <td className="p-6">
                                         <div className="flex items-center gap-4">
-                                            <img src={item.images?.[0]} className="w-14 h-14 rounded-2xl object-cover shadow-sm" />
+                                            <img src={item.images?.[0]} className="w-14 h-14 rounded-2xl object-cover shadow-sm" alt="" />
                                             <div>
                                                 <p className="font-black text-slate-800 text-sm leading-tight">{item.brand ? `${item.brand} ${item.title}` : item.title}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase">{item.location}</p>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">📍 {item.location}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -348,7 +332,7 @@ const Admin: React.FC = () => {
         <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
             <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col animate-pop-in">
                 <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Gestión de Producto y Precios</h3>
+                    <h3 className="text-2xl font-black text-slate-800 uppercase italic tracking-tighter">Gestión de Producto Floripa Fácil</h3>
                     <button onClick={()=>setIsModalOpen(false)} className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all font-bold">×</button>
                 </div>
                 
@@ -356,81 +340,61 @@ const Admin: React.FC = () => {
                     {modalType === 'inventory' && (
                         <form onSubmit={handleSave} className="space-y-10">
                             
-                            {/* ASISTENTE DE CARGA MULTIMONEDA ACTUALIZADO */}
+                            {/* ASISTENTE DE CARGA MULTIMONEDA */}
                             <div className="bg-gradient-to-br from-green-50 via-white to-blue-50 p-8 rounded-[3rem] border-2 border-green-200 shadow-xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16"></div>
-                                
                                 <div className="flex items-center gap-3 mb-8">
                                     <span className="text-3xl">🧮</span>
                                     <div>
-                                        <h4 className="text-sm font-black text-green-800 uppercase tracking-widest">Asistente de Precios Inteligente</h4>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase">Carga en cualquier moneda, el sistema sincroniza automáticamente.</p>
+                                        <h4 className="text-sm font-black text-green-800 uppercase tracking-widest leading-none">Asistente de Precios Inteligente</h4>
+                                        <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Ingresa el costo en cualquier moneda y el sistema sincronizará los valores.</p>
                                     </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
-                                    {/* CARGA EN PESOS (NUEVO) */}
+                                    {/* CARGA EN PESOS */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2 flex items-center gap-2">
-                                            <span className="w-4 h-4 bg-blue-100 rounded-full flex items-center justify-center text-[8px]">🇦🇷</span>
-                                            Costo Proveedor (ARS)
-                                        </label>
-                                        <div className="relative">
-                                            <input 
-                                                type="number" 
-                                                className="w-full bg-white p-4 rounded-2xl font-black border-2 border-blue-100 focus:border-blue-500 outline-none transition-all text-blue-900" 
-                                                value={inputHelper.arsCost} 
-                                                onChange={e => updatePriceFromArs(Number(e.target.value))}
-                                                placeholder="Ej: 26000"
-                                            />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-blue-200">ARS</span>
-                                        </div>
+                                        <label className="text-[10px] font-black text-blue-700 uppercase ml-2 flex items-center gap-2">Costo (ARS)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-blue-100 focus:border-blue-500 outline-none" 
+                                            value={inputHelper.arsCost} 
+                                            onChange={e => updatePriceFromArs(Number(e.target.value))}
+                                            placeholder="Ej: 52000"
+                                        />
                                     </div>
 
                                     {/* CARGA EN REALES */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2 flex items-center gap-2">
-                                            <span className="w-4 h-4 bg-green-100 rounded-full flex items-center justify-center text-[8px]">🇧🇷</span>
-                                            Costo Proveedor (BRL)
-                                        </label>
-                                        <div className="relative">
-                                            <input 
-                                                type="number" 
-                                                className="w-full bg-white p-4 rounded-2xl font-black border-2 border-green-100 focus:border-green-500 outline-none transition-all text-green-900" 
-                                                value={inputHelper.brlCost} 
-                                                onChange={e => updatePriceFromBrl(Number(e.target.value))}
-                                                placeholder="Ej: 100"
-                                            />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-green-200">R$</span>
-                                        </div>
+                                        <label className="text-[10px] font-black text-green-700 uppercase ml-2 flex items-center gap-2">Costo (BRL)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-green-100 focus:border-green-500 outline-none" 
+                                            value={inputHelper.brlCost} 
+                                            onChange={e => updatePriceFromBrl(Number(e.target.value))}
+                                            placeholder="Ej: 200"
+                                        />
                                     </div>
 
                                     {/* MARGEN DE GANANCIA */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-amber-600 uppercase ml-2 flex items-center gap-2">
-                                            <span className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center text-[8px]">📈</span>
-                                            Margen de Ganancia (USD)
-                                        </label>
-                                        <div className="relative">
-                                            <input 
-                                                type="number" 
-                                                className="w-full bg-white p-4 rounded-2xl font-black border-2 border-amber-100 focus:border-amber-500 outline-none transition-all text-amber-900" 
-                                                value={inputHelper.targetMarginUsd} 
-                                                onChange={e => updateMargin(Number(e.target.value))}
-                                                placeholder="Ej: 15"
-                                            />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-amber-200">USD</span>
-                                        </div>
+                                        <label className="text-[10px] font-black text-amber-600 uppercase ml-2 flex items-center gap-2">Margen (USD)</label>
+                                        <input 
+                                            type="number" 
+                                            className="w-full bg-white p-4 rounded-2xl font-black border-2 border-amber-100 focus:border-amber-500 outline-none" 
+                                            value={inputHelper.targetMarginUsd} 
+                                            onChange={e => updateMargin(Number(e.target.value))}
+                                            placeholder="Ej: 15"
+                                        />
                                     </div>
 
                                     {/* VISTA PREVIA CLIENTE */}
-                                    <div className="bg-white p-6 rounded-3xl border-2 border-green-500 shadow-lg flex flex-col justify-center animate-pulse">
-                                        <span className="text-[9px] font-black text-green-600 uppercase mb-2 block text-center">Precio Final Web</span>
+                                    <div className="bg-white p-6 rounded-3xl border-2 border-green-500 shadow-lg flex flex-col justify-center">
+                                        <span className="text-[9px] font-black text-green-600 uppercase mb-2 block text-center">Venta Web (USD)</span>
                                         <div className="text-2xl font-black text-slate-800 tracking-tighter text-center">
                                             {formatPrice(inputHelper.usdCost + inputHelper.targetMarginUsd, 'USD')}
                                         </div>
                                         <div className="text-[9px] font-bold text-gray-400 mt-2 border-t pt-2 text-center">
-                                            Equiv: {(inputHelper.usdCost + inputHelper.targetMarginUsd).toFixed(2)} USD
+                                            {formatPrice(inputHelper.usdCost + inputHelper.targetMarginUsd, 'ARS')}
                                         </div>
                                     </div>
                                 </div>
@@ -440,79 +404,28 @@ const Admin: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* CAMPOS TÉCNICOS ESPECÍFICOS PARA AUTOS */}
-                            {editingItem.type === 'car' && (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Marca del Vehículo</label>
-                                        <input value={editingItem.brand} onChange={e=>setEditingItem({...editingItem, brand: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500" placeholder="Ej: Fiat" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Modelo / Grupo</label>
-                                        <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500" placeholder="Ej: Mobi - Grupo B" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Categoría</label>
-                                        <select value={editingItem.category} onChange={e=>setEditingItem({...editingItem, category: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold">
-                                            {['Económico', 'Compacto', 'Sedán', 'SUV', 'Luxury'].map(c=><option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Transmisión</label>
-                                        <select value={editingItem.transmission} onChange={e=>setEditingItem({...editingItem, transmission: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold">
-                                            <option value="Manual">Manual</option>
-                                            <option value="Automático">Automático</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Punto de Entrega</label>
-                                        <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-white p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500" />
-                                    </div>
-                                    <div className="flex gap-4 items-center pt-6">
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <input type="checkbox" checked={editingItem.hasAC} onChange={e=>setEditingItem({...editingItem, hasAC: e.target.checked})} className="w-5 h-5 rounded text-green-600 focus:ring-green-500" />
-                                            <span className="text-[10px] font-black text-slate-500 uppercase">Aire Acondicionado</span>
-                                        </label>
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <input type="checkbox" checked={editingItem.isOffer} onChange={e=>setEditingItem({...editingItem, isOffer: e.target.checked})} className="w-5 h-5 rounded text-orange-600 focus:ring-orange-500" />
-                                            <span className="text-[10px] font-black text-slate-500 uppercase">Destacar Oferta</span>
-                                        </label>
-                                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título del Servicio</label>
+                                    <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
                                 </div>
-                            )}
-
-                            {/* CAMPOS PARA OTROS PRODUCTOS */}
-                            {editingItem.type !== 'car' && (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Título del Servicio</label>
-                                        <input value={editingItem.title} onChange={e=>setEditingItem({...editingItem, title: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad</label>
-                                        <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-green-500 transition-all" />
-                                    </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Localidad</label>
+                                    <input value={editingItem.location} onChange={e=>setEditingItem({...editingItem, location: e.target.value})} className="w-full bg-slate-50 p-4 rounded-2xl font-bold" />
                                 </div>
-                            )}
+                            </div>
 
-                            {/* GESTIÓN DE IMÁGENES POR URL */}
                             <div className="space-y-6">
-                                <div className="flex items-center justify-between border-b pb-4">
-                                    <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Galería de Imágenes</h4>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase">{editingItem.images?.length || 0} fotos cargadas</span>
-                                </div>
+                                <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Galería de Fotos</h4>
                                 <div className="flex gap-4">
-                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold border-2 border-transparent focus:border-blue-500 outline-none" placeholder="Pegar enlace de la imagen (JPG/PNG)..." />
-                                    <button type="button" onClick={addImageToEditingItem} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg hover:bg-slate-900">Añadir Foto</button>
+                                    <input value={newImageUrl} onChange={e=>setNewImageUrl(e.target.value)} className="flex-1 bg-slate-50 p-4 rounded-2xl font-bold" placeholder="Pegar URL de la imagen..." />
+                                    <button type="button" onClick={addImageToEditingItem} className="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px]">Añadir</button>
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-5 gap-4">
                                     {editingItem.images?.map((img: string, idx: number) => (
-                                        <div key={idx} className="relative group rounded-2xl overflow-hidden aspect-square shadow-md border-2 border-white">
-                                            <img src={img} className="w-full h-full object-cover" alt={`Preview ${idx}`} />
-                                            <div className="absolute inset-0 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer" onClick={()=>removeImageFromEditingItem(idx)}>
-                                                <span className="text-xl">🗑️</span>
-                                                <span className="font-black uppercase text-[8px]">Eliminar</span>
-                                            </div>
+                                        <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden shadow-md">
+                                            <img src={img} className="w-full h-full object-cover" alt="" />
+                                            <div className="absolute inset-0 bg-red-600/90 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer font-black text-[10px] uppercase" onClick={()=>removeImageFromEditingItem(idx)}>Eliminar</div>
                                         </div>
                                     ))}
                                 </div>
@@ -520,13 +433,13 @@ const Admin: React.FC = () => {
 
                             <div className="space-y-4">
                                 <label className="text-[10px] font-black text-slate-400 uppercase ml-2">Descripción Detallada</label>
-                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none focus:border-green-500 border-2 border-transparent transition-all" placeholder="Escribe los detalles que verá el cliente..." />
+                                <textarea value={editingItem.description} onChange={e=>setEditingItem({...editingItem, description: e.target.value})} className="w-full bg-slate-50 p-6 rounded-[2rem] font-bold min-h-[150px] outline-none focus:border-green-500 border-2 border-transparent" />
                             </div>
 
                             <div className="flex justify-end gap-4 border-t pt-8">
-                                <button type="button" onClick={()=>setIsModalOpen(false)} className="px-10 py-4 font-black text-slate-400 uppercase text-[10px] hover:text-slate-600">Cancelar</button>
-                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:bg-green-700 disabled:opacity-50 flex items-center gap-3">
-                                    {isSaving ? '💾 Procesando...' : '✔️ Guardar Cambios'}
+                                <button type="button" onClick={()=>setIsModalOpen(false)} className="px-10 py-4 font-black text-slate-400 uppercase text-[10px]">Cancelar</button>
+                                <button type="submit" disabled={isSaving} className="bg-green-600 text-white px-12 py-4 rounded-3xl font-black uppercase text-[10px] shadow-xl hover:bg-green-700 disabled:opacity-50">
+                                    {isSaving ? 'Guardando...' : '💾 Guardar Cambios'}
                                 </button>
                             </div>
                         </form>

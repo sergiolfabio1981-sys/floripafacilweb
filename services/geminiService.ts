@@ -11,18 +11,12 @@ Tu misión:
 
 IMPORTANTE: 
 - Si el usuario muestra interés real, solicita su nombre y WhatsApp para pasarle con un asesor humano.
-- Las reservas se confirman con un 40% de seña.`;
+- Las reservas se confirman con un 40% de seña para congelar el precio en ARS o USD.`;
 
-/**
- * Función para enviar mensajes a Flori usando la API de Gemini.
- * Obtiene la API KEY exclusivamente de process.env.API_KEY según las directrices.
- */
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    // Fix: Using GoogleGenAI according to guidelines, obtaining API_KEY exclusively from process.env
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
     
-    // Fix: Implementing streaming content generation for better UI experience
     const response = await ai.models.generateContentStream({
       model: 'gemini-3-flash-preview',
       contents: message,
@@ -32,7 +26,6 @@ export const sendMessageToFlori = async function* (message: string) {
       },
     });
 
-    // Fix: Correctly extracting text from response chunks using the .text property
     for await (const chunk of response) {
       const text = chunk.text;
       if (text) {

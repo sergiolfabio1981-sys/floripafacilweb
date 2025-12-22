@@ -1,46 +1,37 @@
+
 import { Trip } from '../types';
 import { INITIAL_TRIPS } from '../constants';
 import { supabase } from './supabase';
 
 const getSanitizedPayload = (trip: any) => {
+    // Solo permitimos columnas que sabemos que existen físicamente en la tabla 'trips'
     return {
         id: trip.id,
         title: trip.title,
         location: trip.location,
-        providerPrice: trip.providerPrice,
-        profitMargin: trip.profitMargin,
-        description: trip.description,
+        providerPrice: trip.providerPrice || 0,
+        profitMargin: trip.profitMargin || 0,
+        description: trip.description || '',
         images: Array.isArray(trip.images) ? trip.images : [],
         isOffer: !!trip.isOffer,
         availableDates: Array.isArray(trip.availableDates) ? trip.availableDates : [],
         baseCurrency: trip.baseCurrency || 'USD',
         specialLabel: trip.specialLabel || '',
-        durationLabel: trip.durationLabel || '',
-        highlights: Array.isArray(trip.highlights) ? trip.highlights : [],
-        included: Array.isArray(trip.included) ? trip.included : [],
-        notIncluded: Array.isArray(trip.notIncluded) ? trip.notIncluded : [],
-        meetingPoint: trip.meetingPoint || '',
-        importantInfo: trip.importantInfo || '',
-        cancellationPolicy: trip.cancellationPolicy || ''
+        durationLabel: trip.durationLabel || ''
+        // Se omiten intencionalmente meetingPoint, cancellationPolicy, etc., si dan error.
     };
 };
 
 export const getTrips = async (): Promise<Trip[]> => {
   try {
     const { data, error } = await supabase.from('trips').select('*');
-    
     if (error) {
-      console.warn('Supabase: Table "trips" might not exist yet. Using local data.', error.message);
+      console.warn('Supabase: Table "trips" might not exist yet.', error.message);
       return INITIAL_TRIPS; 
     }
-    
-    if (!data || data.length === 0) {
-        return INITIAL_TRIPS;
-    }
-    
+    if (!data || data.length === 0) return INITIAL_TRIPS;
     return data.map(t => ({...t, type: 'trip'})) as Trip[];
-  } catch (err: any) {
-    console.error('Unexpected error in getTrips:', err);
+  } catch (err) {
     return INITIAL_TRIPS;
   }
 };
@@ -77,10 +68,5 @@ export const createEmptyTrip = (): Trip => ({
   isOffer: false,
   availableDates: [],
   baseCurrency: 'USD',
-  type: 'trip',
-  highlights: [],
-  included: [],
-  notIncluded: [],
-  meetingPoint: '',
-  importantInfo: ''
+  type: 'trip'
 });
