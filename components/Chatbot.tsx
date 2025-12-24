@@ -27,28 +27,37 @@ const Chatbot: React.FC = () => {
   }, [messages, isOpen]);
 
   const checkKeyStatus = async () => {
-      // Si estamos fuera de AI Studio y no hay process.env.API_KEY, necesitamos que el usuario seleccione una
+      // Intentamos detectar si necesitamos una clave manual
       if (window.aistudio) {
-          const hasKey = await window.aistudio.hasSelectedApiKey();
-          setNeedsKey(!hasKey && !process.env.API_KEY);
+          try {
+              const hasKey = await window.aistudio.hasSelectedApiKey();
+              // Si no tiene key y no hay una inyectada en el env, pedimos vincular
+              setNeedsKey(!hasKey && !process.env.API_KEY);
+          } catch (e) {
+              console.warn("AISTUDIO detect error:", e);
+          }
       }
   };
 
   const handleSelectKey = async () => {
       if (window.aistudio) {
-          await window.aistudio.openSelectKey();
-          setNeedsKey(false);
-          setMessages(prev => [...prev, { id: 'key-ok', role: 'model', text: '¡Excelente! Ya estoy conectada. ¿En qué puedo ayudarte? 🌴✨' }]);
+          try {
+              await window.aistudio.openSelectKey();
+              // Asumimos éxito según requerimientos de Google para evitar race conditions
+              setNeedsKey(false);
+              setMessages(prev => [...prev, { 
+                id: 'key-ok-' + Date.now(), 
+                role: 'model', 
+                text: '¡Conexión establecida con éxito! ✨ Ahora ya puedo responder tus consultas sobre Floripa. 🌴' 
+              }]);
+          } catch (e) {
+              console.error("Error al abrir selector de llaves:", e);
+          }
       }
   };
 
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
-
-    if (needsKey) {
-        setMessages(prev => [...prev, { id: 'error-key', role: 'model', text: 'Por favor, primero vincula una conexión usando el botón "CONECTAR" arriba para que pueda responderte. 🌊' }]);
-        return;
-    }
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -76,15 +85,29 @@ const Chatbot: React.FC = () => {
         );
       }
 
-      if (!hasReceivedContent) throw new Error("No content");
+      if (!hasReceivedContent) throw new Error("EMPTY_RESPONSE");
 
     } catch (error: any) {
       console.error("Error en Chatbot:", error);
-      if (error.message?.includes('API_KEY')) setNeedsKey(true);
+      const errorText = error.message || "";
       
-      setMessages(prev => 
-        prev.map(msg => msg.id === botMessageId ? { ...msg, text: "Tuve un problema de conexión. Si persiste, intenta reconectar usando el botón de arriba. 🌊" } : msg)
-      );
+      // Si el error indica que falta la entidad o es un 404/403 de llave
+      if (errorText.includes("Requested entity was not found") || errorText.includes("API_KEY") || errorText.includes("403")) {
+          setNeedsKey(true);
+          setMessages(prev => 
+            prev.map(msg => msg.id === botMessageId ? { 
+                ...msg, 
+                text: "Necesito que vincules tu cuenta de Google AI para poder responderte fuera del editor. Por favor, usa el botón 'CONECTAR' arriba. 🌊✨" 
+            } : msg)
+          );
+      } else {
+          setMessages(prev => 
+            prev.map(msg => msg.id === botMessageId ? { 
+                ...msg, 
+                text: "Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊" 
+            } : msg)
+          );
+      }
     } finally {
       setIsTyping(false);
     }
@@ -105,7 +128,7 @@ const Chatbot: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-sm uppercase tracking-widest leading-none">Flori AI</h3>
-                <p className="text-[9px] text-lime-100 font-bold uppercase mt-1">Especialista Floripa Fácil</p>
+                <p className="text-[9px] text-lime-100 font-bold uppercase mt-1">Soporte Inteligente</p>
               </div>
             </div>
             
@@ -113,7 +136,7 @@ const Chatbot: React.FC = () => {
                 {needsKey && (
                     <button 
                         onClick={handleSelectKey}
-                        className="bg-white text-green-700 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-tighter shadow-lg hover:scale-105 transition-all"
+                        className="bg-white text-green-700 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse"
                     >
                         ⚡ Conectar
                     </button>
@@ -159,13 +182,12 @@ const Chatbot: React.FC = () => {
                 value={input} 
                 onChange={e => setInput(e.target.value)} 
                 onKeyDown={e => e.key === 'Enter' && handleSend()} 
-                placeholder={needsKey ? "Vincula tu conexión arriba..." : "Escribe un mensaje..."}
-                disabled={needsKey}
-                className="w-full pl-5 pr-12 py-3 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 font-semibold text-sm transition-all border border-transparent focus:bg-white disabled:opacity-50"
+                placeholder={needsKey ? "Vincula tu conexión arriba..." : "Escribir a Flori..."}
+                className="w-full pl-5 pr-12 py-3 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 font-semibold text-sm transition-all border border-transparent focus:bg-white"
               />
               <button 
                 onClick={handleSend} 
-                disabled={isTyping || !input.trim() || needsKey}
+                disabled={isTyping || !input.trim()}
                 className="absolute right-1.5 p-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all disabled:opacity-50 disabled:bg-slate-300 shadow-md shadow-green-200"
               >
                 <svg className="w-5 h-5 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
@@ -180,7 +202,7 @@ const Chatbot: React.FC = () => {
         {!isOpen && (
             <div className="absolute -top-12 right-0 bg-white text-green-700 px-4 py-2 rounded-2xl shadow-xl font-black text-[10px] uppercase tracking-widest animate-bounce border-2 border-green-50 flex items-center gap-2 whitespace-nowrap">
                 <span className={`w-2 h-2 rounded-full animate-pulse ${needsKey ? 'bg-red-500' : 'bg-green-500'}`}></span>
-                {needsKey ? '¡Vincular Flori!' : '¡Consultas Floripa Fácil!'}
+                {needsKey ? '¡Vincula tu conexión!' : '¡Consultas Floripa Fácil!'}
             </div>
         )}
         <button 
