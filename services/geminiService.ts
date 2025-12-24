@@ -15,11 +15,11 @@ IMPORTANTE:
 
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const response = await ai.models.generateContentStream({
       model: 'gemini-3-flash-preview',
-      contents: message,
+      contents: [{ parts: [{ text: message }] }],
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         temperature: 0.7,
@@ -34,6 +34,6 @@ export const sendMessageToFlori = async function* (message: string) {
     }
   } catch (error: any) {
     console.error("Error crítico en Flori AI:", error);
-    yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊✨";
+    yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊✨ (Error: Verifica la configuración de tu API Key)";
   }
 };

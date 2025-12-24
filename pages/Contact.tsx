@@ -56,7 +56,7 @@ const Contact: React.FC = () => {
             <div>
               <h2 className="text-4xl font-black text-gray-800 mb-6 uppercase tracking-tighter italic">Atención Personalizada</h2>
               <p className="text-gray-500 text-lg leading-relaxed font-medium">
-                En ABRAS Travel no solo vendemos servicios, creamos recuerdos. Respondemos todas las consultas en menos de 24 horas.
+                En Floripa Fácil no solo vendemos servicios, creamos recuerdos. Respondemos todas las consultas en menos de 24 horas.
               </p>
             </div>
 
@@ -77,7 +77,7 @@ const Contact: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-black text-gray-800 uppercase tracking-widest text-sm">Emails Oficiales</h3>
-                  <p className="text-gray-500 font-bold mt-1 text-lg">ventas@abrastravel.com</p>
+                  <p className="text-gray-500 font-bold mt-1 text-lg">ventas@floripafacil.com</p>
                 </div>
               </div>
             </div>

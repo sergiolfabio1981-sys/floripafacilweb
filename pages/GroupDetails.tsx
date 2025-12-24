@@ -43,7 +43,7 @@ const GroupDetails: React.FC = () => {
   };
 
   const handleConfirmWhatsApp = (passengerData: any) => {
-    const message = `*RESERVA GRUPAL - ABRAS TRAVEL*\n\n` +
+    const message = `*RESERVA GRUPAL - FLORIPA FÁCIL*\n\n` +
                     `🚌 *Viaje:* ${trip.title}\n` +
                     `📅 *Salida:* ${selectedDate}\n` +
                     `👥 *Pasajeros:* ${guests}\n` +
@@ -69,7 +69,7 @@ const GroupDetails: React.FC = () => {
   };
 
   const shareUrl = window.location.href;
-  const shareText = `Mira este Viaje Grupal en ABRAS Travel: ${trip?.title}`;
+  const shareText = `Mira este Viaje Grupal en Floripa Fácil: ${trip?.title}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
   const emailUrl = `mailto:?subject=${encodeURIComponent(trip?.title || '')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
 

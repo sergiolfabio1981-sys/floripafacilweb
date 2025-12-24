@@ -62,7 +62,7 @@ const HotelDetails: React.FC = () => {
   };
 
   const handleConfirmWhatsApp = (passengerData: any) => {
-    const message = `*SOLICITUD DE RESERVA DE HOTEL - ABRAS TRAVEL*\n\n` +
+    const message = `*SOLICITUD DE RESERVA DE HOTEL - FLORIPA FÁCIL*\n\n` +
                     `🏨 *Hotel:* ${hotel?.title}\n` +
                     `📅 *Check-in:* ${checkIn}\n` +
                     `📅 *Check-out:* ${checkOut} (${nights} noches)\n` +
@@ -89,7 +89,7 @@ const HotelDetails: React.FC = () => {
   };
 
   const shareUrl = window.location.href;
-  const shareText = `Mira este hotel en ABRAS Travel: ${hotel?.title}`;
+  const shareText = `Mira este hotel en Floripa Fácil: ${hotel?.title}`;
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
   const emailUrl = `mailto:?subject=${encodeURIComponent(hotel?.title || '')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
 
@@ -180,7 +180,7 @@ const HotelDetails: React.FC = () => {
                   <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">Check-out</label><input type="date" required className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" min={checkIn} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} /></div>
               </div>
               {nights > 0 && (<div className="bg-blue-50 p-4 rounded-lg space-y-2 text-sm mt-4 border border-blue-100"><div className="flex justify-between text-gray-700"><span>{formatPrice(hotel.pricePerNight)} x {nights} noches</span><span>{formatPrice(totalPrice)}</span></div><div className="flex justify-between font-bold text-orange-600 pt-2 border-t border-blue-200 mt-2"><span>Reserva (10%)</span><span>{formatPrice(bookingFee)}</span></div><p className="text-xs text-gray-400 mt-1 italic">El saldo restante se abona al llegar a la propiedad.</p></div>)}
-              <button onClick={handleBookingClick} disabled={nights <= 0} className="w-full bg-blue-600 disabled:bg-gray-300 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 mt-4 transform hover:-translate-y-1">{nights > 0 ? 'Continuar Reserva' : 'Selecciona Fechas'}</button>
+              <button onClick={handleBookingClick} disabled={nights <= 0} className="w-full bg-blue-600 disabled:bg-gray-100 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 mt-4 transform hover:-translate-y-1">{nights > 0 ? 'Continuar Reserva' : 'Selecciona Fechas'}</button>
             </div>
           </div>
         </div>

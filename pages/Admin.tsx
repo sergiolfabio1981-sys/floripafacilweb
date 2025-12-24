@@ -16,7 +16,7 @@ import { LOGO_URL, INITIAL_TRIPS, INITIAL_EXCURSIONS, INITIAL_CARS } from '../co
 const Admin: React.FC = () => {
   const { formatPrice, convertPrice } = useCurrency();
   const [user, setUser] = useState<Seller | null>(() => {
-      const saved = localStorage.getItem('abras_user');
+      const saved = localStorage.getItem('ff_user');
       return saved ? JSON.parse(saved) : null;
   });
   
@@ -114,7 +114,7 @@ const Admin: React.FC = () => {
     if (email === "sergiolfabio1981@gmail.com" && password === "Colo1981") {
       const adminUser: any = { id: 'admin-1', name: 'Director Floripa Fácil', role: 'admin' };
       setUser(adminUser);
-      localStorage.setItem('abras_user', JSON.stringify(adminUser));
+      localStorage.setItem('ff_user', JSON.stringify(adminUser));
     } else {
       alert("Credenciales incorrectas.");
     }
@@ -285,7 +285,7 @@ const Admin: React.FC = () => {
               <button onClick={()=>setActiveTab('sellers')} className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${activeTab==='sellers' ? 'bg-green-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}>👥 Vendedores</button>
               <div className="pt-4 mt-4 border-t border-white/5">
                 <button onClick={handleSyncDefaults} disabled={isSaving} className="w-full text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-amber-400 hover:bg-amber-400/10 rounded-2xl">⚙️ Sincronizar Datos FF</button>
-                <button onClick={()=>{localStorage.removeItem('abras_user'); window.location.reload();}} className="w-full text-left px-6 py-4 text-[10px] font-black text-red-400 hover:bg-red-400/10 rounded-2xl uppercase tracking-widest mt-2">🚪 Cerrar Sesión</button>
+                <button onClick={()=>{localStorage.removeItem('ff_user'); window.location.reload();}} className="w-full text-left px-6 py-4 text-[10px] font-black text-red-400 hover:bg-red-400/10 rounded-2xl uppercase tracking-widest mt-2">🚪 Cerrar Sesión</button>
               </div>
           </nav>
       </aside>
