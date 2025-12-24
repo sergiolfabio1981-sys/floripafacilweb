@@ -3,7 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { sendMessageToFlori } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
-// Imagen de mujer rubia, piel trigueña, aspecto profesional y cálido (Brasil style)
 const FLORI_AVATAR = "https://images.unsplash.com/photo-1544717302-de2939b7ef71?q=80&w=200&h=200&auto=format&fit=crop";
 
 const Chatbot: React.FC = () => {
@@ -37,20 +36,30 @@ const Chatbot: React.FC = () => {
     setIsTyping(true);
 
     const botMessageId = (Date.now() + 1).toString();
+    // Creamos el mensaje vacío del bot para el streaming
     setMessages(prev => [...prev, { id: botMessageId, role: 'model', text: '' }]);
 
     try {
       let fullResponse = '';
       const stream = sendMessageToFlori(userMessage.text);
       
+      let hasReceivedContent = false;
       for await (const chunk of stream) {
+        hasReceivedContent = true;
         fullResponse += chunk;
         setMessages(prev => 
           prev.map(msg => msg.id === botMessageId ? { ...msg, text: fullResponse } : msg)
         );
       }
+
+      if (!hasReceivedContent) {
+          throw new Error("No content received");
+      }
     } catch (error) {
       console.error("Error con Flori AI:", error);
+      setMessages(prev => 
+        prev.map(msg => msg.id === botMessageId ? { ...msg, text: "Lo siento, tuve un problema de conexión. ¿Podrías intentar de nuevo o hablar con un asesor? 🌊" } : msg)
+      );
     } finally {
       setIsTyping(false);
     }
@@ -129,7 +138,7 @@ const Chatbot: React.FC = () => {
         </div>
       )}
 
-      {/* Launcher Button con efecto visual */}
+      {/* Launcher Button */}
       <div className="relative">
         {!isOpen && (
             <div className="absolute -top-12 right-0 bg-white text-green-700 px-4 py-2 rounded-2xl shadow-xl font-black text-[10px] uppercase tracking-widest animate-bounce border-2 border-green-50 flex items-center gap-2 whitespace-nowrap">
