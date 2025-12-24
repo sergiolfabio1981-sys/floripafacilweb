@@ -120,6 +120,24 @@ const Admin: React.FC = () => {
     }
   };
 
+  const handleDeleteItem = async (item: any) => {
+      if (!window.confirm(`¿ESTÁS SEGURO? Vas a eliminar permanentemente "${item.title}". Esta acción no se puede deshacer.`)) return;
+      
+      setIsSaving(true);
+      try {
+          if (item.type === 'trip') await deleteTrip(item.id);
+          else if (item.type === 'car') await deleteCarRental(item.id);
+          else if (item.type === 'excursion') await deleteExcursion(item.id);
+          
+          alert("¡Publicación eliminada correctamente!");
+          loadData();
+      } catch (err: any) {
+          alert(`Error al eliminar: ${err.message}`);
+      } finally {
+          setIsSaving(false);
+      }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSaving(true);
@@ -227,9 +245,6 @@ const Admin: React.FC = () => {
     });
   };
 
-  const filteredMessages = messages.filter(m => messageFilter === 'all' || m.type === messageFilter);
-  const unreadCount = messages.filter(m => !m.is_read).length;
-
   if (!user) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-900 p-4">
@@ -247,6 +262,8 @@ const Admin: React.FC = () => {
         </div>
     );
   }
+
+  const unreadCount = messages.filter(m => !m.is_read).length;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
@@ -308,7 +325,22 @@ const Admin: React.FC = () => {
                                         {formatPrice((item.providerPrice || item.providerPricePerDay || 0) + (item.profitMargin || item.profitMarginPerDay || 0), 'USD')}
                                     </td>
                                     <td className="p-6 text-right">
-                                        <button onClick={()=>openEdit('inventory', item)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-green-100 hover:text-green-600 transition-all shadow-sm">✏️</button>
+                                        <div className="flex justify-end gap-2">
+                                            <button 
+                                                onClick={()=>openEdit('inventory', item)} 
+                                                className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-green-100 hover:text-green-600 transition-all shadow-sm"
+                                                title="Editar publicación"
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button 
+                                                onClick={()=>handleDeleteItem(item)} 
+                                                className="p-2.5 bg-slate-100 text-red-400 rounded-xl hover:bg-red-100 hover:text-red-600 transition-all shadow-sm"
+                                                title="Eliminar publicación"
+                                            >
+                                                🗑️
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                               ))}
