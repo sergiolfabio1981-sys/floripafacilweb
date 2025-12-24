@@ -16,17 +16,20 @@ REGLAS CRÍTICAS:
 
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    // Inicialización inmediata con la clave de entorno
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Verificamos si la API KEY está disponible
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("API_KEY_MISSING");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContentStream({
-      model: 'gemini-3-pro-preview', // Cambiamos a Pro para mayor capacidad de razonamiento
+      model: 'gemini-3-flash-preview', // Modelo Flash: más rápido y compatible
       contents: [{ role: 'user', parts: [{ text: message }] }],
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.8,
-        topP: 0.95,
-        topK: 40,
+        temperature: 0.7,
       },
     });
 
@@ -37,13 +40,14 @@ export const sendMessageToFlori = async function* (message: string) {
       }
     }
   } catch (error: any) {
-    console.error("Error en la conexión con Flori AI:", error);
+    console.error("Error en Flori AI:", error.message);
     
-    // Si el error es de autenticación o cuota, damos un mensaje amigable
-    if (error.message?.includes('API_KEY')) {
-        yield "¡Olá! Mi conexión con la base central está en mantenimiento momentáneo. Por favor, contacta a nuestros asesores por WhatsApp para una atención inmediata. 🌊✨";
+    if (error.message === "API_KEY_MISSING" || error.message?.includes('API_KEY') || error.message?.includes('403')) {
+        yield "¡Olá! Necesito una conexión activa para ayudarte. Por favor, haz clic en el botón 'Vincular' que aparecerá aquí arriba para activar mis servicios. 🌴✨";
+    } else if (error.message?.includes('Requested entity was not found')) {
+        yield "¡Ups! Parece que mi conexión expiró. Por favor, intenta vincular de nuevo tu acceso. 🌊";
     } else {
-        yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊✨";
+        yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo en unos segundos? 🌊✨";
     }
   }
 };
