@@ -31,57 +31,67 @@ const Navbar: React.FC = () => {
   const currentCurr = currencies.find(c => c.code === currency) || currencies[0];
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50 border-b-4 border-lime-500">
-      <div className="max-w-7xl mx-auto px-4">
+    <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-slate-100">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-20">
-            <div className="flex-shrink-0 flex items-center h-full py-1">
-                <Link to="/" className="group h-full flex items-center">
-                    <div className="relative h-14 w-14 bg-white rounded-full flex items-center justify-center overflow-hidden border border-gray-100 shadow-sm">
+            <div className="flex-shrink-0">
+                <Link to="/" className="group flex items-center gap-3">
+                    <div className="relative h-12 w-12 bg-white rounded-2xl flex items-center justify-center p-1 shadow-sm border border-slate-50 group-hover:shadow-md transition-all duration-500 group-hover:-rotate-3">
                         <img src={LOGO_URL} className="h-full w-full object-contain" alt="Floripa Fácil" />
                     </div>
-                    <div className="ml-3 flex flex-col justify-center">
-                        <span className="font-black text-green-700 text-lg leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</span>
-                        <span className="font-bold text-gray-400 text-[9px] tracking-[0.2em] uppercase">Turismo & Traslados</span>
+                    <div className="flex flex-col">
+                        <span className="font-black text-[#064E3B] text-xl leading-none tracking-tightest italic uppercase">Floripa Fácil</span>
+                        <span className="font-bold text-slate-400 text-[8px] tracking-[0.3em] uppercase mt-1">Premium Travel Services</span>
                     </div>
                 </Link>
             </div>
 
-            <div className="hidden lg:flex items-center space-x-2">
+            <div className="hidden lg:flex items-center bg-slate-100/50 p-1.5 rounded-[1.5rem] border border-slate-200/50">
                 {navLinks.map((link) => (
                 <Link
                     key={link.path}
                     to={link.path}
-                    className={`flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all ${
-                    isActive(link.path) ? 'text-green-700 bg-green-50 font-bold' : 'text-gray-500 hover:text-green-600 hover:bg-green-50'
+                    className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                    isActive(link.path) 
+                        ? 'text-[#064E3B] bg-white shadow-sm ring-1 ring-slate-200' 
+                        : 'text-slate-500 hover:text-[#064E3B] hover:bg-white/50'
                     }`}
                 >
-                    <span className="text-lg mb-1">{link.icon}</span>
-                    <span className="text-[9px] font-bold uppercase tracking-widest">{link.name}</span>
+                    {link.name}
                 </Link>
                 ))}
             </div>
 
-            <div className="flex items-center gap-3">
-                <Link to="/planner" className="relative p-2.5 text-green-600 bg-green-50 rounded-full hover:bg-green-100 transition-all">
-                    🛒
+            <div className="flex items-center gap-4">
+                <Link to="/planner" className="relative p-3 text-[#064E3B] bg-[#D9F99D]/30 rounded-2xl hover:bg-[#D9F99D]/50 transition-all active:scale-90">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     {selectedItems.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+                        <span className="absolute -top-1.5 -right-1.5 bg-[#064E3B] text-[#D9F99D] text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-bounce">
                             {selectedItems.length}
                         </span>
                     )}
                 </Link>
-                <button onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)} className="flex items-center gap-2 text-[10px] font-black text-gray-600 bg-gray-50 px-3 py-2 rounded-full border border-gray-100">
-                    <span>{currentCurr.flag}</span> {currentCurr.code}
-                </button>
-                {currencyDropdownOpen && (
-                    <div className="absolute top-16 right-4 w-32 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-                        {currencies.map(c => (
-                            <button key={c.code} onClick={() => { setCurrency(c.code as any); setCurrencyDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-xs font-bold hover:bg-green-50 flex items-center gap-2 text-gray-700 transition-colors">
-                                <span>{c.flag}</span> {c.code}
-                            </button>
-                        ))}
-                    </div>
-                )}
+                <div className="relative">
+                  <button 
+                    onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)} 
+                    className="flex items-center gap-2 text-[10px] font-black text-slate-700 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all"
+                  >
+                      <span>{currentCurr.flag}</span> {currentCurr.code}
+                  </button>
+                  {currencyDropdownOpen && (
+                      <div className="absolute top-full right-0 mt-2 w-40 bg-white/90 backdrop-blur-xl rounded-[1.5rem] shadow-2xl border border-slate-100 z-50 overflow-hidden p-2 animate-pop-in">
+                          {currencies.map(c => (
+                              <button 
+                                key={c.code} 
+                                onClick={() => { setCurrency(c.code as any); setCurrencyDropdownOpen(false); }} 
+                                className="w-full text-left px-4 py-2.5 text-[10px] font-black hover:bg-[#D9F99D]/20 flex items-center gap-3 text-slate-600 rounded-xl transition-colors uppercase tracking-widest"
+                              >
+                                  <span>{c.flag}</span> {c.code}
+                              </button>
+                          ))}
+                      </div>
+                  )}
+                </div>
             </div>
         </div>
       </div>
