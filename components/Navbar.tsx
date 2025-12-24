@@ -15,10 +15,10 @@ const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: t('nav.home'), path: '/', icon: '🏠' },
-    { name: 'Tours', path: '/trips', icon: '🎒' },
+    { name: 'Destinos', path: '/trips', icon: '📍' },
+    { name: 'Guías', path: '/guides', icon: '📖' },
     { name: 'Traslados', path: '/excursions', icon: '🚐' },
     { name: 'Autos', path: '/cars', icon: '🚗' },
-    { name: 'Admin', path: '/admin', icon: '⚙️' },
   ];
 
   const currencies = [

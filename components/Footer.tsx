@@ -17,14 +17,14 @@ const Footer: React.FC = () => {
 
   return (
     <>
-    <footer className="bg-slate-950 text-white border-t-8 border-lime-500 overflow-hidden">
+    <footer className="bg-slate-950 text-white border-t-8 border-[#D9F99D] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-20 relative">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-lime-500/10 rounded-full blur-[100px]"></div>
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#D9F99D]/5 rounded-full blur-[100px]"></div>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-16 relative z-10">
           <div className="md:col-span-5">
             <div className="flex flex-col items-start gap-6 mb-8">
-                <div className="bg-white p-1 rounded-full shadow-2xl border-4 border-lime-500/20 w-32 h-32 flex items-center justify-center overflow-hidden">
+                <div className="bg-white p-1 rounded-full shadow-2xl border-4 border-[#D9F99D]/20 w-32 h-32 flex items-center justify-center overflow-hidden">
                     <img 
                       src={LOGO_URL} 
                       alt="Floripa Fácil" 
@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <h4 className="text-3xl font-black text-lime-400 leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</h4>
+                    <h4 className="text-3xl font-black text-[#D9F99D] leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</h4>
                     <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-[0.3em] font-black">Tu Conexión Directa con el Paraíso</p>
                 </div>
             </div>
@@ -45,9 +45,10 @@ const Footer: React.FC = () => {
           <div className="md:col-span-3">
             <h4 className="font-black text-xl mb-10 text-white uppercase tracking-tighter italic">Navegación</h4>
             <ul className="space-y-5">
-              <li><Link to="/excursions" className="text-gray-400 hover:text-lime-400 transition-colors font-bold uppercase text-xs tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-lime-500 rounded-full"></span> Traslados</Link></li>
-              <li><Link to="/trips" className="text-gray-400 hover:text-lime-400 transition-colors font-bold uppercase text-xs tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-lime-500 rounded-full"></span> Tours & Paseos</Link></li>
-              <li><Link to="/cars" className="text-gray-400 hover:text-lime-400 transition-colors font-bold uppercase text-xs tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-lime-500 rounded-full"></span> Rent a Car</Link></li>
+              <li><Link to="/trips" className="text-gray-400 hover:text-[#D9F99D] transition-colors font-bold uppercase text-[10px] tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-[#D9F99D] rounded-full"></span> Destinos</Link></li>
+              <li><Link to="/guides" className="text-gray-400 hover:text-[#D9F99D] transition-colors font-bold uppercase text-[10px] tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-[#D9F99D] rounded-full"></span> Guías de Viaje</Link></li>
+              <li><Link to="/excursions" className="text-gray-400 hover:text-[#D9F99D] transition-colors font-bold uppercase text-[10px] tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-[#D9F99D] rounded-full"></span> Traslados</Link></li>
+              <li><Link to="/cars" className="text-gray-400 hover:text-[#D9F99D] transition-colors font-bold uppercase text-[10px] tracking-widest flex items-center gap-3"><span className="w-1.5 h-1.5 bg-[#D9F99D] rounded-full"></span> Rent a Car</Link></li>
             </ul>
           </div>
 
@@ -55,11 +56,11 @@ const Footer: React.FC = () => {
             <h4 className="font-black text-xl mb-10 text-white uppercase tracking-tighter italic">Contacto</h4>
             <div className="space-y-6">
                 <div className="flex items-center gap-4 group cursor-pointer">
-                    <div className="w-10 h-10 bg-lime-500/10 rounded-xl flex items-center justify-center text-lime-400 group-hover:bg-lime-500 group-hover:text-green-950 transition-all">📍</div>
+                    <div className="w-10 h-10 bg-[#D9F99D]/10 rounded-xl flex items-center justify-center text-[#D9F99D] group-hover:bg-[#D9F99D] group-hover:text-green-950 transition-all">📍</div>
                     <span className="text-gray-400 font-bold text-sm">Florianópolis, SC, Brasil</span>
                 </div>
                 <div className="flex items-center gap-4 group cursor-pointer">
-                    <div className="w-10 h-10 bg-lime-500/10 rounded-xl flex items-center justify-center text-lime-400 group-hover:bg-lime-500 group-hover:text-green-950 transition-all">📞</div>
+                    <div className="w-10 h-10 bg-[#D9F99D]/10 rounded-xl flex items-center justify-center text-[#D9F99D] group-hover:bg-[#D9F99D] group-hover:text-green-950 transition-all">📞</div>
                     <span className="text-gray-400 font-bold text-sm">+54 9 11 4063 2644</span>
                 </div>
             </div>
@@ -69,6 +70,7 @@ const Footer: React.FC = () => {
         <div className="border-t border-white/5 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">© {new Date().getFullYear()} Floripa Fácil — Todos los derechos reservados.</p>
           <div className="flex gap-8">
+              <Link to="/admin" className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-[#D9F99D] transition-colors">Login</Link>
               <button onClick={openTerms} className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors">Legales</button>
           </div>
         </div>
