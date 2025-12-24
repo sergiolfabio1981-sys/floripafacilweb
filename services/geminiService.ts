@@ -16,16 +16,17 @@ REGLAS CRÍTICAS:
 
 export const sendMessageToFlori = async function* (message: string) {
   try {
-    // Verificamos si la API KEY está disponible
     const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-        throw new Error("API_KEY_MISSING");
+    
+    // Si no hay API KEY, lanzamos un error específico que el componente pueda atrapar
+    if (!apiKey || apiKey === "") {
+        throw new Error("AUTH_REQUIRED");
     }
 
     const ai = new GoogleGenAI({ apiKey });
     
     const response = await ai.models.generateContentStream({
-      model: 'gemini-3-flash-preview', // Modelo Flash: más rápido y compatible
+      model: 'gemini-3-flash-preview',
       contents: [{ role: 'user', parts: [{ text: message }] }],
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
@@ -40,14 +41,15 @@ export const sendMessageToFlori = async function* (message: string) {
       }
     }
   } catch (error: any) {
-    console.error("Error en Flori AI:", error.message);
+    console.error("Error en Flori AI:", error);
     
-    if (error.message === "API_KEY_MISSING" || error.message?.includes('API_KEY') || error.message?.includes('403')) {
-        yield "¡Olá! Necesito una conexión activa para ayudarte. Por favor, haz clic en el botón 'Vincular' que aparecerá aquí arriba para activar mis servicios. 🌴✨";
-    } else if (error.message?.includes('Requested entity was not found')) {
-        yield "¡Ups! Parece que mi conexión expiró. Por favor, intenta vincular de nuevo tu acceso. 🌊";
+    const errorMsg = error.message || "";
+    
+    // Si el error es de permisos o entidad no encontrada
+    if (errorMsg.includes("Requested entity was not found") || errorMsg.includes("API_KEY") || errorMsg.includes("403") || errorMsg === "AUTH_REQUIRED") {
+        throw new Error("AUTH_REQUIRED");
     } else {
-        yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo en unos segundos? 🌊✨";
+        yield "¡Olá! Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊✨";
     }
   }
 };

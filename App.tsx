@@ -4,7 +4,6 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
-import Chatbot from './components/Chatbot';
 import Home from './pages/Home';
 import Details from './pages/Details';
 import Trips from './pages/Trips';
@@ -47,7 +46,6 @@ const App: React.FC = () => {
               </main>
               <Footer />
               <WhatsAppButton />
-              <Chatbot />
             </div>
           </Router>
         </PlannerProvider>

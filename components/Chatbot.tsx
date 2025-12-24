@@ -8,7 +8,7 @@ const FLORI_AVATAR = "https://images.unsplash.com/photo-1544717302-de2939b7ef71?
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 'welcome', role: 'model', text: '¡Olá! Soy Flori, tu guía inteligente de Floripa Fácil. 🌴 ¿Cómo puedo ayudarte hoy? Consultame por traslados VIP, alquiler de autos o los mejores paseos por la isla. ✈️🚗🌊' }
+    { id: 'welcome', role: 'model', text: '¡Olá! Soy Flori, tu guía de Floripa Fácil. 🌴 ¿En qué puedo ayudarte hoy? ✈️🚗🌊' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -22,37 +22,43 @@ const Chatbot: React.FC = () => {
   useEffect(() => {
     if (isOpen) {
         scrollToBottom();
-        checkKeyStatus();
+        checkConnection();
     }
   }, [messages, isOpen]);
 
-  const checkKeyStatus = async () => {
-      // Intentamos detectar si necesitamos una clave manual
+  const checkConnection = async () => {
+      // Si existe el objeto aistudio, verificamos si ya hay una llave
       if (window.aistudio) {
-          try {
-              const hasKey = await window.aistudio.hasSelectedApiKey();
-              // Si no tiene key y no hay una inyectada en el env, pedimos vincular
-              setNeedsKey(!hasKey && !process.env.API_KEY);
-          } catch (e) {
-              console.warn("AISTUDIO detect error:", e);
+          const hasKey = await window.aistudio.hasSelectedApiKey();
+          // Solo marcamos que necesita llave si NO tiene una seleccionada Y NO hay una en el process.env
+          if (!hasKey && !process.env.API_KEY) {
+              setNeedsKey(true);
+          }
+      } else {
+          // Si no estamos en un entorno con aistudio (ej: local sin el script), 
+          // pero falta la clave de entorno, también mostramos el aviso.
+          if (!process.env.API_KEY) {
+              setNeedsKey(true);
           }
       }
   };
 
-  const handleSelectKey = async () => {
+  const handleConnect = async () => {
       if (window.aistudio) {
           try {
               await window.aistudio.openSelectKey();
-              // Asumimos éxito según requerimientos de Google para evitar race conditions
+              // Según las reglas, asumimos éxito inmediato para evitar condiciones de carrera
               setNeedsKey(false);
               setMessages(prev => [...prev, { 
-                id: 'key-ok-' + Date.now(), 
+                id: 'conn-ok', 
                 role: 'model', 
-                text: '¡Conexión establecida con éxito! ✨ Ahora ya puedo responder tus consultas sobre Floripa. 🌴' 
+                text: '¡Conexión exitosa! Ya estoy lista para asesorarte. 🌴✨' 
               }]);
           } catch (e) {
-              console.error("Error al abrir selector de llaves:", e);
+              console.error("Error al abrir selector:", e);
           }
+      } else {
+          alert("El sistema de conexión segura de Google no está disponible en este navegador.");
       }
   };
 
@@ -76,35 +82,32 @@ const Chatbot: React.FC = () => {
       let fullResponse = '';
       const stream = sendMessageToFlori(userMessage.text);
       
-      let hasReceivedContent = false;
+      let hasReceived = false;
       for await (const chunk of stream) {
-        hasReceivedContent = true;
+        hasReceived = true;
         fullResponse += chunk;
         setMessages(prev => 
           prev.map(msg => msg.id === botMessageId ? { ...msg, text: fullResponse } : msg)
         );
       }
-
-      if (!hasReceivedContent) throw new Error("EMPTY_RESPONSE");
+      if (!hasReceived) throw new Error("EMPTY");
 
     } catch (error: any) {
-      console.error("Error en Chatbot:", error);
-      const errorText = error.message || "";
+      console.error("Chat Error:", error);
       
-      // Si el error indica que falta la entidad o es un 404/403 de llave
-      if (errorText.includes("Requested entity was not found") || errorText.includes("API_KEY") || errorText.includes("403")) {
+      if (error.message === "AUTH_REQUIRED") {
           setNeedsKey(true);
           setMessages(prev => 
             prev.map(msg => msg.id === botMessageId ? { 
                 ...msg, 
-                text: "Necesito que vincules tu cuenta de Google AI para poder responderte fuera del editor. Por favor, usa el botón 'CONECTAR' arriba. 🌊✨" 
+                text: "Necesito una conexión activa para responderte. Haz clic en el botón 'CONECTAR' en la parte superior del chat. 🌊" 
             } : msg)
           );
       } else {
           setMessages(prev => 
             prev.map(msg => msg.id === botMessageId ? { 
                 ...msg, 
-                text: "Tuve un pequeño problema técnico en la isla. ¿Podrías intentar escribirme de nuevo? 🌊" 
+                text: "Disculpa, tuve un error en mi conexión. ¿Intentamos de nuevo? 🌊" 
             } : msg)
           );
       }
@@ -128,14 +131,16 @@ const Chatbot: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-black text-sm uppercase tracking-widest leading-none">Flori AI</h3>
-                <p className="text-[9px] text-lime-100 font-bold uppercase mt-1">Soporte Inteligente</p>
+                <p className="text-[9px] text-lime-100 font-bold uppercase mt-1">
+                    {needsKey ? 'Conexión Requerida' : 'Soporte Floripa Fácil'}
+                </p>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
                 {needsKey && (
                     <button 
-                        onClick={handleSelectKey}
+                        onClick={handleConnect}
                         className="bg-white text-green-700 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-lg hover:scale-105 active:scale-95 transition-all animate-pulse"
                     >
                         ⚡ Conectar
@@ -182,7 +187,7 @@ const Chatbot: React.FC = () => {
                 value={input} 
                 onChange={e => setInput(e.target.value)} 
                 onKeyDown={e => e.key === 'Enter' && handleSend()} 
-                placeholder={needsKey ? "Vincula tu conexión arriba..." : "Escribir a Flori..."}
+                placeholder={needsKey ? "Vincula tu conexión arriba..." : "Pregúntale a Flori..."}
                 className="w-full pl-5 pr-12 py-3 bg-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-green-500 font-semibold text-sm transition-all border border-transparent focus:bg-white"
               />
               <button 
@@ -202,7 +207,7 @@ const Chatbot: React.FC = () => {
         {!isOpen && (
             <div className="absolute -top-12 right-0 bg-white text-green-700 px-4 py-2 rounded-2xl shadow-xl font-black text-[10px] uppercase tracking-widest animate-bounce border-2 border-green-50 flex items-center gap-2 whitespace-nowrap">
                 <span className={`w-2 h-2 rounded-full animate-pulse ${needsKey ? 'bg-red-500' : 'bg-green-500'}`}></span>
-                {needsKey ? '¡Vincula tu conexión!' : '¡Consultas Floripa Fácil!'}
+                {needsKey ? 'Flori Offline - Conectar' : '¡Consultas Floripa Fácil!'}
             </div>
         )}
         <button 
