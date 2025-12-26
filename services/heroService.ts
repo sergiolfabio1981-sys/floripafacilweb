@@ -7,7 +7,7 @@ export const getHeroSlides = async (): Promise<HeroSlide[]> => {
   try {
     const { data, error } = await supabase.from('hero_slides').select('*').order('id', { ascending: true });
     if (error) {
-        console.warn("Supabase: Tabla 'hero_slides' no encontrada o inaccesible. Usando locales.");
+        console.warn("Supabase: Hero slides error:", error.message);
         return INITIAL_HERO_SLIDES;
     }
     return (data && data.length > 0) ? data : INITIAL_HERO_SLIDES;
@@ -17,6 +17,7 @@ export const getHeroSlides = async (): Promise<HeroSlide[]> => {
 };
 
 export const saveHeroSlide = async (slide: HeroSlide): Promise<void> => {
+  // Aseguramos que los nombres coincidan con el SQL (case sensitive en Supabase si se usaron comillas)
   const { error } = await supabase.from('hero_slides').upsert({
       id: slide.id,
       image: slide.image,
@@ -28,7 +29,7 @@ export const saveHeroSlide = async (slide: HeroSlide): Promise<void> => {
   });
   if (error) {
       console.error("Error al guardar hero_slide:", error.message);
-      throw new Error(`Tabla 'hero_slides' no encontrada. Debes crearla en el panel de Supabase.`);
+      throw new Error(`Error en la base de datos: ${error.message}.`);
   }
 };
 
@@ -53,6 +54,6 @@ export const savePromoBanner = async (banner: PromoBanner): Promise<void> => {
       link: banner.link
   });
   if (error) {
-      throw new Error(`Tabla 'promo_banners' no encontrada en Supabase.`);
+      throw new Error(`Error en la tabla promo_banners: ${error.message}`);
   }
 };
