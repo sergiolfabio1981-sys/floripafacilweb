@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
                         <img src={LOGO_URL} className="h-full w-full object-contain" alt="Floripa Fácil" />
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-black text-[#064E3B] text-xl leading-none tracking-tightest italic uppercase">Floripa Fácil</span>
+                        <span className="font-black text-[#064E3B] text-xl leading-none tracking-tightest italic uppercase font-instagram">Floripa Fácil</span>
                         <span className="font-bold text-slate-400 text-[8px] tracking-[0.3em] uppercase mt-1">Premium Travel Services</span>
                     </div>
                 </Link>

@@ -11,6 +11,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
     <style>
+      @font-face {
+        font-family: 'Instagram Sans';
+        src: url('https://db.onlinewebfonts.com/t/20e29b139975b9f7166113b2c262a403.eot');
+        src: url('https://db.onlinewebfonts.com/t/20e29b139975b9f7166113b2c262a403.eot?#iefix') format('embedded-opentype'),
+             url('https://db.onlinewebfonts.com/t/20e29b139975b9f7166113b2c262a403.woff2') format('woff2'),
+             url('https://db.onlinewebfonts.com/t/20e29b139975b9f7166113b2c262a403.woff') format('woff'),
+             url('https://db.onlinewebfonts.com/t/20e29b139975b9f7166113b2c262a403.ttf') format('truetype'),
+             url('https://db.onlinewebfonts.com/t/20e29b139975b9f7166113b2c262a403.svg#Instagram Sans') format('svg');
+        font-weight: bold;
+        font-style: normal;
+      }
+
       :root {
         --primary-dark: #064e3b;
         --accent-lime: #d9f99d;
@@ -23,6 +35,11 @@
       }
       h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
       
+      .font-instagram { 
+        font-family: 'Instagram Sans', 'Outfit', sans-serif !important; 
+        font-weight: bold;
+      }
+
       .scrollbar-hide::-webkit-scrollbar { display: none; }
       .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 

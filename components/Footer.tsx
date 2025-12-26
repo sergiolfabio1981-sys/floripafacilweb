@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <h4 className="text-3xl font-black text-[#D9F99D] leading-none tracking-tighter uppercase italic">FLORIPA FÁCIL</h4>
+                    <h4 className="text-3xl font-black text-[#D9F99D] leading-none tracking-tighter uppercase italic font-instagram">FLORIPA FÁCIL</h4>
                     <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-[0.3em] font-black">Tu Conexión Directa con el Paraíso</p>
                 </div>
             </div>
