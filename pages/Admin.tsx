@@ -87,6 +87,22 @@ const Admin: React.FC = () => {
       setIsModalOpen(true);
   };
 
+  const handleDelete = async (type: string, id: any) => {
+      if (!confirm("¿Seguro que deseas eliminar este elemento? Esta acción no se puede deshacer.")) return;
+      
+      let table = '';
+      if (type === 'hero') table = 'hero_slides';
+      else if (type === 'banner') table = 'promo_banners';
+      else if (type === 'destination') table = 'destinations';
+      else if (type === 'guide') table = 'destination_guides';
+
+      if (table) {
+          const { error } = await supabase.from(table).delete().eq('id', id);
+          if (error) alert("Error al eliminar: " + error.message);
+          else loadTabData();
+      }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsSaving(true);
@@ -171,15 +187,7 @@ const Admin: React.FC = () => {
                   <h1 className="text-5xl font-black text-slate-800 tracking-tightest uppercase italic leading-none">{activeTab}</h1>
               </div>
               <div className="flex gap-4">
-                  {['home', 'inventory', 'destinations', 'guides'].includes(activeTab) && (
-                      <button onClick={()=>{
-                          if(activeTab === 'home') openEdit('hero', {id: Date.now(), title:'', subtitle:'', image:'', ctaText:'Ver más', ctaLink:'/'});
-                          else if(activeTab === 'inventory') openEdit('inventory', createEmptyTrip());
-                          else if(activeTab === 'destinations') openEdit('destination', createEmptyDestination());
-                          else if(activeTab === 'guides') openEdit('guide', createEmptyGuide());
-                      }} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">+ Nuevo</button>
-                  )}
-                  <button onClick={loadTabData} className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-slate-50 transition-all">🔄</button>
+                  <button onClick={loadTabData} className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-slate-50 transition-all">🔄 Refrescar</button>
               </div>
           </header>
 
@@ -193,7 +201,10 @@ const Admin: React.FC = () => {
                 {activeTab === 'home' && (
                     <div className="space-y-16">
                         <section>
-                            <h2 className="text-xl font-black text-slate-800 uppercase italic mb-8 tracking-widest border-l-4 border-green-600 pl-4">Slides Principales (Hero)</h2>
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-xl font-black text-slate-800 uppercase italic tracking-widest border-l-4 border-green-600 pl-4">Carrusel (Slides)</h2>
+                                <button onClick={()=>openEdit('hero', {id: Date.now(), title:'', subtitle:'', image:'', ctaText:'Ver más', ctaLink:'/'})} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest">+ Nuevo Slide</button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {heroSlides.map(slide => (
                                     <div key={slide.id} className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 bento-card">
@@ -203,27 +214,42 @@ const Admin: React.FC = () => {
                                                 <h4 className="text-white font-black text-lg uppercase italic">{slide.title}</h4>
                                             </div>
                                         </div>
-                                        <div className="p-6 flex justify-between items-center">
+                                        <div className="p-6 flex justify-between items-center bg-slate-50/50">
                                             <span className="text-[9px] font-bold text-slate-400">ID: {slide.id}</span>
-                                            <button onClick={()=>openEdit('hero', slide)} className="bg-slate-50 text-slate-600 font-black px-4 py-2 rounded-xl text-[9px] uppercase hover:bg-green-600 hover:text-white transition-all">Editar</button>
+                                            <div className="flex gap-2">
+                                                <button onClick={()=>openEdit('hero', slide)} className="bg-white text-slate-600 font-black px-4 py-2 rounded-xl text-[9px] uppercase hover:bg-green-600 hover:text-white transition-all shadow-sm">Editar</button>
+                                                <button onClick={()=>handleDelete('hero', slide.id)} className="bg-white text-red-400 font-black px-4 py-2 rounded-xl text-[9px] hover:bg-red-500 hover:text-white transition-all shadow-sm">🗑️</button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </section>
+
                         <section>
-                            <h2 className="text-xl font-black text-slate-800 uppercase italic mb-8 tracking-widest border-l-4 border-green-600 pl-4">Promo Banners</h2>
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-xl font-black text-slate-800 uppercase italic tracking-widest border-l-4 border-green-600 pl-4">Banners Promocionales</h2>
+                                <button onClick={()=>openEdit('banner', {id: 'banner_'+Date.now(), title:'', subtitle:'', image:'', badge:'', ctaText:'Ver más', link:'/'})} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest">+ Nuevo Banner</button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {promoBanners.map(banner => (
-                                    <div key={banner.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-6 shadow-sm">
+                                    <div key={banner.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-6 shadow-sm group">
                                         <img src={banner.image} className="w-20 h-20 rounded-2xl object-cover shadow-inner" />
                                         <div className="flex-1">
                                             <span className="text-[8px] font-black text-green-600 uppercase tracking-widest">{banner.badge}</span>
                                             <h4 className="font-black text-slate-800 uppercase italic">{banner.title}</h4>
                                         </div>
-                                        <button onClick={()=>openEdit('banner', banner)} className="p-3 bg-slate-50 rounded-xl hover:bg-slate-100">✏️</button>
+                                        <div className="flex gap-2">
+                                            <button onClick={()=>openEdit('banner', banner)} className="p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-all">✏️</button>
+                                            <button onClick={()=>handleDelete('banner', banner.id)} className="p-3 bg-slate-50 text-red-400 rounded-xl hover:bg-red-50 transition-all">🗑️</button>
+                                        </div>
                                     </div>
                                 ))}
+                                {promoBanners.length === 0 && (
+                                    <div className="col-span-full py-20 text-center border-4 border-dashed border-slate-100 rounded-[3rem]">
+                                        <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest">No hay banners configurados.</p>
+                                    </div>
+                                )}
                             </div>
                         </section>
                     </div>
@@ -231,10 +257,13 @@ const Admin: React.FC = () => {
 
                 {activeTab === 'inventory' && (
                     <div className="space-y-8">
-                        <div className="flex gap-2 p-1.5 bg-slate-200/50 w-fit rounded-2xl border border-slate-200">
-                            {['tours', 'transfers', 'cars'].map(c => (
-                                <button key={c} onClick={()=>setInventoryCategory(c as any)} className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all ${inventoryCategory===c ? 'bg-white text-[#064E3B] shadow-sm ring-1 ring-slate-300' : 'text-slate-500'}`}>{c}</button>
-                            ))}
+                        <div className="flex justify-between items-center">
+                            <div className="flex gap-2 p-1.5 bg-slate-200/50 w-fit rounded-2xl border border-slate-200">
+                                {['tours', 'transfers', 'cars'].map(c => (
+                                    <button key={c} onClick={()=>setInventoryCategory(c as any)} className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all ${inventoryCategory===c ? 'bg-white text-[#064E3B] shadow-sm ring-1 ring-slate-300' : 'text-slate-500'}`}>{c}</button>
+                                ))}
+                            </div>
+                            <button onClick={()=>openEdit('inventory', createEmptyTrip())} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">+ Nuevo Servicio</button>
                         </div>
                         <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
                             <table className="w-full text-left">
@@ -275,7 +304,10 @@ const Admin: React.FC = () => {
                                     <h4 className="text-xl font-black text-slate-800 uppercase italic mb-2">{d.name}</h4>
                                     <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${d.active ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>{d.active ? 'VISIBLE' : 'OCULTO'}</span>
                                 </div>
-                                <button onClick={()=>openEdit('destination', d)} className="mt-6 w-full py-3 bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Editar</button>
+                                <div className="mt-6 flex gap-2">
+                                    <button onClick={()=>openEdit('destination', d)} className="flex-1 py-3 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Editar</button>
+                                    <button onClick={()=>handleDelete('destination', d.id)} className="px-4 py-3 bg-red-50 text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all">🗑️</button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -299,7 +331,6 @@ const Admin: React.FC = () => {
                 <div className="p-10 overflow-y-auto space-y-8 scrollbar-hide">
                     <form onSubmit={handleSave} className="space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                             {/* CAMPOS DE TEXTO - Incluimos 'image' para que aparezca la URL en Slides/Banners */}
                              {Object.keys(editingItem).filter(k => ['title', 'name', 'location', 'subtitle', 'ctaText', 'ctaLink', 'badge', 'link', 'image'].includes(k)).map(key => (
                                  <div key={key} className="space-y-2">
                                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">{key}</label>
@@ -308,7 +339,6 @@ const Admin: React.FC = () => {
                              ))}
                         </div>
 
-                        {/* VISTA PREVIA PARA IMAGEN ÚNICA (Slides / Banners) */}
                         {editingItem.image !== undefined && (
                             <div className="space-y-4">
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Vista Previa Imagen</label>
@@ -319,11 +349,9 @@ const Admin: React.FC = () => {
                                         <div className="flex items-center justify-center h-full text-slate-300 font-black uppercase text-xs">Sin imagen</div>
                                     )}
                                 </div>
-                                <p className="text-[9px] text-slate-400 italic">Pega arriba en el campo 'image' la URL de la nueva fotografía (Unsplash, ImgBB, etc).</p>
                             </div>
                         )}
 
-                        {/* GALERÍA PARA MÚLTIPLES IMÁGENES (Tours / Autos) */}
                         {editingItem.images !== undefined && (
                             <div className="space-y-4">
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Galería de Imágenes</label>
